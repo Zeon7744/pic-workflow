@@ -6,6 +6,28 @@
 # ============================================================================
 version: "0.1.0"
 
+# ============================================================================
+# 亲民化默认策略（自适应引擎核心原则）
+# 目标：T0/T1 用户（占大盘 ~55%）跑通率优先，不追峰值画质。
+#   低配默认 = GGUF Q4 + offload + 云端兜底；高端机(T2+)才解锁 720P/高量化。
+# 该块是"出厂默认"，adaptive.py 会用实机数据进一步校准（写回 matrix.adaptive.yaml）。
+# ============================================================================
+default_policy:
+  philosophy: "低配优先跑通率，不追峰值画质"
+  low_tiers_prefer:        # T0/T1 优先选的实现特征
+    - "gguf_q4_offload"   # 4bit 量化 + CPU offload
+    - "cloud_fallback"    # 云端兜底（Kling/Seedream/generate_music）
+  high_tiers_unlock:       # T2+ 才解锁
+    - "720p_video"
+    - "fp16_sdxl"
+    - "sage_attention"
+    - "lora_trained"
+  unlock_at_tier: "T2"    # 从 T2 起解锁高清/高量化
+  t0_t1_runrate_goal: 0.95   # T0/T1 目标跑通率 >=95%
+  low_res_default:
+    T0: {image: 512, video: 480}
+    T1: {image: 512, video: 480}
+
 # 档位定义（MVP: T0/T1/T2，T3-T5 二期占位）
 tiers:
   T0: {label: "纯云端",    vram_range: [0, 4],    mvp: true}

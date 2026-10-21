@@ -16,6 +16,10 @@ import sys
 from typing import Dict
 
 from .qa_scoring import ShotMetrics, score_shot
+try:
+    from . import record_metrics as _rm
+except Exception:
+    _rm = None
 
 
 def probe_duration(path: str) -> float:
@@ -89,7 +93,27 @@ def assess_shot(video: str, prompt: str, expected_duration: float = 5.0,
     d["duration_s"] = dur
     d["keyframes"] = kf_count
     d["file_exists"] = exists
+    # 实机指标占位（供 record_metrics 采集；无实测则 None/False）
+    d.setdefault("peak_vram_gb", None)
+    d.setdefault("oom_degraded", False)
+    d.setdefault("shot_elapsed_s", None)
     return d
+
+
+def assess_and_record(video: str, prompt: str, expected_duration: float = 5.0,
+                      keyframe_drift: float = 0.0, *, workdir: str = "",
+                      task_id: str = "", tier: str = "T1",
+                      node_id: str = "video_shot",
+                      model_impl: str = "unknown", quant_dtype: str = "unknown",
+                      profile=None) -> Dict:
+    """质检 + 落实机指标（adaptive 反哺输入）。"""
+    res = assess_shot(video, prompt, expected_duration, keyframe_drift)
+    if _rm is not None and workdir:
+        _rm.record_qa(workdir, task_id or video, res,
+                      tier=tier, node_id=node_id,
+                      model_impl=model_impl, quant_dtype=quant_dtype,
+                      profile=profile)
+    return res
 
 
 def main(argv=None):
@@ -98,8 +122,21 @@ def main(argv=None):
     ap.add_argument("--prompt", required=True)
     ap.add_argument("--expected-duration", type=float, default=5.0)
     ap.add_argument("--drift", type=float, default=0.0)
+    ap.add_argument("--record", action="store_true", help="质检后落实机指标")
+    ap.add_argument("--workdir", default=os.getcwd())
+    ap.add_argument("--task-id", default="")
+    ap.add_argument("--tier", default="T1")
+    ap.add_argument("--model-impl", default="unknown")
+    ap.add_argument("--quant", default="unknown")
     args = ap.parse_args(argv)
-    res = assess_shot(args.video, args.prompt, args.expected_duration, args.drift)
+    if args.record:
+        res = assess_and_record(args.video, args.prompt,
+                                args.expected_duration, args.drift,
+                                workdir=args.workdir, task_id=args.task_id,
+                                tier=args.tier, model_impl=args.model_impl,
+                                quant_dtype=args.quant)
+    else:
+        res = assess_shot(args.video, args.prompt, args.expected_duration, args.drift)
     print(json.dumps(res, ensure_ascii=False, indent=2))
     return 0 if res["passed"] else 2
 

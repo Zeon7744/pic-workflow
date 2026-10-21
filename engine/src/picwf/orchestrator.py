@@ -10,6 +10,12 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional
 
+# 可选挂钩：每步落盘后记录实机指标（adaptive 反哺的输入）
+try:
+    from . import record_metrics as _rm
+except Exception:
+    _rm = None
+
 STATE_FILE = "state.json"
 
 
@@ -44,14 +50,32 @@ def load_state(workdir: str) -> TaskState:
 
 
 def save_state(workdir: str, st: TaskState):
+    """落盘状态机；保留 record_metrics 写过的 metrics 键（adaptive 反哺依赖）。"""
     st.updated_at = time.strftime("%Y-%m-%dT%H:%M:%S")
-    with open(_state_path(workdir), "w", encoding="utf-8") as f:
-        json.dump(st.__dict__, f, ensure_ascii=False, indent=2)
+    data = st.__dict__.copy()
+    sp = _state_path(workdir)
+    if os.path.exists(sp):
+        try:
+            with open(sp, encoding="utf-8") as f:
+                ex = json.load(f)
+            if "metrics" in ex:
+                data["metrics"] = ex["metrics"]
+        except Exception:
+            pass
+    with open(sp, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
 
 
 def run_pipeline(all_tasks: List[str], workdir: str,
                  runner: Callable[[str], Any],
-                 resume: bool = True) -> Dict[str, Any]:
+                 resume: bool = True,
+                 record: bool = True,
+                 tier: str = "T1",
+                 node_id: str = "video_shot",
+                 model_impl: str = "auto",
+                 quant_dtype: str = "unknown",
+                 profile: Optional[Dict[str, Any]] = None,
+                 ) -> Dict[str, Any]:
     """执行任务管线，支持断点重跑。
 
     all_tasks: 全量任务 id 列表（保持顺序）
@@ -71,9 +95,23 @@ def run_pipeline(all_tasks: List[str], workdir: str,
     for tid in all_tasks:
         if tid in st.done:
             continue  # 断点复用
+        import time as _t
+        _t0 = _t.time()
         try:
             out = runner(tid)
+            _elapsed = round(_t.time() - _t0, 2)
             st.results[tid] = out
+            if record and _rm is not None:
+                # 峰值显存：优先 runner 返回里带的，否则采样
+                _pk = (out.get("peak_vram_gb") if isinstance(out, dict) else None)
+                _rm.record_step(
+                    workdir, tid, tier=tier, node_id=node_id,
+                    model_impl=(model_impl if model_impl != "auto"
+                                 else (out.get("model_impl") if isinstance(out, dict) else model_impl)),
+                    quant_dtype=quant_dtype,
+                    oom_degraded=bool(out.get("oom_degraded")) if isinstance(out, dict) else False,
+                    redo_queued=bool(out.get("redo_queued")) if isinstance(out, dict) else False,
+                    peak_vram_gb=_pk, shot_elapsed_s=_elapsed, profile=profile)
             st.done.append(tid)
             if tid in st.pending:
                 st.pending.remove(tid)
@@ -82,6 +120,14 @@ def run_pipeline(all_tasks: List[str], workdir: str,
             executed.append(tid)
             save_state(workdir, st)  # 每步落盘，保证可断点
         except Exception as e:
+            _failed = "OOM" in str(e).upper()
+            if record and _rm is not None:
+                _rm.record_step(
+                    workdir, tid, tier=tier, node_id=node_id,
+                    model_impl=model_impl, quant_dtype=quant_dtype,
+                    oom_degraded=_failed, redo_queued=True,
+                    shot_elapsed_s=round(_t.time() - _t0, 2) if "_t0" in dir() else None,
+                    profile=profile)
             st.failed.append(tid)
             if tid in st.pending:
                 st.pending.remove(tid)
