@@ -25,11 +25,14 @@ def _load_yaml(path):
 
 
 def generate_workflow(tier: str, matrix_path: str = MATRIX_PATH_DEFAULT,
-                      free_vram_gb: float = 99.0) -> Dict[str, Any]:
-    """生成指定档位的工作流。
+                      free_vram_gb: float = 99.0,
+                      style: str = "S1_anime_jp") -> Dict[str, Any]:
+    """生成指定档位 + 画风的工作流。
 
     tier: T0/T1/T2（MVP）
     free_vram_gb: 运行时可用显存，用于预筛每节点 fallback 的起始级别。
+    style: 画风轨（style_tracks 的 key，默认 S1_anime_jp）。
+           角色图/视频节点按画风选模型+LoRA+提示词前缀，档位不变。
     返回结构化 workflow（可序列化为 YAML）。
     """
     matrix = _load_yaml(matrix_path)
@@ -61,15 +64,71 @@ def generate_workflow(tier: str, matrix_path: str = MATRIX_PATH_DEFAULT,
             "params": primary.get("params", {}),
         })
 
+    # 画风轨：角色图 / 视频节点按 style 选模型链 + LoRA + 提示词前缀
+    style_tracks = matrix.get("style_tracks", {})
+    st = style_tracks.get(style)
+    if st:
+        for nd in nodes:
+            if nd["id"] == "character_image":
+                imgs = st.get("image_model", [])
+                # 画风内按档位降级：低配走链尾(量化/云)，高配走链首
+                chain = []
+                for impl in imgs:
+                    chain.append({
+                        "impl": impl,
+                        "estimated_vram_need_gb": _style_vram(impl, tier_name),
+                        "params": {"style": style, "lora": st.get("lora"),
+                                   "prompt_prefix": st.get("prompt_prefix", "")},
+                    })
+                nd["fallback_chain"] = chain or nd["fallback_chain"]
+                nd["primary"] = chain[0] if chain else nd["primary"]
+                nd["params"] = nd["primary"].get("params", {})
+                nd["style"] = style
+            elif nd["id"] == "video_shot":
+                vids = st.get("video_model", [])
+                chain = []
+                for impl in vids:
+                    chain.append({
+                        "impl": impl,
+                        "estimated_vram_need_gb": _style_vram(impl, tier_name),
+                        "params": {"style": style, "lora": st.get("lora"),
+                                   "prompt_prefix": st.get("prompt_prefix", "")},
+                    })
+                if chain:
+                    nd["fallback_chain"] = chain or nd["fallback_chain"]
+                    nd["primary"] = chain[0] if chain else nd["primary"]
+                    nd["params"] = nd["primary"].get("params", {})
+                    nd["style"] = style
+
     return {
         "tier": tier_name,
         "tier_label": matrix["tiers"][tier_name].get("label"),
         "free_vram_gb": free_vram_gb,
+        "style": style,
+        "style_label": st.get("label") if st else "未指定画风",
         "nodes": nodes,
-        "note": "YAML 是数据不是代码；引擎按档位裁剪，运行时可再降级",
+        "note": "YAML 是数据不是代码；引擎按档位+画风裁剪，运行时可再降级",
     }
 
 
+
+
+
+
+def _style_vram(impl: str, tier: str) -> int:
+    """画风内某模型实现的显存估算（按档位粗估，0=云端）。"""
+    s = (impl or "").lower()
+    if any(k in s for k in ["cloud", "kling", "seedream", "api"]):
+        return 0
+    if "flux" in s:
+        return 12 if tier in ("T0", "T1") else 16
+    if "sdxl" in s or "ltx" in s:
+        return 8
+    if "wan13b" in s:
+        return 5 if "offload" in s or "q4" in s else 9
+    if "sd15" in s:
+        return 4
+    return 6
 
 
 def _impl_class(impl: str) -> str:
@@ -115,8 +174,9 @@ def workflow_to_yaml(workflow: Dict[str, Any]) -> str:
 
 def generate_and_dump(tier: str, out_path: str,
                       matrix_path: str = MATRIX_PATH_DEFAULT,
-                      free_vram_gb: float = 99.0) -> Dict[str, Any]:
-    wf = generate_workflow(tier, matrix_path, free_vram_gb)
+                      free_vram_gb: float = 99.0,
+                      style: str = "S1_anime_jp") -> Dict[str, Any]:
+    wf = generate_workflow(tier, matrix_path, free_vram_gb, style)
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(workflow_to_yaml(wf))
     return wf

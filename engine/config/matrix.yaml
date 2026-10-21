@@ -28,6 +28,43 @@ default_policy:
     T0: {image: 512, video: 480}
     T1: {image: 512, video: 480}
 
+# ============================================================================
+# 画风轨（style_track）：覆盖 2026 短剧市场主流 5 档画风，可切换
+# 画风只改「模型 + LoRA + 提示词前缀」，不改档位 T（亲民逻辑不变）
+# 角色图 / 分镜 / 视频 三节点读这块选模型，其余 5 环节与画风无关
+# ============================================================================
+style_tracks:
+  S1_anime_jp:        # 日系2D动漫（漫剧主力，都市/校园/穿越）
+    label: "日系2D动漫"
+    image_model: ["sdxl_anime_lora", "sd15_gguf_q4_512_offload", "cloud_api_seedream"]
+    video_model: ["wan13b_gguf_q4_offload_480", "cloud_kling"]
+    prompt_prefix: "日本2D手绘动漫风, 新海诚式体积光, 青蓝主色+暖橙霓虹点缀, 动漫线稿清晰, 高细节"
+    lora: "anime_style_animerus"
+  S2_korean_cool:     # 韩系清冷插画（高质感漫剧，偶像/复仇/豪门）
+    label: "韩系清冷插画"
+    image_model: ["flux_dev_cool_lora", "sdxl_turbo_768", "cloud_api_seedream"]
+    video_model: ["wan13b_fa_480", "cloud_kling"]
+    prompt_prefix: "韩系清冷插画, 低饱和电影色调, 高级留白构图, 柔光人像, 都市时尚质感, 8K级细节"
+    lora: "cool_portrait_realistic"
+  S3_cn_shuimo:      # 国风水墨（国风/仙侠，战神/修仙/历史）
+    label: "国风水墨"
+    image_model: ["sd15_shuimo_lora", "sd15_gguf_q4_512_offload", "cloud_api_seedream"]
+    video_model: ["wan13b_gguf_q4_offload_480", "cloud_kling"]
+    prompt_prefix: "国风水墨写意, 宣纸留白质感, 泼墨晕染, 青绿山水配色, 古典留白构图, 东方意境"
+    lora: "shuimo_chinese_ink"
+  S4_realistic:      # 写实拟真（真人向短剧，情感/现实/悬疑）
+    label: "写实拟真"
+    image_model: ["flux_dev_realistic", "sdxl_turbo_768", "cloud_api_seedream"]
+    video_model: ["wan13b_fa_480", "cloud_kling"]
+    prompt_prefix: "写实摄影风格, 真实光影, 皮肤质感, 85mm人像镜头, 浅景深, 电影级色彩还原, 真实细节"
+    lora: "realistic_human_photo"
+  S5_mmd_2d:         # 二次元MMD（强IP向，二创/虚拟人/电竞）
+    label: "二次元MMD"
+    image_model: ["flux_mmd_lora", "sdxl_turbo_768", "cloud_api_seedream"]
+    video_model: ["ltx095_720", "cloud_kling"]
+    prompt_prefix: "3D二次元MMD渲染, 夸张表情, 发光材质, 虚拟偶像风格, 高饱和, 3D模型感"
+    lora: "mmd_render"
+
 # 档位定义（MVP: T0/T1/T2，T3-T5 二期占位）
 tiers:
   T0: {label: "纯云端",    vram_range: [0, 4],    mvp: true}
