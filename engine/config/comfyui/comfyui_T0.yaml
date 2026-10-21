@@ -1,0 +1,14 @@
+# ComfyUI T0 档（纯云端，本机不跑 ComfyUI）
+# 保留配置仅为降级兜底：万一云端不可用，临时拉起最轻量本地草图
+name: "comfyui_T0"
+tier: T0
+launch:
+  enabled: false                   # T0 默认不启动 ComfyUI
+  note: "全云端 Kling/Grok + generate_music；此配置仅作本地草图兜底"
+quantization:
+  dtype: "gguf"
+  precision: "Q4_K_M"
+  offload: true
+resolution: {image: 512, video: 480}
+fallback:
+  - "云端 API 限流 -> 临时启用本配置出 512 草图"

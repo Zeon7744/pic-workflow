@@ -1,0 +1,35 @@
+# ComfyUI T1 档启动配置（6-8GB，开发机 GTX 1060 6GB Pascal 验证主力）
+# 特点：GGUF Q4 量化 + CPU offload + VAE Tiling + --lowvram
+name: "comfyui_T1"
+tier: T1
+launch:
+  entrypoint: "python main.py"
+  args:
+    - "--lowvram"
+    - "--use-pytorch-cross-attention"
+    - "--fp16-vae"
+    - "--high-ram"          # 32GB 内存时启用，省显存
+    - "--cuda"
+    # Pascal(1060) 不支持 FP8/SageAttention，这里关闭
+    # SageAttention 开关：false（T1 Pascal 不支持）
+attention:
+  type: "pytorch_cross_attention"   # T1 用 PyTorch 交叉注意力（SageAttention 不可用）
+  sage: false
+quantization:
+  dtype: "gguf"
+  precision: "Q4_K_M"              # 4bit 量化
+  offload: true                    # 权重 offload 到 CPU，运行时分批上 GPU
+  vram_budget_gb: 5.0             # 1060 实际可用 ~5.5GB，留 0.5 余量
+resolution:
+  image: 512                        # SD1.5
+  video: 480                        # Wan1.3B 480P
+vae:
+  tiling: true                     # VAE Tiling 防 OOM
+  tile_size: 512
+models:
+  text_to_image: {path: "models/checkpoints/sd15.safetensors", quant: "Q4_K_M"}
+  text_to_video: {path: "models/gguf/Wan2.1-T2V-1.3B-q4.gguf", offload: true}
+  tts: {path: "models/gguf/GPT-SoVITS-q4.gguf", offload: true}
+fallback:
+  - "offload 不够 -> --cpu（纯 CPU 出草图）"
+  - "仍 OOM -> 切云端 Seedream/Kling API"

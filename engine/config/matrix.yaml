@@ -1,0 +1,187 @@
+# ============================================================================
+# pic-workflow 核心资产：档位 × 节点矩阵
+# 引擎按硬件档位从这里"读"出工作流。YAML 是数据不是代码。
+# 每个节点 8 环节，每个节点含「本地 → 量化/offload → 云端 API」三级降级路径。
+# estimated_vram_need_gb: 该实现估算显存占用（0=纯云端，不占本地）
+# ============================================================================
+version: "0.1.0"
+
+# 档位定义（MVP: T0/T1/T2，T3-T5 二期占位）
+tiers:
+  T0: {label: "纯云端",    vram_range: [0, 4],    mvp: true}
+  T1: {label: "6-8GB",    vram_range: [6, 8],    mvp: true}
+  T2: {label: "10-12GB",  vram_range: [10, 12],  mvp: true}
+  T3: {label: "14-16GB",  vram_range: [14, 16],  mvp: false}
+  T4: {label: "20-24GB",  vram_range: [20, 24],  mvp: false}
+  T5: {label: "32GB+",    vram_range: [32, 99],  mvp: false}
+
+# 8 环节节点。primary_impl = 该档位默认实现（fallback_chain[0]）
+nodes:
+
+  - id: "script_struct"
+    name: "① 剧本结构化"
+    fallback_chain:
+      T0:
+        - {impl: "llm_api", estimated_vram_need_gb: 0}
+      T1:
+        - {impl: "llm_api", estimated_vram_need_gb: 0}
+      T2:
+        - {impl: "llm_api", estimated_vram_need_gb: 0}
+        - {impl: "qwen7b_gguf_q4_local", estimated_vram_need_gb: 6}
+      T3:
+        - {impl: "qwen7b_local", estimated_vram_need_gb: 8}
+      T4:
+        - {impl: "qwen14b_local", estimated_vram_need_gb: 12}
+      T5:
+        - {impl: "qwen14b_lora_local", estimated_vram_need_gb: 16}
+
+  - id: "character_image"
+    name: "② 角色图"
+    fallback_chain:
+      T0:
+        - {impl: "cloud_api_seedream", estimated_vram_need_gb: 0}
+      T1:
+        - {impl: "sd15_gguf_q4_512_offload", estimated_vram_need_gb: 4,
+           params: {model: "sd15.safetensors(gguf Q4_K_M)", res: 512,
+                    sampler: "Euler a", steps: 20, offload: true}}
+        - {impl: "cloud_api_seedream", estimated_vram_need_gb: 0}
+      T2:
+        - {impl: "sdxl_turbo_768", estimated_vram_need_gb: 8,
+           params: {model: "sdxl_turbo.safetensors", res: 768, steps: 8}}
+        - {impl: "sd15_gguf_q4_512_offload", estimated_vram_need_gb: 4}
+        - {impl: "cloud_api_seedream", estimated_vram_need_gb: 0}
+      T3:
+        - {impl: "flux_gguf_q4_1024", estimated_vram_need_gb: 12}
+        - {impl: "sdxl_turbo_768", estimated_vram_need_gb: 8}
+        - {impl: "cloud_api_seedream", estimated_vram_need_gb: 0}
+      T4:
+        - {impl: "flux_fp16_1024", estimated_vram_need_gb: 16}
+        - {impl: "flux_gguf_q4_1024", estimated_vram_need_gb: 12}
+        - {impl: "cloud_api_seedream", estimated_vram_need_gb: 0}
+      T5:
+        - {impl: "flux_lora_trained", estimated_vram_need_gb: 20}
+        - {impl: "flux_fp16_1024", estimated_vram_need_gb: 16}
+        - {impl: "cloud_api_seedream", estimated_vram_need_gb: 0}
+
+  - id: "storyboard_prompt"
+    name: "③ 分镜提示词"
+    fallback_chain:
+      T0:
+        - {impl: "llm_api", estimated_vram_need_gb: 0}
+      T1:
+        - {impl: "llm_api", estimated_vram_need_gb: 0}
+      T2:
+        - {impl: "llm_api", estimated_vram_need_gb: 0}
+      T3:
+        - {impl: "local_llm", estimated_vram_need_gb: 8}
+        - {impl: "llm_api", estimated_vram_need_gb: 0}
+      T4:
+        - {impl: "local_llm", estimated_vram_need_gb: 8}
+        - {impl: "llm_api", estimated_vram_need_gb: 0}
+      T5:
+        - {impl: "local_llm_lora", estimated_vram_need_gb: 16}
+        - {impl: "llm_api", estimated_vram_need_gb: 0}
+
+  - id: "video_shot"
+    name: "④ 视频镜头"
+    fallback_chain:
+      T0:
+        - {impl: "cloud_kling", estimated_vram_need_gb: 0,
+           params: {api: "Kling", res: 720, fa: true}}
+      T1:
+        - {impl: "wan13b_gguf_q4_offload_480", estimated_vram_need_gb: 5,
+           params: {model: "Wan2.1-T2V-1.3B(gguf Q4)", res: 480,
+                    offload: true, duration_s: 5}}
+        - {impl: "cloud_kling", estimated_vram_need_gb: 0}
+      T2:
+        - {impl: "wan13b_fa_480", estimated_vram_need_gb: 9,
+           params: {model: "Wan2.1-T2V-1.3B", res: 480, fa: true, duration_s: 5}}
+        - {impl: "ltx095_720", estimated_vram_need_gb: 10,
+           params: {model: "LTX-Video-0.95", res: 720, duration_s: 5}}
+        - {impl: "cloud_kling", estimated_vram_need_gb: 0}
+      T3:
+        - {impl: "ltx23_720", estimated_vram_need_gb: 14,
+           params: {model: "LTX-Video-2.3", res: 720}}
+        - {impl: "wan13b_fa_480", estimated_vram_need_gb: 9}
+        - {impl: "cloud_kling", estimated_vram_need_gb: 0}
+      T4:
+        - {impl: "wan22_14b_720", estimated_vram_need_gb: 20,
+           params: {model: "Wan2.2-14B", res: 720}}
+        - {impl: "ltx23_720", estimated_vram_need_gb: 14}
+        - {impl: "cloud_kling", estimated_vram_need_gb: 0}
+      T5:
+        - {impl: "wan22_14b_1080", estimated_vram_need_gb: 24,
+           params: {model: "Wan2.2-14B", res: 1080}}
+        - {impl: "wan22_14b_720", estimated_vram_need_gb: 20}
+        - {impl: "cloud_kling", estimated_vram_need_gb: 0}
+
+  - id: "fx_enhance"
+    name: "⑤ 特效增强"
+    fallback_chain:
+      T0:
+        - {impl: "ffmpeg_cloud", estimated_vram_need_gb: 0}
+      T1:
+        - {impl: "ffmpeg_local", estimated_vram_need_gb: 0}
+      T2:
+        - {impl: "ffmpeg_local", estimated_vram_need_gb: 0}
+      T3:
+        - {impl: "ffmpeg_local", estimated_vram_need_gb: 0}
+      T4:
+        - {impl: "ffmpeg_local", estimated_vram_need_gb: 0}
+      T5:
+        - {impl: "ffmpeg_local_batch", estimated_vram_need_gb: 0}
+
+  - id: "post_assemble"
+    name: "⑥ 后期整合"
+    fallback_chain:
+      T0:
+        - {impl: "cloud_assemble", estimated_vram_need_gb: 0}
+      T1:
+        - {impl: "ffmpeg_local", estimated_vram_need_gb: 0}
+      T2:
+        - {impl: "ffmpeg_local", estimated_vram_need_gb: 0}
+      T3:
+        - {impl: "ffmpeg_local", estimated_vram_need_gb: 0}
+      T4:
+        - {impl: "ffmpeg_local", estimated_vram_need_gb: 0}
+      T5:
+        - {impl: "ffmpeg_local_batch", estimated_vram_need_gb: 0}
+
+  - id: "bgm_audio"
+    name: "⑦ BGM 音频"
+    fallback_chain:
+      T0:
+        - {impl: "cloud_generate_music", estimated_vram_need_gb: 0}
+      T1:
+        - {impl: "cloud_generate_music", estimated_vram_need_gb: 0}
+        - {impl: "ffmpeg_local_mix", estimated_vram_need_gb: 0}
+      T2:
+        - {impl: "gpt_sovits_q4", estimated_vram_need_gb: 4,
+           params: {model: "GPT-SoVITS(gguf Q4)"}}
+        - {impl: "cloud_generate_music", estimated_vram_need_gb: 0}
+      T3:
+        - {impl: "gpt_sovits_full", estimated_vram_need_gb: 6}
+        - {impl: "cloud_generate_music", estimated_vram_need_gb: 0}
+      T4:
+        - {impl: "gpt_sovits_full", estimated_vram_need_gb: 6}
+        - {impl: "cloud_generate_music", estimated_vram_need_gb: 0}
+      T5:
+        - {impl: "gpt_sovits_trained", estimated_vram_need_gb: 8}
+        - {impl: "gpt_sovits_full", estimated_vram_need_gb: 6}
+        - {impl: "cloud_generate_music", estimated_vram_need_gb: 0}
+
+  - id: "package_publish"
+    name: "⑧ 包装发布"
+    fallback_chain:
+      T0:
+        - {impl: "cloud_template", estimated_vram_need_gb: 0}
+      T1:
+        - {impl: "ffmpeg_pil", estimated_vram_need_gb: 0}
+      T2:
+        - {impl: "ffmpeg_pil", estimated_vram_need_gb: 0}
+      T3:
+        - {impl: "ffmpeg_pil", estimated_vram_need_gb: 0}
+      T4:
+        - {impl: "ffmpeg_pil", estimated_vram_need_gb: 0}
+      T5:
+        - {impl: "ffmpeg_pil_batch", estimated_vram_need_gb: 0}

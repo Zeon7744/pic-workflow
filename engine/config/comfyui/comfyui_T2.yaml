@@ -1,0 +1,31 @@
+# ComfyUI T2 档启动配置（10-12GB，如 3060 12GB）
+# 特点：FP16/量化混用，Ampere 可用 SageAttention，720P 视频
+name: "comfyui_T2"
+tier: T2
+launch:
+  entrypoint: "python main.py"
+  args:
+    - "--fp16-vae"
+    - "--use-pytorch-cross-attention"
+    - "--high-ram"
+    - "--cuda"
+attention:
+  type: "sage_attention"          # Ampere/Ada 可用 SageAttention
+  sage: true
+quantization:
+  dtype: "fp16"
+  precision: "fp16"               # T2 显存够，走半精度不量化
+  offload: false
+  vram_budget_gb: 9.5            # 留 2.5GB 余量
+resolution:
+  image: 768                        # SDXL-Turbo
+  video: 720                        # LTX0.95 720P
+vae:
+  tiling: false                    # 显存够，关 tiling 提速
+models:
+  text_to_image: {path: "models/checkpoints/sdxl_turbo.safetensors", quant: "fp16"}
+  text_to_video: {path: "models/ltx/LTX-Video-0.95.safetensors", quant: "fp16"}
+  tts: {path: "models/gpt_sovits_full.bin"}
+fallback:
+  - "OOM -> 切 T1 配置（GGUF Q4 + offload）"
+  - "仍 OOM -> 切云端 Kling/Seedream API"

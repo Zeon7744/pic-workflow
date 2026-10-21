@@ -1,0 +1,86 @@
+tier: T1
+tier_label: 6-8GB
+free_vram_gb: 99.0
+nodes:
+- id: script_struct
+  name: ① 剧本结构化
+  primary: &id001
+    impl: llm_api
+    estimated_vram_need_gb: 0
+  fallback_chain:
+  - *id001
+  params: {}
+- id: character_image
+  name: ② 角色图
+  primary: &id002
+    impl: sd15_gguf_q4_512_offload
+    estimated_vram_need_gb: 4
+    params: &id003
+      model: sd15.safetensors(gguf Q4_K_M)
+      res: 512
+      sampler: Euler a
+      steps: 20
+      offload: true
+  fallback_chain:
+  - *id002
+  - impl: cloud_api_seedream
+    estimated_vram_need_gb: 0
+  params: *id003
+- id: storyboard_prompt
+  name: ③ 分镜提示词
+  primary: &id004
+    impl: llm_api
+    estimated_vram_need_gb: 0
+  fallback_chain:
+  - *id004
+  params: {}
+- id: video_shot
+  name: ④ 视频镜头
+  primary: &id005
+    impl: wan13b_gguf_q4_offload_480
+    estimated_vram_need_gb: 5
+    params: &id006
+      model: Wan2.1-T2V-1.3B(gguf Q4)
+      res: 480
+      offload: true
+      duration_s: 5
+  fallback_chain:
+  - *id005
+  - impl: cloud_kling
+    estimated_vram_need_gb: 0
+  params: *id006
+- id: fx_enhance
+  name: ⑤ 特效增强
+  primary: &id007
+    impl: ffmpeg_local
+    estimated_vram_need_gb: 0
+  fallback_chain:
+  - *id007
+  params: {}
+- id: post_assemble
+  name: ⑥ 后期整合
+  primary: &id008
+    impl: ffmpeg_local
+    estimated_vram_need_gb: 0
+  fallback_chain:
+  - *id008
+  params: {}
+- id: bgm_audio
+  name: ⑦ BGM 音频
+  primary: &id009
+    impl: cloud_generate_music
+    estimated_vram_need_gb: 0
+  fallback_chain:
+  - *id009
+  - impl: ffmpeg_local_mix
+    estimated_vram_need_gb: 0
+  params: {}
+- id: package_publish
+  name: ⑧ 包装发布
+  primary: &id010
+    impl: ffmpeg_pil
+    estimated_vram_need_gb: 0
+  fallback_chain:
+  - *id010
+  params: {}
+note: YAML 是数据不是代码；引擎按档位裁剪，运行时可再降级
