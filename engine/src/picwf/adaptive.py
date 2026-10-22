@@ -239,3 +239,119 @@ def fit_tier_offset(rows: List[Dict[str, Any]]) -> Dict[str, float]:
         else:
             offsets[tier] = 0.0
     return offsets
+
+
+# ---------------------------------------------------------------------------
+# 6. 剧种 × 档位 双维聚类 + combo 独立学习（数据迭代闭环增强）
+# ---------------------------------------------------------------------------
+SCENARIOS = ["light_comedy", "daily_romance", "male_revenge", "dark_thriller",
+             "fantasy_wuxia", "romance_sad", "sci_fi_cyber", "action_battle",
+             "family_warm", "school_youth"]
+DEFAULT_SCENARIO = "light_comedy"
+
+
+def cluster_history_by_scenario(rows: List[Dict[str, Any]]
+                                ) -> Dict[str, List[Dict[str, Any]]]:
+    """按 (scenario, tier, node, impl) 四键分桶。
+
+    旧 history 无 scenario 字段时归 DEFAULT_SCENARIO，保证兼容。
+    """
+    buckets: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+    for r in rows:
+        sc = r.get("scenario") or DEFAULT_SCENARIO
+        key = f"{sc}::{r.get('tier','?')}::{r.get('node_id','?')}::{r.get('model_impl','?')}"
+        buckets[key].append(r)
+    return dict(buckets)
+
+
+def combo_learn(rows: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+    """剧种 × 档位 双维 combo 独立学习。
+
+    对每个 (scenario, tier)，从 history 的 combo 字段学出"哪组画风+音乐+声音+BGM
+    在该剧种该档位下 OOM 率最低 / 耗时最短"，独立输出 best_combo。
+
+    返回 {f"{scenario}::{tier}": {"best_combo": {...}, "samples": N,
+                                   "oom_rate": x, "p95_elapsed": y}}
+    这是数据迭代核心：不同剧种、不同档位学到各自的最优四维组合，
+    反哺 combo_optimizer 的 emotion_arc_map（越跑越准）。
+    """
+    per_cell: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+    for r in rows:
+        sc = r.get("scenario") or DEFAULT_SCENARIO
+        tier = r.get("tier", "?")
+        combo = r.get("combo") or {}
+        if not combo:
+            continue
+        key = f"{sc}::{tier}"
+        combo["scenario"] = sc
+        combo["tier"] = tier
+        combo["_row"] = r
+        per_cell[key].append(combo)
+
+    out: Dict[str, Dict[str, Any]] = {}
+    for key, combos in per_cell.items():
+        sc, tier = key.split("::")
+        # 以 combo 的 (style,music,voice,bgm) 为子键再聚合
+        by_combo: Dict[tuple, List[Dict[str, Any]]] = defaultdict(list)
+        for c in combos:
+            sub = (c.get("style"), c.get("music"), c.get("voice"), c.get("bgm"))
+            by_combo[sub].append(c)
+        best_sub, best_samples = None, 0
+        best_oom, best_elapsed = 1.0, 1e9
+        for sub, cs in by_combo.items():
+            oom = sum(1 for c in cs if c["_row"].get("oom_degraded")) / len(cs)
+            el = [c["_row"].get("shot_elapsed_s") for c in cs
+                  if c["_row"].get("shot_elapsed_s")]
+            elapsed = sorted(el)[min(len(el)-1, int(0.95*len(el)))] if el else 0.0
+            # 选 OOM 率低 + 耗时短的 combo（加权：oom*2 + elapsed/60）
+            score = oom * 2.0 + elapsed / 60.0
+            if score < best_oom + best_elapsed / 60.0 or best_sub is None:
+                # 简单取 score 最小
+                if best_sub is None or score < (best_oom * 2.0 + best_elapsed / 60.0):
+                    best_sub = sub
+                    best_samples = len(cs)
+                    best_oom = oom
+                    best_elapsed = elapsed
+        sc_oom = sum(1 for c in combos if c["_row"].get("oom_degraded")) / len(combos)
+        sc_el = [c["_row"].get("shot_elapsed_s") for c in combos
+                 if c["_row"].get("shot_elapsed_s")]
+        sc_p95 = round(sorted(sc_el)[min(len(sc_el)-1, int(0.95*len(sc_el)))], 1) if sc_el else None
+        out[key] = {
+            "scenario": sc, "tier": tier,
+            "best_combo": {
+                "style": best_sub[0], "music": best_sub[1],
+                "voice": best_sub[2], "bgm": best_sub[3]
+            } if best_sub else {},
+            "samples": len(combos),
+            "oom_rate": round(sc_oom, 3),
+            "p95_elapsed": sc_p95,
+        }
+    return out
+
+
+def apply_combo_learn_to_matrix(matrix: Dict[str, Any],
+                                learned: Dict[str, Dict[str, Any]]
+                                ) -> Dict[str, Any]:
+    """把 combo_learn 结果写回 matrix 的 emotion_arc_map（深拷贝）。
+
+    每个 (scenario,tier) 学到的 best_combo 覆盖对应剧种 emotion_arc_map 的
+    各阶段 combo（保守：仅当 samples>=MIN_SAMPLES 才覆盖）。
+    """
+    import copy
+    m = copy.deepcopy(matrix)
+    arcs = m.setdefault("emotion_arc_map", {})
+    for key, lv in learned.items():
+        if lv.get("samples", 0) < MIN_SAMPLES:
+            continue
+        sc, tier = key.split("::")
+        best = lv.get("best_combo") or {}
+        if not best:
+            continue
+        # 剧种默认走 act1_opening 阶段映射（MVP：剧种级 combo，集数级二期）
+        act = arcs.setdefault(f"{sc}__{tier}", {})
+        for stage in act.values():
+            for dim in ("style", "music", "voice", "bgm"):
+                if dim in best and best[dim]:
+                    stage.setdefault("combo", {})[dim] = best[dim]
+        m.setdefault("default_policy", {})["combo_learn_source"] = "adaptive_history"
+    return m

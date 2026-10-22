@@ -82,3 +82,59 @@ def match_tier(profile: Dict[str, Any]) -> Dict[str, Any]:
 def clamp_mvp(tier: str) -> str:
     """非 MVP 档位钳到最近 MVP 档。"""
     return tier if tier in MVP_TIERS else "T2"
+
+
+# ---------------------------------------------------------------------------
+# CPU 算力修正（只用于本地 offload 路线的耗时预估，不影响档位 T0-T5）
+# 档位由显存决定；CPU 快慢只影响"本地 gguf/offload 跑得多快"。
+# ---------------------------------------------------------------------------
+CPU_CORRECTION = {
+    "low_u_series": 3.0,     # N95/N100 低功耗 U 级：本地 offload 耗时放大 3x
+    "desktop_mid": 1.0,      # i5/Ryzen 5 桌面级：基准
+    "desktop_high": 0.6,     # i7/i9 桌面级：offload 更快
+    "workstation": 0.5,      # Xeon/Epyc
+    "unknown": 1.0,
+}
+
+OFFLOAD_BASE_ELAPSED_S = 90.0  # 单镜头本地 gguf+offload 基准耗时（i5 桌面级）
+
+
+def _cpu_class(cpu: Dict[str, Any]) -> str:
+    if not cpu:
+        return "unknown"
+    model = str(cpu.get("model", "")).lower()
+    ghz = float(cpu.get("ghz", 0) or 0)
+    cores = int(cpu.get("cores", 0) or 0)
+    if any(k in model for k in ("n95", "n100", "n200", "j4125")):
+        return "low_u_series"
+    if ghz and ghz <= 1.8 and cores and cores <= 6:
+        return "low_u_series"
+    if "xeon" in model or "epyc" in model:
+        return "workstation"
+    if ghz and ghz >= 4.0:
+        return "desktop_high"
+    if any(k in model for k in ("i7", "i9", "ryzen 7", "ryzen 9")):
+        return "desktop_high"
+    if any(k in model for k in ("i5", "ryzen 5")):
+        return "desktop_mid"
+    return "desktop_mid"
+
+
+def estimate_offload_elapsed(profile: Dict[str, Any],
+                             shots_per_ep: int = 10) -> Dict[str, Any]:
+    """预估本地 offload 路线单集耗时（供 resource_profiler 实机回填对照）。
+
+    档位/模型由 tier_scoring 决定，这里只算"这台 CPU 跑 offload 要多久"。
+    N95（low_u_series）放大 3x → 本地 offload 慢，应优先云端；
+    i7 桌面级（desktop_high）0.6x → 本地 offload 比基准快。
+    """
+    cpu_class = _cpu_class(profile.get("cpu", {}))
+    factor = CPU_CORRECTION.get(cpu_class, 1.0)
+    per_shot = round(OFFLOAD_BASE_ELAPSED_S * factor, 1)
+    return {
+        "cpu_class": cpu_class,
+        "per_shot_s": per_shot,
+        "ep_estimated_s": round(per_shot * shots_per_ep, 1),
+        "ep_estimated_min": round(per_shot * shots_per_ep / 60.0, 1),
+        "prefer_cloud": cpu_class in ("low_u_series", "unknown") and factor >= 2.0,
+    }

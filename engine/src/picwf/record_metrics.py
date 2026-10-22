@@ -74,6 +74,8 @@ def record_step(workdir: str,
                 shot_elapsed_s: Optional[float] = None,
                 profile: Optional[Dict[str, Any]] = None,
                 clip_4d: Optional[Dict[str, float]] = None,
+                scenario: str = "",
+                combo: Optional[Dict[str, str]] = None,
                 ) -> Dict[str, Any]:
     """采集并落盘单步实机指标。
 
@@ -96,6 +98,8 @@ def record_step(workdir: str,
         "redo_queued": bool(redo_queued),
         "clip_4d": clip_4d or {"shape": None, "style": None,
                                  "place": None, "intent": None},
+        "scenario": scenario or "",
+        "combo": combo or {},
         "machine_hash": machine_hash(profile) if profile else "unknown",
     }
     os.makedirs(workdir, exist_ok=True)
