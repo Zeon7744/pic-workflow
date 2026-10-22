@@ -170,7 +170,9 @@ def run_pipeline(all_tasks: List[str], workdir: str,
                     model_impl=_mk, quant_dtype=quant_dtype,
                     oom_degraded=bool(out.get("oom_degraded")) if isinstance(out, dict) else False,
                     redo_queued=False,
-                    peak_vram_gb=_pk, shot_elapsed_s=_elapsed,
+                    peak_vram_gb=_pk,
+                    shot_elapsed_s=(out.get("shot_elapsed_s") if isinstance(out, dict)
+                                    and out.get("shot_elapsed_s") is not None else _elapsed),
                     profile=profile, scenario=scenario, combo=combo)
             if isinstance(out, dict) and _route is not None:
                 out["_failure_route"] = _route
