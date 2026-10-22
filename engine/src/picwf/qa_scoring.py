@@ -22,6 +22,25 @@ DEFAULT_THRESH = {
     "alignment_intent":  0.82,  # 偏移下限
 }
 
+# 档位感知阈值：高端档(T2+)画质要求严，低配档(T0/T1 云端/量化)容忍度高。
+# 未列出的档位用 DEFAULT_THRESH。
+TIER_THRESH = {
+    "T0": {"consistency_shape": 0.80, "consistency_style": 0.75,
+           "continuity_place": 0.72, "alignment_intent": 0.78},
+    "T1": {"consistency_shape": 0.83, "consistency_style": 0.78,
+           "continuity_place": 0.75, "alignment_intent": 0.80},
+    "T2": {"consistency_shape": 0.88, "consistency_style": 0.83,
+           "continuity_place": 0.80, "alignment_intent": 0.85},
+}
+
+
+def thresh_for_tier(tier: str, override: Dict[str, float] = None) -> Dict[str, float]:
+    """按档位取阈值（默认 T1 基线），可被显式 override 覆盖。"""
+    base = dict(TIER_THRESH.get(tier, DEFAULT_THRESH))
+    if override:
+        base.update(override)
+    return base
+
 
 @dataclass
 class ShotMetrics:
@@ -63,7 +82,8 @@ def _clamp(v: float, lo: float = 0.0, hi: float = 1.0) -> float:
 
 def score_shot(m: ShotMetrics,
                thresh: Dict[str, float] = None,
-               duration_tolerance_s: float = 2.0) -> QAReport:
+               duration_tolerance_s: float = 2.0,
+               tier: str = "T1") -> QAReport:
     """对单镜头打分并路由。
 
     路由规则：
@@ -72,9 +92,10 @@ def score_shot(m: ShotMetrics,
         - 偏移/迁移 严重（< 阈值*0.85）或时长不合规 -> cloud_refine（切云端精修）
         - 其余 -> redo_local（本地重做）
     """
-    th = dict(DEFAULT_THRESH)
-    if thresh:
-        th.update(thresh)
+    # 档位感知阈值：显式传入 thresh 优先，否则按档位取
+    th = thresh if thresh else thresh_for_tier(tier)
+    if not th:
+        th = dict(DEFAULT_THRESH)
 
     scores = {
         "consistency_shape": _clamp(m.consistency_shape),
