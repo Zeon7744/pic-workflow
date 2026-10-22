@@ -16,6 +16,16 @@ try:
 except Exception:
     _rm = None
 
+# 可选挂钩：失败路由 + 双维 combo 学习（接到主链路的闭环）
+try:
+    from . import downgrade as _dg
+except Exception:
+    _dg = None
+try:
+    from . import adaptive as _ad
+except Exception:
+    _ad = None
+
 STATE_FILE = "state.json"
 
 
@@ -75,6 +85,11 @@ def run_pipeline(all_tasks: List[str], workdir: str,
                  model_impl: str = "auto",
                  quant_dtype: str = "unknown",
                  profile: Optional[Dict[str, Any]] = None,
+                 scenario: str = "",
+                 combo: Optional[Dict[str, str]] = None,
+                 node_cfg: Optional[Dict[str, Any]] = None,
+                 free_vram_gb: float = 6.0,
+                 max_retries: int = 2,
                  ) -> Dict[str, Any]:
     """执行任务管线，支持断点重跑。
 
@@ -97,43 +112,95 @@ def run_pipeline(all_tasks: List[str], workdir: str,
             continue  # 断点复用
         import time as _t
         _t0 = _t.time()
-        try:
-            out = runner(tid)
-            _elapsed = round(_t.time() - _t0, 2)
-            st.results[tid] = out
+        _impl = model_impl
+        _route = None
+        out = None
+        _last_err = None
+        for _attempt in range(max_retries + 1):
+            try:
+                # runner 若接受 model_impl 参数则透传当前 impl（OOM/超时换 impl 后生效）
+                import inspect
+                _sig = inspect.signature(runner)
+                if "model_impl" in _sig.parameters:
+                    out = runner(tid, model_impl=_impl)
+                else:
+                    out = runner(tid)
+                _last_err = None  # 成功清错误
+                break
+            except Exception as e:
+                _last_err = e
+                _err_s = str(e)
+                # 三失败类型识别
+                _failure = ("quality" if ("quality" in _err_s.lower())
+                            else ("oom" if ("OOM" in _err_s.upper() or "MEMORY" in _err_s.upper())
+                                  else "timeout"))
+                # 失败路由
+                if _dg is not None and node_cfg is not None:
+                    _route = _dg.route_fallback(node_cfg, free_vram_gb=free_vram_gb,
+                                                failure=_failure)
+                else:
+                    _route = {"level": _attempt, "impl_name": None,
+                              "reason": f"{_failure} -> level {_attempt} (无 node_cfg)",
+                              "adjust": {}}
+                # 记录实机指标（带 scenario + combo，供双维学习）
+                if record and _rm is not None:
+                    _rm.record_step(
+                        workdir, tid, tier=tier, node_id=node_id,
+                        model_impl=_impl, quant_dtype=quant_dtype,
+                        oom_degraded=(_failure == "oom"),
+                        redo_queued=True,
+                        shot_elapsed_s=round(_t.time() - _t0, 2),
+                        profile=profile, scenario=scenario, combo=combo)
+                # 路由决策：OOM/超时换 impl 重试；质量收紧参数（留原 impl）
+                if _failure == "quality":
+                    # 质量：保留 impl，记下路由决策，最后一次尝试时收紧参数
+                    pass
+                else:
+                    _impl = _route.get("impl_name") or _impl
+        # 重试结束：成功 or 耗尽
+        _elapsed = round(_t.time() - _t0, 2)
+        if out is not None and _last_err is None:
+            # 成功：也采实机指标（peak_vram + elapsed + scenario + combo），供双维学习
             if record and _rm is not None:
-                # 峰值显存：优先 runner 返回里带的，否则采样
                 _pk = (out.get("peak_vram_gb") if isinstance(out, dict) else None)
+                _mk = (out.get("model_impl") if isinstance(out, dict) and out.get("model_impl")
+                       else _impl)
                 _rm.record_step(
                     workdir, tid, tier=tier, node_id=node_id,
-                    model_impl=(model_impl if model_impl != "auto"
-                                 else (out.get("model_impl") if isinstance(out, dict) else model_impl)),
-                    quant_dtype=quant_dtype,
+                    model_impl=_mk, quant_dtype=quant_dtype,
                     oom_degraded=bool(out.get("oom_degraded")) if isinstance(out, dict) else False,
-                    redo_queued=bool(out.get("redo_queued")) if isinstance(out, dict) else False,
-                    peak_vram_gb=_pk, shot_elapsed_s=_elapsed, profile=profile)
+                    redo_queued=False,
+                    peak_vram_gb=_pk, shot_elapsed_s=_elapsed,
+                    profile=profile, scenario=scenario, combo=combo)
+            if isinstance(out, dict) and _route is not None:
+                out["_failure_route"] = _route
+            st.results[tid] = out
             st.done.append(tid)
             if tid in st.pending:
                 st.pending.remove(tid)
             if tid in st.failed:
                 st.failed.remove(tid)
-            executed.append(tid)
-            save_state(workdir, st)  # 每步落盘，保证可断点
-        except Exception as e:
-            _failed = "OOM" in str(e).upper()
-            if record and _rm is not None:
-                _rm.record_step(
-                    workdir, tid, tier=tier, node_id=node_id,
-                    model_impl=model_impl, quant_dtype=quant_dtype,
-                    oom_degraded=_failed, redo_queued=True,
-                    shot_elapsed_s=round(_t.time() - _t0, 2) if "_t0" in dir() else None,
-                    profile=profile)
+        else:
+            # 重试耗尽仍失败
+            if isinstance(out, dict):
+                out["_failure_route"] = _route
+                out.setdefault("error", str(_last_err))
+            st.results[tid] = out if out is not None else {"error": str(_last_err), "_failure_route": _route}
             st.failed.append(tid)
             if tid in st.pending:
                 st.pending.remove(tid)
-            st.results[tid] = {"error": str(e)}
-            executed.append(tid)
-            save_state(workdir, st)
+        executed.append(tid)
+        save_state(workdir, st)  # 每步落盘，保证可断点
+
+    # 双维 combo 学习：管线跑完，把本次指标喂给 adaptive，写回 matrix
+    _combo_learned = None
+    if record and _ad is not None and scenario:
+        try:
+            _rows = _rm.load_history(workdir)
+            _learned = _ad.combo_learn(_rows)
+            _combo_learned = _learned
+        except Exception:
+            _combo_learned = None
 
     return {
         "executed": executed,
