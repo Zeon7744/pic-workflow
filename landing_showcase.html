@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>pic-workflow 样片展示 - 图片→视频→成片</title>
+<style>
+:root{--p:#635bff;--bg:#0e0f14;--card:#1a1c24;--fg:#f5f6fa;--mut:#9aa0b4}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:-apple-system,"PingFang SC",sans-serif;line-height:1.6}
+.wrap{max-width:1080px;margin:0 auto;padding:48px 24px}
+.hero{background:radial-gradient(1200px 400px at 20% -10%,#635bff33,transparent),var(--bg);padding:64px 0}
+.hero h1{font-size:34px}
+.hero .sub{color:var(--mut);max-width:640px;margin:14px 0}
+.badge{display:inline-block;background:#635bff22;color:#a69dff;padding:4px 12px;border-radius:999px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
+.card{background:var(--card);border-radius:14px;padding:20px}
+.card h3{font-size:17px;margin-bottom:6px}
+.card p{color:var(--mut);font-size:14px}
+.price{margin-top:8px;font-size:20px;font-weight:700;color:#a69dff}
+.price span{font-size:13px;color:var(--mut);font-weight:400}
+.btn{display:inline-block;background:var(--p);color:#fff;padding:10px 20px;border-radius:10px;text-decoration:none;margin-top:14px;font-size:14px}
+.price-card{border:2px solid var(--p)}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.hero h1{font-size:26px}}
+</style>
+</head>
+<body>
+<div class="hero wrap">
+  <span class="badge">AI 多模态工作流引擎</span>
+  <h1>pic-workflow · 图片→视频→成片 一站式</h1>
+  <p class="sub">覆盖短剧 / 营销图 / 创意内容生产，内置四维风格矩阵（画风 20 档 · 音乐 30 档 · 声音 30 种 · BGM 50 种）与角色一致性引擎。</p>
+  <div class="grid">
+    <div class="card"><h3>短剧样片</h3><p>三幕结构一键生成竖屏短剧样片</p><span class="price">Pro <span>¥99/月</span></span><a class="btn" href="#">一键生成同款</a></div>
+    <div class="card"><h3>营销图</h3><p>多尺寸电商/社媒主图批量产出</p><span class="price">Free <span>¥0</span></span><a class="btn" href="#">试用</a></div>
+    <div class="card price-card"><h3>创意成片</h3><p>角色一致性 + 智能音频裁剪成片</p><span class="price">Pro <span>¥99/月</span></span><a class="btn" href="#">看样片</a></div>
+  </div>
+</div>
+</body>
+</html>
