@@ -4,7 +4,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).parent.parent.parent / "src"))
 from picwf.workflow_gen import generate_workflow
 from picwf.conflict_check import check_conflict
 
-MATRIX = str(pathlib.Path(__file__).parent.parent.parent / "config" / "matrix.yaml")
+MATRIX = str(pathlib.Path(__file__).resolve().parent.parent / "config" / "matrix.yaml")
 
 def test_dim_counts():
     m = yaml.safe_load(open(MATRIX, encoding="utf-8"))
