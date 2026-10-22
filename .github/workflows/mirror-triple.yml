@@ -24,8 +24,8 @@ jobs:
           set -e
           REPO_NAME="pic-workflow"
           GITEE_TOKEN_ENC=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$GITEE_TOKEN")
-          git remote add gitee "https://Zeon7744:${GITEE_TOKEN_ENC}@gitee.com/Zeon7744/${REPO_NAME}.git" 2>/dev/null || \
-            git remote set-url gitee "https://Zeon7744:${GITEE_TOKEN_ENC}@gitee.com/Zeon7744/${REPO_NAME}.git"
+          git remote add gitee "https://oauth2:${GITEE_TOKEN_ENC}@gitee.com/Zeon7744/${REPO_NAME}.git" 2>/dev/null || \
+            git remote set-url gitee "https://oauth2:${GITEE_TOKEN_ENC}@gitee.com/Zeon7744/${REPO_NAME}.git"
           git push gitee main --force-with-lease
           echo "✅ Gitee synced: $(git rev-parse main)"
 
