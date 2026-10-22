@@ -23,8 +23,9 @@ jobs:
         run: |
           set -e
           REPO_NAME="pic-workflow"
-          git remote add gitee "https://Zeon7744:${GITEE_TOKEN}@gitee.com/Zeon7744/${REPO_NAME}.git" 2>/dev/null || \
-            git remote set-url gitee "https://Zeon7744:${GITEE_TOKEN}@gitee.com/Zeon7744/${REPO_NAME}.git"
+          GITEE_TOKEN_ENC=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$GITEE_TOKEN")
+          git remote add gitee "https://Zeon7744:${GITEE_TOKEN_ENC}@gitee.com/Zeon7744/${REPO_NAME}.git" 2>/dev/null || \
+            git remote set-url gitee "https://Zeon7744:${GITEE_TOKEN_ENC}@gitee.com/Zeon7744/${REPO_NAME}.git"
           git push gitee main --force-with-lease
           echo "✅ Gitee synced: $(git rev-parse main)"
 
@@ -34,8 +35,9 @@ jobs:
         run: |
           set -e
           REPO_NAME="pic-workflow"
-          git remote add gitcode "https://Zeon7744:${GITCODE_TOKEN}@gitcode.com/Zeon7744/${REPO_NAME}.git" 2>/dev/null || \
-            git remote set-url gitcode "https://Zeon7744:${GITCODE_TOKEN}@gitcode.com/Zeon7744/${REPO_NAME}.git"
+          GITCODE_TOKEN_ENC=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$GITCODE_TOKEN")
+          git remote add gitcode "https://Zeon7744:${GITCODE_TOKEN_ENC}@gitcode.com/Zeon7744/${REPO_NAME}.git" 2>/dev/null || \
+            git remote set-url gitcode "https://Zeon7744:${GITCODE_TOKEN_ENC}@gitcode.com/Zeon7744/${REPO_NAME}.git"
           git push gitcode main --force-with-lease
           echo "✅ GitCode synced: $(git rev-parse main)"
 
