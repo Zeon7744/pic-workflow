@@ -26,7 +26,12 @@ jobs:
           set -e
           REPO_NAME="pic-workflow"
           # 配置 SSH
-          echo "$GITEE_SSH_PRIVATE_KEY" > /tmp/gitee_key
+          printf '%s\n' "$GITEE_SSH_PRIVATE_KEY" > /tmp/gitee_key
+          # 校验私钥完整性（缺 BEGIN/END 说明 secret 贴错）
+          if ! grep -q "BEGIN" /tmp/gitee_key || ! grep -q "END" /tmp/gitee_key; then
+            echo "::error::GITEE_SSH_PRIVATE_KEY secret 不含 OPENSSH 私钥边界，请重贴全文（含首尾 -----BEGIN/END OPENSSH PRIVATE KEY----- 两行）"
+            exit 1
+          fi
           chmod 600 /tmp/gitee_key
           mkdir -p ~/.ssh
           ssh-keyscan gitee.com >> ~/.ssh/known_hosts
