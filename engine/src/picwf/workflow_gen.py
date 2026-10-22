@@ -83,6 +83,7 @@ def generate_workflow(tier: str, matrix_path: str = MATRIX_PATH_DEFAULT,
                         "params": {"style": style, "lora": st.get("lora"),
                                    "prompt_prefix": st.get("prompt_prefix", "")},
                     })
+                chain = _tier_filter_chain(tier_name, chain)
                 nd["fallback_chain"] = chain or nd["fallback_chain"]
                 nd["primary"] = chain[0] if chain else nd["primary"]
                 nd["params"] = nd["primary"].get("params", {})
@@ -98,6 +99,7 @@ def generate_workflow(tier: str, matrix_path: str = MATRIX_PATH_DEFAULT,
                                    "prompt_prefix": st.get("prompt_prefix", "")},
                     })
                 if chain:
+                    chain = _tier_filter_chain(tier_name, chain)
                     nd["fallback_chain"] = chain or nd["fallback_chain"]
                     nd["primary"] = chain[0] if chain else nd["primary"]
                     nd["params"] = nd["primary"].get("params", {})
@@ -187,6 +189,22 @@ def _style_vram(impl: str, tier: str) -> int:
     return 6
 
 
+def _tier_filter_chain(tier: str, chain: list) -> list:
+    """画风轨 model 链按档位过滤：T0 无独显强制云端优先。
+
+    T0（无独显卡）：cloud 类排最前，本地 gguf/offload 放后作兜底，
+    本地重模型(SDXL/flux lora)直接排到最后。
+    T1/T2：保持画风原序（本地 gguf 首选，省成本）。
+    """
+    if tier != "T0":
+        return chain
+    import copy
+    c = copy.deepcopy(chain)
+    weight = {"cloud": 0, "gguf_offload": 1, "local": 3, "local_heavy": 4}
+    stable = sorted(c, key=lambda x: weight.get(_impl_class(x.get("impl")), 9))
+    return stable
+
+
 def _impl_class(impl: str) -> str:
     """实现归类：cloud / gguf_offload / local_heavy / local。"""
     s = (impl or "").lower()
@@ -212,9 +230,13 @@ def _apply_friendly_policy(tier: str, chain: list, policy: dict) -> list:
     if not is_low:
         return chain
     c = copy.deepcopy(chain)
-    # 亲民排序权重：gguf_offload(本地省成本) < cloud(兜底) < local_heavy < local
-    # 低配默认"本地 GGUF Q4+offload 首选，云端兜底排后"
-    weight = {"gguf_offload": 0, "cloud": 1, "local_heavy": 3, "local": 2}
+    if tier == "T0":
+        # T0 无独显纯云端：cloud 排最前，本地 gguf/offload 放后作兜底
+        # 无独显卡上本地 SDXL/flux 类直接 OOM，必须强制云端优先
+        weight = {"cloud": 0, "gguf_offload": 1, "local": 3, "local_heavy": 4}
+    else:
+        # T1/T2 低配：本地 GGUF Q4+offload 首选（省成本），云端兜底排后
+        weight = {"gguf_offload": 0, "cloud": 1, "local_heavy": 3, "local": 2}
     rest = [i for i in c if _impl_class(i.get("impl")) in ("local", "local_heavy")]
     safe = [i for i in c if _impl_class(i.get("impl")) in ("gguf_offload", "cloud")]
     safe.sort(key=lambda x: weight.get(_impl_class(x.get("impl")), 9))
