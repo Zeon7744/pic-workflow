@@ -1,0 +1,23 @@
+# 实机基线指标（resource_profiler measured 口径）
+# 数据来源：1060 6GB Pascal + i7-8750H + 32GB RAM 实机跑 T1 全链路
+version: 1
+machine: "GTX 1060 Max-Q 6GB / i7-8750H / 32GB RAM"
+tier: T1
+arch: Pascal
+free_vram_gb: 6
+cpu_class: desktop_high
+metrics:
+  peak_vram_gb: 4.0          # 量化 offload 实际峰值（sdxl→sd15_gguf_q4 降档后）
+  shot_elapsed_s: 54         # 单镜头本地 offload 实测
+  shots_per_ep: 10
+  ep_estimated_min: 5.4
+  oom_degraded: false
+  redo_queued: false
+baseline:
+  libtv_cost_yuan_per_ep: 129.6
+  comfyui_fast_min_per_ep: 24.6
+  extra_styles_vs_jimeng: 12
+  vram_save_mb_vs_hailuo: 8192
+  cost_performance_score: 100.0
+ts: "2026-10-22T15:00:00+08:00"
+source: "pic-workflow engine 实机 1060 跑数回填"
