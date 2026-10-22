@@ -347,8 +347,17 @@ def apply_combo_learn_to_matrix(matrix: Dict[str, Any],
         best = lv.get("best_combo") or {}
         if not best:
             continue
-        # 剧种默认走 act1_opening 阶段映射（MVP：剧种级 combo，集数级二期）
-        act = arcs.setdefault(f"{sc}__{tier}", {})
+        # 剧种级 combo 写回：若该 sc__tier 键原不存在，按全局 5 act 阶段骨架初始化
+        # （act1_opening/act2_setup/act3_mid/act4_climax/act5_ending）再写 combo
+        _GLOBAL_ACT_STAGES = ("act1_opening", "act2_setup", "act3_mid",
+                              "act4_climax", "act5_ending")
+        sc_tier_key = f"{sc}__{tier}"
+        act = arcs.setdefault(sc_tier_key, {})
+        if not act:
+            # 剧种级骨架：每个 stage 一个 dict，combo 默认全空
+            for _st in _GLOBAL_ACT_STAGES:
+                act[_st] = {"arc_label": _st, "combo": {}, "episodes": []}
+        # 写 combo 到所有 stage（剧种级 combo，集数级二期细化）
         for stage in act.values():
             for dim in ("style", "music", "voice", "bgm"):
                 if dim in best and best[dim]:

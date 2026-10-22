@@ -17,3 +17,4 @@ state.json
 kfs/
 *.log
 __pycache__/
+.ssh-mirror/
