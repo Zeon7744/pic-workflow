@@ -1,5 +1,7 @@
-# 三端自动镜像：GitHub push → GitCode 自动同步（Gitee 手动，跨平台 IP 策略限制）
-# 凭据走 GitHub Secrets：GITCODE_TOKEN（GITEE_TOKEN 可选，配了才自动推 Gitee）
+# 三端自动镜像：GitHub push → Gitee(SSH) + GitCode(login:token) 全自动
+# 凭据走 GitHub Secrets：
+#   GITEE_SSH_PRIVATE_KEY = 本仓专用 SSH 私钥（已生成）
+#   GITCODE_TOKEN         = GitCode PAT
 name: mirror-triple
 
 on:
@@ -17,7 +19,26 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Mirror to GitCode
+      - name: Mirror to Gitee (SSH)
+        env:
+          GITEE_SSH_PRIVATE_KEY: ${{ secrets.GITEE_SSH_PRIVATE_KEY }}
+        run: |
+          set -e
+          REPO_NAME="pic-workflow"
+          # 配置 SSH
+          echo "$GITEE_SSH_PRIVATE_KEY" > /tmp/gitee_key
+          chmod 600 /tmp/gitee_key
+          mkdir -p ~/.ssh
+          ssh-keyscan gitee.com >> ~/.ssh/known_hosts
+          git config --global url."git@gitee.com:".insteadOf "https://gitee.com/"
+          export GIT_SSH_COMMAND="ssh -i /tmp/gitee_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes"
+          git remote add gitee "git@gitee.com:Zeon7744/${REPO_NAME}.git" 2>/dev/null || \
+            git remote set-url gitee "git@gitee.com:Zeon7744/${REPO_NAME}.git"
+          git fetch gitee main 2>/dev/null || true
+          git push gitee main --force
+          echo "✅ Gitee SSH synced: $(git rev-parse main)"
+
+      - name: Mirror to GitCode (login:token)
         env:
           GITCODE_TOKEN: ${{ secrets.GITCODE_TOKEN }}
         run: |
@@ -30,24 +51,11 @@ jobs:
           git push gitcode main --force
           echo "✅ GitCode synced: $(git rev-parse main)"
 
-      - name: Mirror to Gitee (optional, may 403 due to Gitee IP policy)
-        if: github.event_name != 'schedule'
-        env:
-          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
-        continue-on-error: true
-        run: |
-          REPO_NAME="pic-workflow"
-          GITEE_TOKEN_ENC=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$GITEE_TOKEN")
-          git remote add gitee "https://oauth2:${GITEE_TOKEN_ENC}@gitee.com/Zeon7744/${REPO_NAME}.git" 2>/dev/null || \
-            git remote set-url gitee "https://oauth2:${GITEE_TOKEN_ENC}@gitee.com/Zeon7744/${REPO_NAME}.git"
-          git push gitee main --force-with-lease 2>&1 || \
-            echo "⚠️ Gitee 推码失败（Gitee 对 Actions 出口 IP 的 oauth2 认证策略），已降级为手动同步；不影响 GitCode 镜像"
-
       - name: Summary
         run: |
-          echo "## Mirror-triple 完成" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Mirror-triple 完成（Gitee SSH + GitCode token）" >> "$GITHUB_STEP_SUMMARY"
           echo "- 仓: Zeon7744/pic-workflow" >> "$GITHUB_STEP_SUMMARY"
           echo "- 触发: ${{ github.event_name }} @ ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- GitCode: 自动镜像 ✅" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Gitee: 手动同步（跨平台 IP 策略限制）" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Gitee: SSH 自动镜像 ✅" >> "$GITHUB_STEP_SUMMARY"
+          echo "- GitCode: token 自动镜像 ✅" >> "$GITHUB_STEP_SUMMARY"
           echo "- 时间: $(date -u)" >> "$GITHUB_STEP_SUMMARY"
