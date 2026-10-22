@@ -1,42 +1,57 @@
-"""四维冲突检测：画风 S × 音乐 M × 声音 V × BGM B 的组合合理性检查。
-违和组合标 conflict 并给降级/替换建议，避免生硬硬配。
+"""四维冲突检测（升级版）：画风 S × 音乐 M × 声音 V × BGM B 的组合合理性。
+v2：从 0/1 违和 → 0-100 适配分矩阵；high=推荐 / mid=可用 / low=违和。
 """
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional
 
-# 冲突矩阵（画风×音乐）：某画风配某音乐违和，给建议替换
-STYLE_MUSIC_CONFLICT: Dict[str, Dict[str, List[str]]] = {
-    "S1_anime_jp": {"M1_guoqin_classic": ["M28_anime_jpop","M4_rock_electric"], "M11_horror_drone": ["M12_suspense_strings","M20_ambient_space"]},
-    "S8_dark_gothic": {"M13_funny_quirky": ["M27_haunting_gothic","M11_horror_drone"], "M30_corporate_soft": ["M27_haunting_gothic"]},
-    "S9_cyberpunk": {"M1_guoqin_classic": ["M9_synthwave","M8_electronic_dance"], "M17_world_ethnic": ["M9_synthwave","M19_industrial"]},
-    "S13_watercolor": {"M19_industrial": ["M25_classical_piano","M2_folk_guitar"], "M4_rock_electric": ["M25_classical_piano","M14_ballet_classical"]},
-    "S18_cel_3d": {"M11_horror_drone": ["M13_funny_quirky","M30_corporate_soft"], "M27_haunting_gothic": ["M13_funny_quirky","M28_anime_jpop"]},
+# 冲突矩阵（画风×音乐）：key = (S, M)，value = 适配分 0-100（<40 标违和）
+STYLE_MUSIC_FIT: Dict[str, Dict[str, int]] = {
+    "S1_anime_jp":     {"M1_guoqin_classic": 30, "M11_horror_drone": 20, "M28_anime_jpop": 95, "M4_rock_electric": 85},
+    "S8_dark_gothic":  {"M13_funny_quirky": 10, "M27_haunting_gothic": 90, "M11_horror_drone": 80},
+    "S9_cyberpunk":    {"M1_guoqin_classic": 15, "M9_synthwave": 95, "M8_electronic_dance": 85},
+    "S13_watercolor":  {"M19_industrial": 10, "M25_classical_piano": 90, "M2_folk_guitar": 80},
+    "S18_cel_3d":      {"M11_horror_drone": 15, "M13_funny_quirky": 90, "M30_corporate_soft": 80},
+    "S20_photoreal_8k":{"M5_classical_orch": 85, "M25_classical_piano": 90, "M1_guoqin_classic": 40},
 }
-# 画风×BGM（场景功能违和）
-STYLE_BGM_CONFLICT: Dict[str, Dict[str, List[str]]] = {
-    "S18_cel_3d": {"B09_horror_deep": ["B07_daily_light","B34_cheer_merry"]},
-    "S13_watercolor": {"B23_battle_full": ["B07_daily_light","B11_lyric_soft"], "B09_horror_deep": ["B11_lyric_soft","B12_ambience_bg"]},
-    "S8_dark_gothic": {"B10_funny_relax": ["B08_suspense_cold","B28_tense_quiet"], "B34_cheer_merry": ["B27_despair_dark"]},
+
+STYLE_BGM_FIT: Dict[str, Dict[str, int]] = {
+    "S18_cel_3d":      {"B09_horror_deep": 10, "B07_daily_light": 90, "B34_cheer_merry": 85},
+    "S13_watercolor":  {"B23_battle_full": 10, "B11_lyric_soft": 90, "B07_daily_light": 80},
+    "S8_dark_gothic":  {"B10_funny_relax": 15, "B08_suspense_cold": 90, "B27_despair_dark": 80},
+    "S9_cyberpunk":    {"B12_ambience_bg": 85, "B28_tense_quiet": 80, "B07_daily_light": 30},
 }
+
+THRESHOLDS = {"high": 80, "mid": 50, "low": 0}  # >=80 推荐 / 50-79 可用 / <50 违和
 
 def check_conflict(style: str, music: str = "", voice: str = "", bgm: str = "") -> List[dict]:
+    """返回冲突告警列表。每条 = {axis, combo, score, level, suggest}。
+    level: high/mid/low；low 时附 suggest 替换建议。
+    """
     out: List[dict] = []
     if style and music:
-        alt = STYLE_MUSIC_CONFLICT.get(style, {}).get(music)
-        if alt:
-            out.append({"axis": "style×music", "combo": f"{style}+{music}", "issue": "画风与音乐违和", "suggest": alt})
+        fit = STYLE_MUSIC_FIT.get(style, {}).get(music, 60)  # 未知组合默认 60（mid 可用）
+        out.append(_mk("style×music", f"{style}+{music}", fit,
+                       _suggest_alt(STYLE_MUSIC_FIT, style, music)))
     if style and bgm:
-        alt = STYLE_BGM_CONFLICT.get(style, {}).get(bgm)
-        if alt:
-            out.append({"axis": "style×bgm", "combo": f"{style}+{bgm}", "issue": "画风与BGM场景违和", "suggest": alt})
-    # BGM 自带 music_ref，BGM与显式music冲突时（同情绪反向）粗检
-    if music and bgm:
-        _coarse_bgm_music(music, bgm, out)
-    return out
+        fit = STYLE_BGM_FIT.get(style, {}).get(bgm, 60)
+        out.append(_mk("style×bgm", f"{style}+{bgm}", fit,
+                       _suggest_alt(STYLE_BGM_FIT, style, bgm)))
+    # 过滤：只保留 level != "high" 的告警（high 不告警）
+    return [c for c in out if c["level"] in ("mid", "low")]
 
-def _coarse_bgm_music(music: str, bgm: str, out: List[dict]) -> None:
-    # 极简粗检：BGM若标注music_ref与显式music同轴且情绪相反，提示
-    # 这里保留扩展位，默认不强判
-    pass
+def _mk(axis: str, combo: str, score: int, suggest: List[str]) -> dict:
+    if score >= THRESHOLDS["high"]:
+        level = "high"
+    elif score >= THRESHOLDS["mid"]:
+        level = "mid"
+    else:
+        level = "low"
+    return {"axis": axis, "combo": combo, "score": score, "level": level,
+            "suggest": suggest if level == "low" else []}
 
-if __name__ == "__main__":
-    print(check_conflict("S18_cel_3d", "M11_horror_drone", "", "B09_horror_deep"))
+def _suggest_alt(fit_matrix: Dict[str, Dict[str, int]], style: str, bad_key: str) -> List[str]:
+    """找该 style 下适配分最高的 top-2 key（排除 bad_key 本身）。"""
+    rows = fit_matrix.get(style, {})
+    if not rows:
+        return []
+    ranked = sorted(rows.items(), key=lambda x: -x[1])
+    return [k for k, _ in ranked[:2] if k != bad_key]

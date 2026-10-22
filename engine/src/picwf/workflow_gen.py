@@ -27,7 +27,9 @@ def _load_yaml(path):
 def generate_workflow(tier: str, matrix_path: str = MATRIX_PATH_DEFAULT,
                       free_vram_gb: float = 99.0,
                       style: str = "S1_anime_jp",
-                      music: str = "", voice: str = "", bgm: str = "") -> Dict[str, Any]:
+                      music: str = "", voice: str = "", bgm: str = "",
+                      scenario: str = "", ep: int = 0,
+                      audio_mode: str = "auto") -> Dict[str, Any]:
     """生成指定档位 + 画风的工作流。
 
     tier: T0/T1/T2（MVP）
@@ -101,21 +103,51 @@ def generate_workflow(tier: str, matrix_path: str = MATRIX_PATH_DEFAULT,
                     nd["params"] = nd["primary"].get("params", {})
                     nd["style"] = style
 
-    # 四维音频轨（音乐 M / 声音 V / BGM B）：配了才生成对应节点 + 冲突检测
+    # ---- 智能音频轨裁剪（省心省事）+ 四维协同优化（精准命中）----
+    from .audio_advisor import advise_tracks
+    from .combo_optimizer import optimize
+    audio_cfg = matrix.get("scenario_resource_map", {})
+    scenario_eff = scenario or (audio_cfg.get("DEFAULT_SCENARIO") if audio_cfg else "light_comedy")
+    adv = advise_tracks(scenario_eff, matrix, audio_mode=audio_mode, ep=ep or 1)
+    adv_ids = [t["id"] for t in adv]
+    # 兼容旧调用：显式传了某轨参数但 adv_ids 没包含时，强制补入（不裁剪用户显式指定的轨）
+    for _k in ("music", "voice", "bgm"):
+        _v = locals().get(_k, "")
+        if _v and _k not in adv_ids:
+            adv_ids.append(_k)
+    # 四维协同优化（ep 有效时跑）
+    opt = {}
+    if ep:
+        opt = optimize(scenario_eff, ep, matrix)
+        # 若用户没显式传 music/voice/bgm，用优化器 best 组合补齐（auto 裁剪时保留）
+        if not music and "music" in adv_ids:
+            music = opt.get("best", {}).get("music", music)
+        if not voice and "voice" in adv_ids:
+            voice = opt.get("best", {}).get("voice", voice)
+        if not bgm and "bgm" in adv_ids:
+            bgm = opt.get("best", {}).get("bgm", bgm)
+
+    # 四维音频轨（音乐 M / 声音 V / BGM B）：按裁剪结果生成 + 冲突检测
     from .conflict_check import check_conflict
     _cw = check_conflict(style, music=music, voice=voice, bgm=bgm)
     _meta_extra = {"conflict_warnings": _cw} if _cw else {}
-    if music:
+    _meta_extra["audio_mode"] = audio_mode
+    _meta_extra["audio_advised"] = adv_ids
+    if opt:
+        _meta_extra["combo_best"] = opt.get("best", {})
+        _meta_extra["combo_alt"] = opt.get("alt", {})
+        _meta_extra["combo_scores"] = opt.get("scores", {})
+    if music and "music" in adv_ids:
         nodes.append({"id": "music", "name": "M音乐轨_" + music,
             "primary": {"impl": "music_gen." + music,
                         "params": {"track": music, "tracks": matrix.get("music_tracks", {})}},
             "fallback_chain": [{"impl": "cloud_generate_music"}], "style": style})
-    if voice:
+    if voice and "voice" in adv_ids:
         nodes.append({"id": "voice", "name": "V声音轨_" + voice,
             "primary": {"impl": "voice_tts." + voice,
                         "params": {"track": voice, "tracks": matrix.get("voice_tracks", {})}},
             "fallback_chain": [{"impl": "cloud_tts"}], "style": style})
-    if bgm:
+    if bgm and "bgm" in adv_ids:
         nodes.append({"id": "bgm", "name": "B背景轨_" + bgm,
             "primary": {"impl": "bgm_mix." + bgm,
                         "params": {"track": bgm, "music_tracks": matrix.get("music_tracks", {}),

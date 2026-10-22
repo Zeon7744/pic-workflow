@@ -285,6 +285,44 @@ bgm_tracks:
   B49_work_routine: {label:"工作",      func:"日常节奏",   music_ref:"M2/M30", dur:"15-30s", scene:"工作/学习"}
   B50_travel_wind: {label:"旅行",      func:"在路上",     music_ref:"M2/M21", dur:"30-60s", scene:"旅行/路上"}
 
+# ============================================================================
+# 场景资源映射（scenario_resource_map）：剧种 → 默认音频轨生成配置
+# 省心省事：默认只生成 1-2 条音频轨，省 50%+ 资源；精品/大场面走 full 模式
+# ============================================================================
+scenario_resource_map:
+  light_comedy:       {label: "轻喜剧",   default_tracks: ["bgm"],        full_tracks: ["bgm", "music", "voice"], default_bgm: "B07_daily_light", default_mood: "轻快"}
+  daily_romance:      {label: "都市甜宠",  default_tracks: ["bgm", "music"], full_tracks: ["bgm", "music", "voice"], default_bgm: "B36_romantic_warm", default_mood: "甜蜜"}
+  male_revenge:       {label: "男频逆袭",  default_tracks: ["bgm", "music"], full_tracks: ["bgm", "music", "voice"], default_bgm: "B26_hope_rise", default_mood: "热血"}
+  dark_thriller:      {label: "暗黑悬疑",  default_tracks: ["bgm"],        full_tracks: ["bgm", "music", "voice"], default_bgm: "B08_suspense_cold", default_mood: "紧张"}
+  fantasy_wuxia:      {label: "国风玄幻",  default_tracks: ["bgm", "music"], full_tracks: ["bgm", "music", "voice"], default_bgm: "B31_glory_grand", default_mood: "宏大"}
+  romance_sad:        {label: "虐心情感",  default_tracks: ["bgm"],        full_tracks: ["bgm", "music", "voice"], default_bgm: "B35_sorrow_soft", default_mood: "忧伤"}
+  sci_fi_cyber:       {label: "科幻近未来", default_tracks: ["bgm"],       full_tracks: ["bgm", "music", "voice"], default_bgm: "B12_ambience_bg", default_mood: "冷峻"}
+  action_battle:      {label: "动作战斗",  default_tracks: ["bgm", "music"], full_tracks: ["bgm", "music", "voice"], default_bgm: "B23_battle_full", default_mood: "燃"}
+  family_warm:        {label: "家庭温情",  default_tracks: ["bgm"],        full_tracks: ["bgm", "music", "voice"], default_bgm: "B41_reunion_warm", default_mood: "温情"}
+  school_youth:       {label: "校园青春",  default_tracks: ["bgm", "music"], full_tracks: ["bgm", "music", "voice"], default_bgm: "B44_growth_up", default_mood: "向上"}
+
+# ============================================================================
+# 情绪弧线映射（emotion_arc_map）：第几集 × 情绪 → 推荐四维组合
+# 集数按 10 集短剧模板（1-2 开篇 / 3-7 中段 / 8-9 高潮 / 10 结局）
+# 每档给 4 维（S/M/V/B）推荐 + 次优备选
+# ============================================================================
+emotion_arc_map:
+  act1_opening:      {arc_label: "开篇定调", episodes: [1,2],
+                      combo: {style: "S1_anime_jp", music: "M28_anime_jpop", voice: "V1_male_young_cool", bgm: "B14_opening_theme"},
+                      combo_alt: {style: "S4_realistic", music: "M5_classical_orch", voice: "V15_narrator_male", bgm: "B14_opening_theme"}}
+  act2_setup:        {arc_label: "冲突铺垫", episodes: [3,4],
+                      combo: {style: "S1_anime_jp", music: "M13_funny_quirky", voice: "V1_male_young_cool", bgm: "B21_standoff"},
+                      combo_alt: {style: "S4_realistic", music: "M12_suspense_strings", voice: "V16_narrator_female", bgm: "B08_suspense_cold"}}
+  act3_mid:          {arc_label: "中段发展", episodes: [5,6,7],
+                      combo: {style: "S1_anime_jp", music: "M7_lofi_chill", voice: "V1_male_young_cool", bgm: "B07_daily_light"},
+                      combo_alt: {style: "S4_realistic", music: "M25_classical_piano", voice: "V15_narrator_male", bgm: "B11_lyric_soft"}}
+  act4_climax:       {arc_label: "高潮爆发", episodes: [8,9],
+                      combo: {style: "S1_anime_jp", music: "M4_rock_electric", voice: "V1_male_young_cool", bgm: "B05_climax_peak"},
+                      combo_alt: {style: "S4_realistic", music: "M10_orchestral_epic", voice: "V29_low_bass_deep", bgm: "B24_victory"}}
+  act5_ending:       {arc_label: "结局收尾", episodes: [10],
+                      combo: {style: "S1_anime_jp", music: "M25_classical_piano", voice: "V5_female_young_clear", bgm: "B15_ending_theme"},
+                      combo_alt: {style: "S4_realistic", music: "M29_sad_piano_ballad", voice: "V16_narrator_female", bgm: "B46_redemption_soft"}}
+
 # 档位定义（MVP: T0/T1/T2，T3-T5 二期占位）
 # 档位定义（MVP: T0/T1/T2，T3-T5 二期占位）
 tiers:
