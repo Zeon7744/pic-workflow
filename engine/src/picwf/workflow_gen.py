@@ -26,7 +26,8 @@ def _load_yaml(path):
 
 def generate_workflow(tier: str, matrix_path: str = MATRIX_PATH_DEFAULT,
                       free_vram_gb: float = 99.0,
-                      style: str = "S1_anime_jp") -> Dict[str, Any]:
+                      style: str = "S1_anime_jp",
+                      music: str = "", voice: str = "", bgm: str = "") -> Dict[str, Any]:
     """生成指定档位 + 画风的工作流。
 
     tier: T0/T1/T2（MVP）
@@ -100,15 +101,38 @@ def generate_workflow(tier: str, matrix_path: str = MATRIX_PATH_DEFAULT,
                     nd["params"] = nd["primary"].get("params", {})
                     nd["style"] = style
 
-    return {
+    # 四维音频轨（音乐 M / 声音 V / BGM B）：配了才生成对应节点 + 冲突检测
+    from .conflict_check import check_conflict
+    _cw = check_conflict(style, music=music, voice=voice, bgm=bgm)
+    _meta_extra = {"conflict_warnings": _cw} if _cw else {}
+    if music:
+        nodes.append({"id": "music", "name": "M音乐轨_" + music,
+            "primary": {"impl": "music_gen." + music,
+                        "params": {"track": music, "tracks": matrix.get("music_tracks", {})}},
+            "fallback_chain": [{"impl": "cloud_generate_music"}], "style": style})
+    if voice:
+        nodes.append({"id": "voice", "name": "V声音轨_" + voice,
+            "primary": {"impl": "voice_tts." + voice,
+                        "params": {"track": voice, "tracks": matrix.get("voice_tracks", {})}},
+            "fallback_chain": [{"impl": "cloud_tts"}], "style": style})
+    if bgm:
+        nodes.append({"id": "bgm", "name": "B背景轨_" + bgm,
+            "primary": {"impl": "bgm_mix." + bgm,
+                        "params": {"track": bgm, "music_tracks": matrix.get("music_tracks", {}),
+                                    "bgm_tracks": matrix.get("bgm_tracks", {})}},
+            "fallback_chain": [{"impl": "cloud_bgm"}], "style": style})
+    _ret = {
         "tier": tier_name,
         "tier_label": matrix["tiers"][tier_name].get("label"),
         "free_vram_gb": free_vram_gb,
         "style": style,
         "style_label": st.get("label") if st else "未指定画风",
+        "music": music, "voice": voice, "bgm": bgm,
         "nodes": nodes,
-        "note": "YAML 是数据不是代码；引擎按档位+画风裁剪，运行时可再降级",
+        "note": "YAML 是数据不是代码；引擎按档位+画风+音频轨裁剪，运行时可再降级",
     }
+    _ret.update(_meta_extra)
+    return _ret
 
 
 
@@ -175,7 +199,8 @@ def workflow_to_yaml(workflow: Dict[str, Any]) -> str:
 def generate_and_dump(tier: str, out_path: str,
                       matrix_path: str = MATRIX_PATH_DEFAULT,
                       free_vram_gb: float = 99.0,
-                      style: str = "S1_anime_jp") -> Dict[str, Any]:
+                      style: str = "S1_anime_jp",
+                      music: str = "", voice: str = "", bgm: str = "") -> Dict[str, Any]:
     wf = generate_workflow(tier, matrix_path, free_vram_gb, style)
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(workflow_to_yaml(wf))

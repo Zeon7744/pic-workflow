@@ -65,6 +65,227 @@ style_tracks:
     prompt_prefix: "3D二次元MMD渲染, 夸张表情, 发光材质, 虚拟偶像风格, 高饱和, 3D模型感"
     lora: "mmd_render"
 
+  S6_shounen_manga:   # 少年漫（热血/运动/超自然，男频主力）
+    label: "少年漫热血"
+    image_model: ["sdxl_shounen_lora", "sd15_gguf_q4_512_offload", "cloud_api_seedream"]
+    video_model: ["wan13b_gguf_q4_offload_480", "cloud_kling"]
+    prompt_prefix: "少年热血动漫, 动态线条, 速度线, 高饱和, 战斗爆发感, 男频爽感"
+    lora: "shounen_action"
+  S7_shoujo_manga:    # 少女漫（恋爱/成长，女频主力）
+    label: "少女漫恋爱"
+    image_model: ["sdxl_shoujo_lora", "sd15_gguf_q4_512_offload", "cloud_api_seedream"]
+    video_model: ["wan13b_gguf_q4_offload_480", "cloud_kling"]
+    prompt_prefix: "少女恋爱动漫, 柔光, 花瓣特效, 高纯度粉紫, 细腻线条, 甜宠感"
+    lora: "shoujo_romance"
+  S8_dark_gothic:     # 暗黑哥特（复仇/暗黑/悬疑）
+    label: "暗黑哥特"
+    image_model: ["flux_dark_gothic", "sdxl_turbo_768", "cloud_api_seedream"]
+    video_model: ["wan13b_fa_480", "cloud_kling"]
+    prompt_prefix: "暗黑哥特风, 高对比明暗, 暗紫黑色调, 阴影质感, 压抑神秘, 电影级"
+    lora: "dark_gothic"
+  S9_cyberpunk:       # 赛博朋克（科幻/未来/近未来）
+    label: "赛博朋克"
+    image_model: ["flux_cyberpunk", "sdxl_turbo_768", "cloud_api_seedream"]
+    video_model: ["wan13b_fa_480", "cloud_kling"]
+    prompt_prefix: "赛博朋克, 霓虹高饱和, 雨夜反光, 科技都市, 冷蓝+品红, 高对比"
+    lora: "cyberpunk_neon"
+  S10_steampunk:      # 蒸汽朋克（架空/奇幻/历史穿越）
+    label: "蒸汽朋克"
+    image_model: ["flux_steampunk", "sd15_gguf_q4_512_offload", "cloud_api_seedream"]
+    video_model: ["wan13b_gguf_q4_offload_480", "cloud_kling"]
+    prompt_prefix: "蒸汽朋克, 铜锈齿轮, 暖棕复古色调, 维多利亚质感, 蒸汽烟雾"
+    lora: "steampunk_vintage"
+  S11_lowpoly:        # 低多边形（游戏风/二次元/虚拟人）
+    label: "低多边形"
+    image_model: ["sdxl_lowpoly", "cloud_api_seedream"]
+    video_model: ["ltx095_720", "cloud_kling"]
+    prompt_prefix: "低多边形3D渲染, 棱角分明, 平面色块, 游戏感, 几何体"
+    lora: "lowpoly_3d"
+  S12_thick_paint:    # 厚涂（高质感/史诗/神话）
+    label: "厚涂写实"
+    image_model: ["flux_thick_paint", "sdxl_turbo_768", "cloud_api_seedream"]
+    video_model: ["wan13b_fa_480", "cloud_kling"]
+    prompt_prefix: "厚涂数字绘画, 笔触质感, 光影体积, 高细节, 史诗感"
+    lora: "thick_paint"
+  S13_watercolor:     # 水彩（治愈/文艺/日常）
+    label: "水彩治愈"
+    image_model: ["sdxl_watercolor", "sd15_gguf_q4_512_offload", "cloud_api_seedream"]
+    video_model: ["wan13b_gguf_q4_offload_480", "cloud_kling"]
+    prompt_prefix: "水彩淡彩, 晕染边缘, 低饱和柔和, 留白, 治愈系, 通透感"
+    lora: "watercolor_soft"
+  S14_flat_illustration: # 扁平插画（轻喜剧/都市/生活）
+    label: "扁平插画"
+    image_model: ["sdxl_flat", "cloud_api_seedream"]
+    video_model: ["wan13b_gguf_q4_offload_480", "cloud_kling"]
+    prompt_prefix: "扁平矢量插画, 简洁色块, 无渐变, 几何化, 现代感"
+    lora: "flat_design"
+  S15_pixel_90s:      # 90年代像素/复古（怀旧/游戏梗）
+    label: "复古像素"
+    image_model: ["sdxl_pixel", "cloud_api_seedream"]
+    video_model: ["wan13b_gguf_q4_offload_480", "cloud_kling"]
+    prompt_prefix: "90年代像素风, 8-bit质感, 怀旧配色, 游戏机画面感"
+    lora: "retro_pixel"
+  S16_film_photo:     # 胶片摄影（文艺/现实/纪实）
+    label: "胶片摄影"
+    image_model: ["flux_film", "sdxl_turbo_768", "cloud_api_seedream"]
+    video_model: ["wan13b_fa_480", "cloud_kling"]
+    prompt_prefix: "胶片摄影, 颗粒感, 35mm画幅, 暖调偏青, 复古光影"
+    lora: "film_grain"
+  S17_doc_real:       # 纪实/纪录片（现实向/纪实短剧）
+    label: "纪实影像"
+    image_model: ["flux_doc_real", "cloud_api_seedream"]
+    video_model: ["wan13b_fa_480", "cloud_kling"]
+    prompt_prefix: "纪实影像, 手持镜头, 自然光, 去修饰, 真实质感"
+    lora: "documentary"
+  S18_cel_3d:        # 3D卡通（动画电影感/合家欢）
+    label: "3D卡通"
+    image_model: ["flux_cel3d", "ltx095_720", "cloud_api_seedream"]
+    video_model: ["ltx095_720", "cloud_kling"]
+    prompt_prefix: "3D卡通渲染, 圆润造型, 皮克斯质感, 柔和光影, 合家欢"
+    lora: "cel3d_cartoon"
+  S19_ink_brush_cn:  # 工笔重彩（国风/历史/宫廷）
+    label: "工笔重彩"
+    image_model: ["sd15_gongbi", "sd15_gguf_q4_512_offload", "cloud_api_seedream"]
+    video_model: ["wan13b_gguf_q4_offload_480", "cloud_kling"]
+    prompt_prefix: "工笔重彩, 细线勾勒, 矿物色, 宫廷质感, 东方华丽"
+    lora: "gongbi_chinese"
+  S20_photoreal_8k:  # 极致写实拟真（真人向/电影级）
+    label: "极致写实"
+    image_model: ["flux_photoreal_8k", "cloud_api_seedream"]
+    video_model: ["wan13b_fa_480", "cloud_kling"]
+    prompt_prefix: "8K极致写实, 超写实皮肤, 电影级布光, 真实材质, 大片感"
+    lora: "photoreal_ultra"
+
+
+# ============================================================================
+# 音乐轨（music_tracks，30 档）：情绪 × 题材，供 BGM/音乐生成 + 选曲
+# 每档 = 调性区间 + BPM 区间 + 乐器组 + 情绪标签 + 适配场景
+# ============================================================================
+music_tracks:
+  M1_guoqin_classic: {label: "国风器乐",   key: "宫调/徵调", bpm: [60,90],  instruments: "古琴/琵琶/笛/古筝", mood: "古雅",        scenes: "国风/历史/修仙"}
+  M2_folk_guitar: {label: "民谣吉他",   key: "大调",      bpm: [80,110], instruments: "木吉他/口琴",       mood: "治愈日常",      scenes: "日常/生活/旅行"}
+  M3_jazz_swing: {label: "爵士摇摆",   key: "小调",      bpm: [100,130],instruments: "萨克斯/钢琴/低音提琴",mood:"慵懒都市",      scenes: "都市/情感/高级感"}
+  M4_rock_electric: {label: "电摇滚",     key: "小调",      bpm: [120,150],instruments: "电吉他/鼓/贝斯",    mood:"热血爆发",      scenes: "战斗/逆袭/燃"}
+  M5_classical_orch: {label: "古典管弦",   key: "大小调",    bpm: [70,130], instruments: "弦乐四重奏/铜管",   mood:"史诗悲壮",      scenes: "大场面/高潮/悲剧"}
+  M6_hiphop_4beat: {label: "嘻哈4拍",    key: "小调",      bpm: [85,140], instruments: "808鼓/人声采样",     mood:"态度街头",      scenes: "反转/炫/爽点"}
+  M7_lofi_chill: {label: "lofi慵懒",   key: "小调",      bpm: [60,85],  instruments: "钢琴loops/黑胶噪声", mood:"治愈怀旧",      scenes: "日常/回忆/慢节奏"}
+  M8_electronic_dance: {label: "电子舞曲",   key: "大调",      bpm: [120,140],instruments:"合成器/4-on-floor鼓", mood:"律动时尚",      scenes: "都市/夜/时尚"}
+  M9_synthwave: {label: "合成器波",   key: "小调",      bpm: [100,120],instruments:"复古合成器/琶音",    mood:"复古未来",      scenes: "赛博/近未来/追车"}
+  M10_orchestral_epic: {label: "史诗管弦",   key: "小调",      bpm: [90,140], instruments: "全编制管弦+定音鼓", mood:"宏大宿命",      scenes: "大战/王权/宿命"}
+  M11_horror_drone: {label: "恐怖低频",   key: "无调",     bpm: [40,60],  instruments: "低频drone/不协和音", mood:"压迫恐怖",      scenes: "惊悚/恐怖/悬疑"}
+  M12_suspense_strings: {label: "悬疑弦乐",   key: "小调",     bpm: [60,100], instruments: "弦乐震音/单簧管",   mood:"紧张悬念",      scenes: "悬疑/反转/危机"}
+  M13_funny_quirky: {label: "轻快俏皮",   key: "大调",     bpm: [110,140],instruments:"木琴/单簧管/拨弦",    mood:"喜剧喜感",      scenes: "搞笑/轻松/日常"}
+  M14_ballet_classical: {label:"芭蕾古典",    key:"大调",      bpm:[70,90],  instruments:"钢琴/弦乐",          mood:"优雅纯真",      scenes:"婚礼/纯洁/童年"}
+  M15_blues_slow: {label:"蓝调慢板",    key:"小调蓝调",  bpm:[60,80],  instruments:"滑棒吉他/人声",       mood:"沧桑怀旧",      scenes:"中年/往事/孤独"}
+  M16_reggaeton: {label:"雷鬼顿",      key:"小调",     bpm:[90,100], instruments:"dembow鼓/合成器",     mood:"热辣动感",      scenes:"夜店/热/性感"}
+  M17_world_ethnic: {label:"世界民族",    key:"民族调",    bpm:[80,120], instruments:"民族乐器/手鼓",       mood:"异域风情",      scenes:"异域/探险/文化"}
+  M18_indian_raga: {label:"印度拉格",    key:"拉格调式",  bpm:[60,100], instruments:"西塔琴/塔布拉鼓",     mood:"神秘灵性",      scenes:"异域/神秘/修行"}
+  M19_industrial: {label:"工业金属",    key:"小调",     bpm:[120,160],instruments:"失真吉他/机械节拍",    mood:"硬核压迫",      scenes:"科幻/工业/反派"}
+  M20_ambient_space: {label:"氛围太空",    key:"无调",     bpm:[40,70],  instruments:"合成器pad/混响",      mood:"空灵辽阔",      scenes:"梦境/太空/意识流"}
+  M21_celtic_folk: {label:"凯尔特民谣",  key:"大调",     bpm:[100,130],instruments:"风笛/竖琴/宝思兰琴",  mood:"自由旷野",      scenes:"旅行/旷野/自由"}
+  M22_samba_latino: {label:"拉丁桑巴",    key:"大调",     bpm:[120,150],instruments:"桑巴鼓/小军鼓",        mood:"热情奔放",      scenes:"热/庆典/热烈"}
+  M23_eb_90s: {label:"90年代R&B",   key:"小调",     bpm:[80,100], instruments:"缓速R&B鼓/弦乐",      mood:"复古深情",      scenes:"怀旧/情感/深情"}
+  M24_rock_c90s: {label:"90年代摇滚",  key:"小调",     bpm:[110,140],instruments:"摇滚吉他/贝斯",        mood:"叛逆怀旧",      scenes:"怀旧/叛逆/青春"}
+  M25_classical_piano: {label:"古典钢琴",    key:"大小调",    bpm:[60,120], instruments:"独奏钢琴",           mood:"纯净抒情",      scenes:"情感/独处/治愈"}
+  M26_orchestral_west: {label:"西部管弦",    key:"大调",     bpm:[80,120], instruments:"管乐/原声吉他",       mood:"辽阔荒原",      scenes:"荒野/英雄/旅程"}
+  M27_haunting_gothic: {label:"阴森哥特",    key:"小调",     bpm:[50,80],  instruments:"低音提琴/钟琴",        mood:"阴森诡谲",      scenes:"哥特/黑暗/灵异"}
+  M28_anime_jpop: {label:"动漫流行",    key:"大调",     bpm:[120,150],instruments:"电吉他+合成器+鼓",     mood:"热血青春",      scenes:"动漫/校园/成长"}
+  M29_sad_piano_ballad: {label:"悲伤钢琴",    key:"小调",     bpm:[60,80],  instruments:"钢琴+弦乐群",         mood:"催泪虐心",      scenes:"虐心/离别/悲剧"}
+  M30_corporate_soft: {label:"轻快广告",    key:"大调",     bpm:[110,130],instruments:"拨弦+轻鼓+合成器",     mood:"明快正向",      scenes:"广告/日常/正向"}
+
+# ============================================================================
+# 声音轨（voice_tracks，30 种）：发声体 × 质感，供 TTS/配音（GPT-SoVITS）
+# 每档 = 音色描述 + 参考音特征 + 适配角色
+# ============================================================================
+voice_tracks:
+  V1_male_young_cool: {label:"青年男·冷", desc:"25-35岁男声，低沉平稳，气少，冷感",           role:"男主/冷峻/反派"}
+  V2_male_young_warm: {label:"青年男·暖", desc:"20-30岁男声，明亮有磁性，气息足",             role:"男主/暖/邻家"}
+  V3_male_mature_grave: {label:"成熟男·厚", desc:"40+男声，胸腔共鸣厚，有威严",                 role:"长辈/权威/大佬"}
+  V4_male_old_withered: {label:"老者·沙",   desc:"60+男声，沙哑带颤，气声多",                   role:"老者/智者/反派"}
+  V5_female_young_clear: {label:"青年女·清", desc:"20-30女声，清亮高亢，气声适中",               role:"女主/灵动"}
+  V6_female_young_soft: {label:"青年女·柔", desc:"20-30女声，温柔绵软，气息细腻",                role:"女主/甜/治愈"}
+  V7_female_mature_steady: {label:"成熟女·稳",desc:"30-45女声，沉稳有力，质感厚",                role:"女强人/母亲"}
+  V8_female_old_gentle: {label:"老年女·慈", desc:"60+女声，沙哑含慈，气声多",                   role:"祖母/长辈"}
+  V9_child_boy: {label:"男童",       desc:"8-12岁男孩，明亮稚嫩，高音",                 role:"少年/童角"}
+  V10_child_girl: {label:"女童",       desc:"6-10岁女孩，清亮甜软",                       role:"少女/童角"}
+  V11_boy_teen: {label:"少年",       desc:"13-17岁男，变声期后清亮",                    role:"少年"}
+  V12_girl_teen: {label:"少女",       desc:"13-17岁女，清亮带少年感",                    role:"少女"}
+  V13_robot_cold: {label:"机械·冷",    desc:"合成器电子音色，无气声，机械感",             role:"AI/机器/科技"}
+  V14_robot_warm: {label:"机械·暖",    desc:"合成器带人味，柔和电子",                     role:"AI萌/机器"}
+  V15_narrator_male: {label:"男旁白",     desc:"40岁男，中性音色，节奏稳，叙述感强",          role:"旁白"}
+  V16_narrator_female: {label:"女旁白",     desc:"35岁女，中性偏柔，叙述清晰",                 role:"旁白"}
+  V17_dialect_cn_nor: {label:"北方方言",   desc:"东北/中原官话，硬朗直爽",                    role:"喜剧/接地气"}
+  V18_dialect_cn_south: {label:"南方方言",   desc:"吴语/粤语/闽南，软糯/铿锵",                  role:"地域角色"}
+  V19_dialect_cn_west: {label:"西南方言",   desc:"川渝话，软中带硬，带调",                     role:"喜剧/市井"}
+  V20_vtuber_male: {label:"虚拟男",     desc:"二次元男声，带少年气，甜感",                  role:"虚拟人/偶像"}
+  V21_vtuber_female: {label:"虚拟女",     desc:"二次元女声，甜软，元气",                     role:"虚拟人/偶像"}
+  V22_whisper_soft: {label:"耳语·柔",    desc:"贴耳气声，极低音量，亲密感",                 role:"亲密/耳语"}
+  V23_roar_power: {label:"怒吼·强",    desc:"胸腔爆发，高音撕吼，力量感",                role:"爆发/怒吼"}
+  V24_breathy_throat: {label:"气声·喉",    desc:"喉音重，气声多，沧桑",                      role:"沧桑/重伤"}
+  V25_bubble_soft: {label:"气泡音",     desc:"低频气泡，喉音颗粒感，慵懒",                 role:"慵懒/性感"}
+  V26_reverb_space: {label:"混响·空",    desc:"大混响，空间感，空灵",                      role:"梦境/幻觉"}
+  V27_metal_harsh: {label:"金属·粗",    desc:"金属质感，粗粝压迫",                        role:"反派/压迫"}
+  V28_wood_warm: {label:"木质·暖",    desc:"温暖木质感，中频厚",                         role:"温和/治愈"}
+  V29_low_bass_deep: {label:"低音·沉",    desc:"超低音，胸腔共鸣，压迫感",                   role:"大佬/反派"}
+  V30_high_bright: {label:"高音·亮",    desc:"超高音，清亮尖锐",                          role:"激昂/情绪"}
+
+# ============================================================================
+# BGM 轨（bgm_tracks，50 种）：场景 × 功能，组合 music M + voice V 形成完整音轨
+# 每档 = 场景功能 + 推荐音乐子类 + 时长/转场特征
+# ============================================================================
+bgm_tracks:
+  B01_battle_ramp: {label:"战斗升级",  func:"对决高燃",   music_ref:"M4/M10", dur:"30-60s", scene:"打斗/反杀"}
+  B02_chase_urgent: {label:"追逐紧迫",  func:"紧张追戏",   music_ref:"M9/M12", dur:"20-40s", scene:"追车/逃离"}
+  B03_confession: {label:"告白",      func:"情感升温",   music_ref:"M14/M25",dur:"20-30s", scene:"表白/心动"}
+  B04_plot_twist: {label:"反转",      func:"意外冲击",   music_ref:"M12/M11",dur:"5-10s",  scene:"剧情反转"}
+  B05_climax_peak: {label:"高潮峰值",  func:"情绪顶点",   music_ref:"M5/M10", dur:"30-60s", scene:"全剧高潮"}
+  B06_tragedy_sad: {label:"虐心",      func:"悲伤催泪",   music_ref:"M29",    dur:"30-60s", scene:"虐心/离别"}
+  B07_daily_light: {label:"日常轻快",  func:"过渡铺垫",   music_ref:"M2/M13", dur:"15-30s", scene:"日常/生活"}
+  B08_suspense_cold: {label:"悬疑冷峻",  func:"悬念积累",   music_ref:"M11/M12",dur:"20-40s", scene:"悬疑/危机"}
+  B09_horror_deep: {label:"恐怖深底",  func:"压迫惊吓",   music_ref:"M11/M27",dur:"20-60s", scene:"恐怖/惊悚"}
+  B10_funny_relax: {label:"搞笑放松",  func:"喜感调节",   music_ref:"M13/M30",dur:"10-30s", scene:"搞笑/轻松"}
+  B11_lyric_soft: {label:"抒情柔",    func:"情感铺陈",   music_ref:"M2/M7",  dur:"30-60s", scene:"抒情/独白"}
+  B12_ambience_bg: {label:"氛围底",    func:"背景铺陈",   music_ref:"M20/M8", dur:"30-90s", scene:"场景氛围"}
+  B13_transition_cue: {label:"过场",      func:"转场衔接",   music_ref:"M7/M30", dur:"5-10s",  scene:"镜头转场"}
+  B14_opening_theme: {label:"片头",      func:"开场定调",   music_ref:"M4/M28", dur:"20-30s", scene:"每集片头"}
+  B15_ending_theme: {label:"片尾",      func:"收尾情感",   music_ref:"M25/M29",dur:"30-60s", scene:"每集片尾"}
+  B16_countdown: {label:"倒计时",    func:"紧张铺垫",   music_ref:"M12",    dur:"10-20s", scene:"生死倒计时"}
+  B17_flashback: {label:"闪回",      func:"记忆回溯",   music_ref:"M7/M23", dur:"15-30s", scene:"回忆/闪回"}
+  B18_dream_like: {label:"梦境",      func:"虚幻迷离",   music_ref:"M20",    dur:"20-40s", scene:"做梦/幻觉"}
+  B19_reality_gnd: {label:"现实",      func:"落地清醒",   music_ref:"M2/M26", dur:"15-30s", scene:"现实/清醒"}
+  B20_memory_warm: {label:"回忆暖",    func:"温情往事",   music_ref:"M23/M25",dur:"30-60s", scene:"温暖回忆"}
+  B21_standoff: {label:"对峙",      func:"剑拔弩张",   music_ref:"M12/M19",dur:"20-40s", scene:"双方对峙"}
+  B22_reconcile: {label:"和解",      func:"冰释情感",   music_ref:"M25/M29",dur:"30-60s", scene:"和解/释怀"}
+  B23_battle_full: {label:"全战",      func:"大战",       music_ref:"M4/M10", dur:"30-60s", scene:"大规模战斗"}
+  B24_victory: {label:"胜利",      func:"凯旋",       music_ref:"M5/M28", dur:"20-40s", scene:"胜利/成功"}
+  B25_defeat_bitter: {label:"失败苦",    func:"败北",       music_ref:"M29/M15",dur:"20-40s", scene:"失败/挫折"}
+  B26_hope_rise: {label:"希望升起",  func:"转机",       music_ref:"M28/M30",dur:"20-40s", scene:"转机/希望"}
+  B27_despair_dark: {label:"绝望暗",    func:"谷底",       music_ref:"M11/M27",dur:"30-60s", scene:"绝望/低谷"}
+  B28_tense_quiet: {label:"紧张静",    func:"无声压迫",   music_ref:"M20/M11",dur:"20-40s", scene:"安静紧张"}
+  B29_relax_calm: {label:"舒缓",      func:"平息",       music_ref:"M7/M25", dur:"30-60s", scene:"平静/舒缓"}
+  B30_mystery_cold: {label:"神秘冷",    func:"谜团",       music_ref:"M12/M27",dur:"20-40s", scene:"谜团/神秘"}
+  B31_glory_grand: {label:"华丽",      func:"高光",       music_ref:"M5/M26", dur:"30-60s", scene:"高光/荣耀"}
+  B32_plain_simple: {label:"朴素",      func:"生活",       music_ref:"M2/M21", dur:"15-30s", scene:"朴素生活"}
+  B33_mourn_solemn: {label:"悲壮",      func:"悼念",       music_ref:"M29/M5", dur:"30-60s", scene:"悼念/牺牲"}
+  B34_cheer_merry: {label:"欢快",      func:"喜庆",       music_ref:"M13/M22",dur:"20-40s", scene:"喜庆/热闹"}
+  B35_sorrow_soft: {label:"忧伤",      func:"低回",       music_ref:"M25/M29",dur:"30-60s", scene:"忧伤/失落"}
+  B36_romantic_warm: {label:"浪漫暖",    func:"甜蜜",       music_ref:"M14/M23",dur:"30-60s", scene:"浪漫/甜蜜"}
+  B37_passion_fiery: {label:"激情",      func:"炽热",       music_ref:"M4/M22", dur:"20-40s", scene:"激情/冲动"}
+  B38_cold_static: {label:"冷静",      func:"克制",       music_ref:"M25/M20",dur:"20-40s", scene:"冷静/克制"}
+  B39_impulse_rush: {label:"冲动",      func:"爆发",       music_ref:"M4/M19", dur:"10-20s", scene:"冲动/爆发"}
+  B40_lonely_empty: {label:"孤独",      func:"空寂",       music_ref:"M20/M29",dur:"30-60s", scene:"孤独/空寂"}
+  B41_reunion_warm: {label:"团聚",      func:"重逢",       music_ref:"M25/M14",dur:"30-60s", scene:"团聚/重逢"}
+  B42_separation_sad: {label:"分离",      func:"别离",       music_ref:"M29/M15",dur:"30-60s", scene:"分离/别离"}
+  B43_meeting_fate: {label:"相遇",      func:"初见",       music_ref:"M14/M25",dur:"20-40s", scene:"初见/命运"}
+  B44_growth_up: {label:"成长",      func:"蜕变向上",   music_ref:"M28/M5", dur:"30-60s", scene:"成长/蜕变"}
+  B45_transform_evol: {label:"蜕变",      func:"质变",       music_ref:"M4/M10", dur:"30-60s", scene:"蜕变/进化"}
+  B46_redemption_soft: {label:"救赎",      func:"感化",       music_ref:"M25/M14",dur:"30-60s", scene:"救赎/感化"}
+  B47_destruction_harsh: {label:"毁灭",     func:"崩塌",       music_ref:"M19/M10",dur:"30-60s", scene:"毁灭/崩塌"}
+  B48_rebirth_light: {label:"重生",      func:"破晓",       music_ref:"M28/M5", dur:"30-60s", scene:"重生/破晓"}
+  B49_work_routine: {label:"工作",      func:"日常节奏",   music_ref:"M2/M30", dur:"15-30s", scene:"工作/学习"}
+  B50_travel_wind: {label:"旅行",      func:"在路上",     music_ref:"M2/M21", dur:"30-60s", scene:"旅行/路上"}
+
+# 档位定义（MVP: T0/T1/T2，T3-T5 二期占位）
 # 档位定义（MVP: T0/T1/T2，T3-T5 二期占位）
 tiers:
   T0: {label: "纯云端",    vram_range: [0, 4],    mvp: true}
