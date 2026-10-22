@@ -26,7 +26,8 @@ jobs:
           GITCODE_TOKEN_ENC=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$GITCODE_TOKEN")
           git remote add gitcode "https://Zeon7744:${GITCODE_TOKEN_ENC}@gitcode.com/Zeon7744/${REPO_NAME}.git" 2>/dev/null || \
             git remote set-url gitcode "https://Zeon7744:${GITCODE_TOKEN_ENC}@gitcode.com/Zeon7744/${REPO_NAME}.git"
-          git push gitcode main --force-with-lease
+          git fetch gitcode main 2>/dev/null || true
+          git push gitcode main --force
           echo "✅ GitCode synced: $(git rev-parse main)"
 
       - name: Mirror to Gitee (optional, may 403 due to Gitee IP policy)
