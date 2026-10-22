@@ -1,0 +1,43 @@
+# 引擎测试 + 矩阵配置校验（规范化 CI）
+# 每次 push 到 main：跑全量单测 + config_validator 校验 matrix.yaml
+# 有结构性 error 则 fail（悬空引用 warning 不 fail，只提示）
+name: engine-tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install --quiet pyyaml pytest
+
+      - name: Run engine tests
+        run: python -m pytest engine/tests/ -q
+
+      - name: Validate matrix.yaml
+        run: |
+          python -c "
+          import sys
+          sys.path.insert(0, 'engine/src')
+          from picwf.config_validator import validate_matrix_file
+          res = validate_matrix_file('engine/config/matrix.yaml')
+          print(f'errors={len(res[\"errors\"])} warnings={len(res[\"warnings\"])}')
+          for e in res['errors']:
+              print('  [E]', e)
+          for w in res['warnings'][:50]:
+              print('  [W]', w)
+          if res['errors']:
+              sys.exit(1)
+          "
