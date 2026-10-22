@@ -1,0 +1,47 @@
+# 三端自动镜像：GitHub push → 自动同步 Gitee + GitCode
+# 凭据走 GitHub Secrets：GITEE_TOKEN / GITCODE_TOKEN
+name: mirror-triple
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Mirror to Gitee
+        env:
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+        run: |
+          set -e
+          REPO_NAME="pic-workflow"
+          git remote add gitee "https://oauth2:${GITEE_TOKEN}@gitee.com/Zeon7744/${REPO_NAME}.git" 2>/dev/null || \
+            git remote set-url gitee "https://oauth2:${GITEE_TOKEN}@gitee.com/Zeon7744/${REPO_NAME}.git"
+          git push gitee main --force-with-lease
+          echo "✅ Gitee synced: $(git rev-parse main)"
+
+      - name: Mirror to GitCode
+        env:
+          GITCODE_TOKEN: ${{ secrets.GITCODE_TOKEN }}
+        run: |
+          set -e
+          REPO_NAME="pic-workflow"
+          git remote add gitcode "https://Zeon7744:${GITCODE_TOKEN}@gitcode.com/Zeon7744/${REPO_NAME}.git" 2>/dev/null || \
+            git remote set-url gitcode "https://Zeon7744:${GITCODE_TOKEN}@gitcode.com/Zeon7744/${REPO_NAME}.git"
+          git push gitcode main --force-with-lease
+          echo "✅ GitCode synced: $(git rev-parse main)"
+
+      - name: Summary
+        run: |
+          echo "## Mirror-triple 完成" >> "$GITHUB_STEP_SUMMARY"
+          echo "- 仓: Zeon7744/pic-workflow" >> "$GITHUB_STEP_SUMMARY"
+          echo "- 触发: ${{ github.event_name }} @ ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- 时间: $(date -u)" >> "$GITHUB_STEP_SUMMARY"
