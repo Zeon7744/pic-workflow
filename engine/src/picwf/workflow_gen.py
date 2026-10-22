@@ -84,6 +84,7 @@ def generate_workflow(tier: str, matrix_path: str = MATRIX_PATH_DEFAULT,
                                    "prompt_prefix": st.get("prompt_prefix", "")},
                     })
                 chain = _tier_filter_chain(tier_name, chain)
+                chain = _vram_filter(chain, free_vram_gb, min_vram_need=0)
                 nd["fallback_chain"] = chain or nd["fallback_chain"]
                 nd["primary"] = chain[0] if chain else nd["primary"]
                 nd["params"] = nd["primary"].get("params", {})
@@ -100,6 +101,7 @@ def generate_workflow(tier: str, matrix_path: str = MATRIX_PATH_DEFAULT,
                     })
                 if chain:
                     chain = _tier_filter_chain(tier_name, chain)
+                    chain = _vram_filter(chain, free_vram_gb, min_vram_need=0)
                     nd["fallback_chain"] = chain or nd["fallback_chain"]
                     nd["primary"] = chain[0] if chain else nd["primary"]
                     nd["params"] = nd["primary"].get("params", {})
@@ -203,6 +205,26 @@ def _tier_filter_chain(tier: str, chain: list) -> list:
     weight = {"cloud": 0, "gguf_offload": 1, "local": 3, "local_heavy": 4}
     stable = sorted(c, key=lambda x: weight.get(_impl_class(x.get("impl")), 9))
     return stable
+
+
+def _vram_filter(chain: list, free_vram_gb: float,
+                  min_vram_need: float) -> list:
+    """按 free_vram_gb 过滤画风轨 model 链：
+
+    超出 free_vram_gb 的 impl 自动降到下一档。
+    例：1060 free_vram=6GB，画风链 [sdxl_anime_lora(12), sd15_gguf_q4(4), cloud]
+    → 降到 [sd15_gguf_q4(4), cloud]，跳过 12GB 的 sdxl。
+    """
+    import copy
+    c = copy.deepcopy(chain)
+    kept = []
+    for impl in c:
+        need = float(impl.get("estimated_vram_need_gb", 0) or 0)
+        # 云端/0 显存需求始终保留；超出 free_vram 的本地实现跳过
+        if need == 0 or need <= free_vram_gb:
+            kept.append(impl)
+        # 跳过超出显存需求的本地实现（让下一档量化/offload 顶上）
+    return kept or c
 
 
 def _impl_class(impl: str) -> str:
