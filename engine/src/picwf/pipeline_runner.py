@@ -154,18 +154,81 @@ def wire_orchestrator_stage(workflow: Dict[str, Any],
     return executors
 
 
-def script_to_shots(script_text: str, shots_per_ep: int = 10) -> Dict[str, Any]:
-    """剧本输入解析：script_text → shots（喂第一环节 script_struct 的分镜拆解）。
+# 分镜专业拆解：景别 / 镜头运动 / 情绪 规则库（短剧爽点镜头语言）
+_SHOT_TYPES = [
+    ("特写", "缓推", "紧张", "角色面部特写，情绪克制，背景虚化"),
+    ("近景", "手持", "压抑", "近景人物动作，手持微晃增强临场"),
+    ("中景", "跟随", "推进", "中景跟拍动作，节奏加快"),
+    ("全景", "摇臂", "爆发", "全景摇臂展现冲突全貌"),
+    ("特写", "急推", "反转", "特写急推抓反转瞬间，浅景深"),
+    ("近景", "横移", "铺垫", "近景横移交代环境关系"),
+    ("中景", "推拉", "对峙", "中景推拉强化双方对峙张力"),
+    ("全景", "升降", "收尾", "全景升降给情绪落点"),
+    ("特写", "甩镜", "冲击", "甩镜特写制造视觉冲击"),
+    ("中景", "固定", "沉淀", "固定中景留白沉淀情绪"),
+]
+_EMOTION_KEYWORDS = {
+    "反转": ("反转", "翻", "真相", "露馅", "假"),
+    "爆发": ("冲", "打", "摔", "砸", "喊", "刀"),
+    "紧张": ("看", "盯", "静", "沉默", "阴"),
+    "铺垫": ("走", "进", "站", "坐", "拿"),
+}
 
-    纯文本轻量拆解：按段落/换行切分 + 标记镜头序号，输出结构化 shots 列表。
-    后续接 LLM 分镜拆解器时可替换本函数实现（保持返回结构）。
+
+def _classify_emotion(text: str) -> str:
+    for emo, kws in _EMOTION_KEYWORDS.items():
+        if any(k in (text or "") for k in kws):
+            return emo
+    return "推进"
+
+
+def script_to_shots(script_text: str, shots_per_ep: int = 10,
+                    use_llm: bool = False,
+                    llm_fn: Optional[Callable] = None) -> Dict[str, Any]:
+    """剧本输入解析：script_text → 专业分镜 shots（喂第一环节 script_struct）。
+
+    B 块升级：输出专业分镜提示词（景别+镜头运动+情绪+动作分解），可直接喂
+    视频生成。use_llm=True 且提供 llm_fn 时走 LLM 拆解（llm_fn(text)->list[dict]），
+    否则用规则化专业拆解（_SHOT_TYPES 轮替 + 情绪分类）。返回结构兼容旧调用。
     """
-    lines = [ln.strip() for ln in (script_text or "").splitlines() if ln.strip()]
+    lines = [ln.strip() for ln in (script_text or "").splitlines()
+             if ln.strip() and not ln.strip().startswith("#")]
     shots: List[Dict[str, Any]] = []
-    for i, ln in enumerate(lines[:shots_per_ep] or [script_text[:120] or "shot_1"]):
-        shots.append({"index": i + 1, "raw": ln[:200],
+
+    if use_llm and llm_fn is not None:
+        try:
+            llm_shots = llm_fn(script_text)
+            if isinstance(llm_shots, list) and llm_shots:
+                for i, s in enumerate(llm_shots[:shots_per_ep]):
+                    shots.append({"index": i + 1, "raw": s.get("raw", s.get("text", "")),
+                                 "prompt": s.get("prompt", ""), "shot_type": s.get("shot_type", "中景"),
+                                 "est_s": s.get("est_s", 5.4)})
+        except Exception:
+            shots = []  # LLM 失败回退规则拆解
+        if len(shots) >= shots_per_ep:
+            return {"shots": shots, "shot_count": len(shots), "script_lines": len(lines),
+                    "mode": "llm"}
+
+    # 规则化专业拆解（默认 / LLM 失败回退）
+    raws = lines[:shots_per_ep] if lines else [script_text[:120] or "shot_1"]
+    for i, ln in enumerate(raws):
+        emo = _classify_emotion(ln)
+        st = _SHOT_TYPES[i % len(_SHOT_TYPES)]
+        shot_type, motion, emo_label, action = st
+        # 情绪命中时覆盖默认景别动作
+        if emo == "爆发" and motion != "甩镜":
+            shot_type, motion, action = "特写", "急推", "爆发瞬间特写，冲击构图"
+        elif emo == "反转" and motion != "甩镜":
+            shot_type, motion, action = "特写", "急推", "反转特写，浅景深抓瞬间"
+        prompt = f"{shot_type}（{motion}）{action}：{ln[:80]}。情绪基调：{emo}"
+        shots.append({"index": i + 1, "raw": ln[:200], "prompt": prompt,
+                     "shot_type": shot_type, "motion": motion, "emotion": emo,
                      "est_s": 5.4 if len(ln) < 60 else 12.0})
-    # 镜头数不足时补齐到 shots_per_ep
     while len(shots) < shots_per_ep:
-        shots.append({"index": len(shots) + 1, "raw": "(空镜头)", "est_s": 5.4})
-    return {"shots": shots, "shot_count": len(shots), "script_lines": len(lines)}
+        st = _SHOT_TYPES[len(shots) % len(_SHOT_TYPES)]
+        shots.append({"index": len(shots) + 1, "raw": "(空镜头)",
+                      "prompt": f"{st[0]}（{st[1]}）{st[3]}：留白过渡镜头。情绪基调：沉淀",
+                      "shot_type": st[0], "motion": st[1], "emotion": "沉淀",
+                      "est_s": 5.4})
+    return {"shots": shots, "shot_count": len(shots), "script_lines": len(lines),
+            "mode": "llm" if use_llm and llm_fn else "rules"}

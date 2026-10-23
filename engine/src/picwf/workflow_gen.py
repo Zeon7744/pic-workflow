@@ -279,7 +279,7 @@ NODE_DATAFLOW = [
      "inputs": ["shots"], "outputs": ["character_refs"], "depends_on": ["script_struct"]},
     {"id": "storyboard_prompt", "name": "③ 分镜提示词", "stage": 3,
      "inputs": ["shots", "character_refs"], "outputs": ["shot_prompts"],
-     "depends_on": ["character_image"]},
+     "depends_on": ["script_struct", "character_image"]},
     {"id": "video_shot", "name": "④ 视频镜头", "stage": 4,
      "inputs": ["shot_prompts", "character_refs"], "outputs": ["video_clips"],
      "depends_on": ["storyboard_prompt"]},
@@ -293,7 +293,7 @@ NODE_DATAFLOW = [
      "depends_on": ["post_assemble"]},
     {"id": "package_publish", "name": "⑧ 包装发布", "stage": 8,
      "inputs": ["assembled_video", "bgm_track"], "outputs": ["final_video"],
-     "depends_on": ["bgm_audio"]},
+     "depends_on": ["post_assemble", "bgm_audio"]},
     # 叠加音频轨（可被裁剪，裁剪时环节直通）
     {"id": "music", "name": "M音乐轨", "stage": 6,
      "inputs": ["shots"], "outputs": ["music_track"], "depends_on": ["script_struct"],
