@@ -40,12 +40,54 @@ JIMENG_STYLE_COUNT = 8         # 即梦官方画风数
 HAIUO_VRAM_GB = 12.0          # 海螺官方推荐 VRAM（GB）
 
 HOOKFORGE_T1_BASELINE = {
-    # T1（6-8GB 档）实测/估算口径：单镜头默认 4 秒，一集 6 镜头
+    # T1（6-8GB 档）估算口径（无 1060 实测时 fallback）：单镜头 4 秒，一集 6 镜头
     "shot_s": 4.0,
     "shots_per_ep": 6,
     "style_count": 20,
     "vram_gb": 6.0,
 }
+
+# 1060 T1 实测基线（record_metrics.yaml 读回，覆盖估算值）
+_T1_MEASURED_BASELINE = None
+
+def load_t1_measured_baseline(config_path: Optional[str] = None) -> Dict[str, Any]:
+    """从 record_metrics.yaml 读 1060 T1 实测基线（覆盖估算值）。
+
+    返回 {"shot_s", "shots_per_ep", "peak_vram_gb", "source"} 或估算 fallback。
+    1060 实测：shot_elapsed=54s / shots_per_ep=10 / peak_vram=4.0GB
+    """
+    global _T1_MEASURED_BASELINE
+    if _T1_MEASURED_BASELINE is not None:
+        return _T1_MEASURED_BASELINE
+    # 估算 fallback（不递归调自身）
+    base = dict(HOOKFORGE_T1_BASELINE)
+    base["source"] = "estimated"
+    if _T1_MEASURED_BASELINE is None:
+        _T1_MEASURED_BASELINE = base
+    # 尝试读 record_metrics.yaml
+    if yaml is None:
+        return base
+    if config_path is None:
+        # 默认路径：engine/config/record_metrics.yaml
+        _here = os.path.dirname(os.path.abspath(__file__))
+        config_path = os.path.abspath(os.path.join(_here, "..", "..", "config", "record_metrics.yaml"))
+    try:
+        with open(config_path, encoding="utf-8") as f:
+            m = yaml.safe_load(f)
+        if m and m.get("tier") == "T1" and "metrics" in m:
+            mt = m["metrics"]
+            base = {
+                "shot_s": float(mt.get("shot_elapsed_s", 4.0)),
+                "shots_per_ep": int(mt.get("shots_per_ep", 6)),
+                "vram_gb": float(mt.get("peak_vram_gb", 6.0)),
+                "style_count": 20,
+                "source": f"record_metrics.yaml ({m.get('machine','unknown')})",
+            }
+            _T1_MEASURED_BASELINE = base
+            return base
+    except Exception:
+        pass
+    return base
 
 
 def load_metrics_from_state(state_path: str) -> List[Dict[str, Any]]:
@@ -94,7 +136,7 @@ def profile(metrics_rows: Optional[List[Dict[str, Any]]] = None,
     else:
         agg = _aggregate(rows or [])
 
-    base = dict(HOOKFORGE_T1_BASELINE)
+    base = load_t1_measured_baseline()
     hf_vram = None if estimated else (agg["peak_vram_gb"] or base["vram_gb"])
     hf_vram = hf_vram if hf_vram else base["vram_gb"]
     shot_s = (None if estimated else agg["avg_shot_s"]) if agg else None

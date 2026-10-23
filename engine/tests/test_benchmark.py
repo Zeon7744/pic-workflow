@@ -45,10 +45,12 @@ def test_profiler_cost_saving():
 
 
 def test_profiler_vram_saving():
-    prof = rp.profile()  # 估算模式：T1 6GB vs 海螺 12GB
-    assert prof["hook_forge"]["vram_gb"] == 6.0
-    assert prof["savings"]["vram_save_mb_vs_hailuo"] == 6144.0, \
-        prof["savings"]  # 12GB - 6GB = 6GB = 6144MB
+    prof = rp.profile()  # estimated 模式读 1060 T1 实测基线：4GB vs 海螺 12GB
+    # 1060 实测 peak_vram=4.0GB（量化 offload 降档后），比海螺 12GB 省 8192MB
+    assert prof["hook_forge"]["vram_gb"] == 4.0, \
+        f"vram 应 1060 实测 4.0GB，实际 {prof['hook_forge']['vram_gb']}"
+    assert prof["savings"]["vram_save_mb_vs_hailuo"] == 8192.0, \
+        f"省显存应 8192MB（12GB-4GB），实际 {prof['savings']}"
     assert prof["savings"]["extra_styles_vs_jimeng"] == 12  # 20 - 8 = 12
 
 

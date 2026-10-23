@@ -157,6 +157,8 @@ def generate_workflow(tier: str, matrix_path: str = MATRIX_PATH_DEFAULT,
                         "params": {"track": bgm, "music_tracks": matrix.get("music_tracks", {}),
                                     "bgm_tracks": matrix.get("bgm_tracks", {})}},
             "fallback_chain": [{"impl": "cloud_bgm"}], "style": style})
+    # 8 环节全链路数据流编排（按实际生成节点裁剪）
+    dataflow = build_dataflow(nodes)
     _ret = {
         "tier": tier_name,
         "tier_label": matrix["tiers"][tier_name].get("label"),
@@ -165,6 +167,7 @@ def generate_workflow(tier: str, matrix_path: str = MATRIX_PATH_DEFAULT,
         "style_label": st.get("label") if st else "未指定画风",
         "music": music, "voice": voice, "bgm": bgm,
         "nodes": nodes,
+        "dataflow": dataflow,
         "note": "YAML 是数据不是代码；引擎按档位+画风+音频轨裁剪，运行时可再降级",
     }
     _ret.update(_meta_extra)
@@ -263,6 +266,69 @@ def _apply_friendly_policy(tier: str, chain: list, policy: dict) -> list:
     safe = [i for i in c if _impl_class(i.get("impl")) in ("gguf_offload", "cloud")]
     safe.sort(key=lambda x: weight.get(_impl_class(x.get("impl")), 9))
     return safe + rest
+
+
+# 8 环节全链路节点间数据流依赖（按 matrix 真实节点 ID 定义）
+# matrix 8 主链：script_struct→character_image→storyboard_prompt→video_shot
+#              →fx_enhance→post_assemble→bgm_audio→package_publish
+# 叠加音频轨（可裁剪）：music(M)/voice(V)/bgm(B)，并入 bgm_audio 环节
+NODE_DATAFLOW = [
+    {"id": "script_struct", "name": "① 剧本结构化", "stage": 1,
+     "inputs": ["script_text"], "outputs": ["script_nodes", "shots"], "depends_on": []},
+    {"id": "character_image", "name": "② 角色图生成", "stage": 2,
+     "inputs": ["shots"], "outputs": ["character_refs"], "depends_on": ["script_struct"]},
+    {"id": "storyboard_prompt", "name": "③ 分镜提示词", "stage": 3,
+     "inputs": ["shots", "character_refs"], "outputs": ["shot_prompts"],
+     "depends_on": ["character_image"]},
+    {"id": "video_shot", "name": "④ 视频镜头", "stage": 4,
+     "inputs": ["shot_prompts", "character_refs"], "outputs": ["video_clips"],
+     "depends_on": ["storyboard_prompt"]},
+    {"id": "fx_enhance", "name": "⑤ 特效增强", "stage": 5,
+     "inputs": ["video_clips"], "outputs": ["fx_clips"], "depends_on": ["video_shot"]},
+    {"id": "post_assemble", "name": "⑥ 后期整合", "stage": 6,
+     "inputs": ["fx_clips", "voice_track", "music_track", "bgm_track"],
+     "outputs": ["assembled_video"], "depends_on": ["fx_enhance", "music", "voice", "bgm"]},
+    {"id": "bgm_audio", "name": "⑦ BGM 音频", "stage": 7,
+     "inputs": ["assembled_video"], "outputs": ["bgm_track"],
+     "depends_on": ["post_assemble"]},
+    {"id": "package_publish", "name": "⑧ 包装发布", "stage": 8,
+     "inputs": ["assembled_video", "bgm_track"], "outputs": ["final_video"],
+     "depends_on": ["bgm_audio"]},
+    # 叠加音频轨（可被裁剪，裁剪时环节直通）
+    {"id": "music", "name": "M音乐轨", "stage": 6,
+     "inputs": ["shots"], "outputs": ["music_track"], "depends_on": ["script_struct"],
+     "clip": True},
+    {"id": "voice", "name": "V声音轨", "stage": 6,
+     "inputs": ["shots"], "outputs": ["voice_track"], "depends_on": ["script_struct"],
+     "clip": True},
+    {"id": "bgm", "name": "B背景轨", "stage": 6,
+     "inputs": ["music_track", "shots"], "outputs": ["bgm_track"],
+     "depends_on": ["music"], "clip": True},
+]
+
+
+def build_dataflow(nodes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """按实际生成的节点裁剪 8 环节全链路数据流。
+
+    8 主链环节始终保留；叠加音频轨(music/voice/bgm)仅在实际生成时纳入。
+    depends_on_eff 只保留实际存在（已生成）的上游环节，被裁掉的直通，保证一致。
+    """
+    present_ids = {nd.get("id") for nd in nodes}
+    # 收集本数据流将纳入的环节 ID
+    included = []
+    for spec in NODE_DATAFLOW:
+        if spec.get("clip") and spec["id"] not in present_ids:
+            continue
+        included.append(spec["id"])
+    included_set = set(included)
+    flow = []
+    for spec in NODE_DATAFLOW:
+        if spec.get("clip") and spec["id"] not in present_ids:
+            continue
+        f = {k: v for k, v in spec.items() if k != "clip"}
+        f["depends_on_eff"] = [d for d in spec["depends_on"] if d in included_set]
+        flow.append(f)
+    return flow
 
 
 def workflow_to_yaml(workflow: Dict[str, Any]) -> str:
