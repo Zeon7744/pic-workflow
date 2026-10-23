@@ -68,21 +68,49 @@ def make_executors(workflow: Dict[str, Any],
 
     def _post_assemble(up: Dict[str, Any]) -> Dict[str, Any]:
         # fx_enhance 透传了 fx_clips（源头 video_shot 的 video_clips）
-        clips = up.get("fx_enhance", {}).get("fx_clips",
+        clips_raw = up.get("fx_enhance", {}).get("fx_clips",
                   up.get("video_shot", {}).get("video_clips", []))
-        return {"assembled_video": f"{workdir}/assembled_ep{ep}.mp4",
-                "clip_count": len(clips), "music": music_track,
-                "voice": voice_track, "bgm": bgm_track}
+        # video_shot 的 clips 是 [{index,clip,peak_vram}]，取文件路径
+        clips_paths = [c.get("path", "") for c in clips_raw if isinstance(c, dict)]
+        # 真·ffmpeg 合成：不存在的 clip 自动占位，接 BGM/voice 音频轨
+        assembled_path = f"{workdir}/assembled_ep{ep}.mp4"
+        from .assembler import assemble as _asm
+        _audio = []
+        if voice_track:
+            _audio.append(f"{workdir}/voice_ep{ep}.wav")
+        if bgm_track:
+            _audio.append(f"{workdir}/bgm_ep{ep}.wav")
+        asm_res = _asm(clips_paths or [""]*max(len(clips_raw),1),
+                        audio_tracks=_audio or None,
+                        out_path=assembled_path, workdir=workdir)
+        return {"assembled_video": assembled_path,
+                "clip_count": asm_res.get("clip_count", len(clips_raw)),
+                "music": music_track, "voice": voice_track, "bgm": bgm_track,
+                "duration_s": asm_res.get("duration_s", 0),
+                "assembled": asm_res.get("ok", False),
+                "assembled_ffmpeg": asm_res.get("ffmpeg", False)}
 
     def _bgm_audio(up: Dict[str, Any]) -> Dict[str, Any]:
         # B 轨真建议（advise_tracks 出 B08_suspense_cold）
         return {"bgm_track": bgm_track, "bgm_path": f"{workdir}/bgm_ep{ep}.wav"}
 
     def _package_publish(up: Dict[str, Any]) -> Dict[str, Any]:
-        assembled = up.get("post_assemble", {}).get("assembled_video", "")
+        pa = up.get("post_assemble", {})
+        assembled = pa.get("assembled_video", "")
         bgm = up.get("bgm_audio", {}).get("bgm_track", bgm_track)
-        return {"final_video": f"{workdir}/final_ep{ep}.mp4",
-                "bgm_track": bgm, "publish_ready": bool(assembled)}
+        # 成片路径：post_assemble 已真合成时直接用，否则占位路径
+        import os
+        final_path = f"{workdir}/final_ep{ep}.mp4"
+        if pa.get("assembled") and os.path.exists(assembled):
+            # 复制/硬链成片
+            try:
+                import shutil; shutil.copyfile(assembled, final_path)
+            except Exception:
+                final_path = assembled
+        return {"final_video": final_path,
+                "bgm_track": bgm,
+                "publish_ready": bool(pa.get("assembled")) and bool(final_path),
+                "duration_s": pa.get("duration_s", 0)}
 
     def _fx_enhance(up: Dict[str, Any]) -> Dict[str, Any]:
         clips = up.get("video_shot", {}).get("video_clips", [])
