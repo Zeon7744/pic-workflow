@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>爽点厂 HookForge · 快速上手：10 分钟出你的第一支短剧</title>
+<style>
+:root{
+--bg:#0f1220;--card:#1a1f35;--card2:#141828;--accent:#ff4d6d;--accent2:#4d7cfe;
+--text:#e8eaf2;--muted:#9aa0b5;--ok:#3ddc84;--warn:#ffb020;--r:16px;
+--font:-apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:920px;margin:0 auto;padding:0 20px}
+header{padding:56px 0 36px;text-align:center}
+header .badge{display:inline-block;font-size:13px;color:var(--accent);border:1px solid rgba(255,77,109,.4);border-radius:999px;padding:5px 14px;margin-bottom:18px}
+h1{font-size:34px;font-weight:800;letter-spacing:.5px}
+h1 .hl{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+header p{color:var(--muted);font-size:16px;margin-top:12px;max-width:640px;margin-inline:auto}
+section{padding:34px 0}
+section>h2{font-size:22px;font-weight:700;margin-bottom:6px;scroll-margin-top:20px}
+section>.lead{color:var(--muted);font-size:14px;margin-bottom:22px}
+.nav{position:sticky;top:0;z-index:20;background:rgba(15,18,32,.9);backdrop-filter:blur(8px);border-bottom:1px solid #232a45}
+.nav .wrap{display:flex;gap:6px;flex-wrap:wrap;padding:10px 20px}
+.nav a{color:var(--muted);text-decoration:none;font-size:13px;padding:6px 12px;border-radius:8px;transition:color .2s}
+.nav a:hover{color:var(--text);background:var(--card)}
+.card{background:var(--card);border-radius:var(--r);padding:24px;margin-bottom:16px;border:1px solid #232a45}
+.card h3{font-size:16px;font-weight:600;margin-bottom:10px}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:700;font-size:15px;margin-right:10px;flex:none}
+.step{display:flex;gap:14px;align-items:flex-start;margin-bottom:18px}
+.step .body{flex:1}
+.step .body strong{display:block;font-size:15px;margin-bottom:4px}
+.step .body p{color:var(--muted);font-size:14px}
+.tip{background:var(--card2);border-left:3px solid var(--accent2);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--muted);margin:14px 0}
+.tip b{color:var(--text)}
+.tip.good{border-left-color:var(--ok)}
+pre{background:#0c0f1c;border:1px solid #232a45;border-radius:10px;padding:14px;font-size:13px;overflow-x:auto;margin:10px 0;color:#c8cde0}
+code{font-family:"SF Mono",Consolas,monospace}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+th,td{padding:8px;text-align:left}
+th{color:var(--muted);font-size:12px}
+td{color:var(--muted)}
+td b{color:var(--text)}
+.qa{border:1px solid #232a45;border-radius:12px;margin-bottom:10px;overflow:hidden}
+.qa summary{cursor:pointer;padding:14px 18px;font-size:14px;font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary::after{content:"+";color:var(--accent);font-size:20px}
+.qa[open] summary::after{content:"\2212"}
+.qa .a{padding:0 18px 16px;color:var(--muted);font-size:14px}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:6px;background:#232a45;color:var(--muted);margin-right:6px}
+.tag.ok{background:rgba(61,220,132,.15);color:var(--ok)}
+footer{padding:40px 0;text-align:center;color:var(--muted);font-size:13px;border-top:1px solid #232a45;margin-top:20px}
+footer a{color:var(--accent2);text-decoration:none}
+@media (max-width:640px){h1{font-size:26px}section>h2{font-size:19px}}
+@media print{body{background:#fff;color:#000}.nav{display:none}.card{border:1px solid #ccc}header{padding-top:20px}}
+</style>
+</head>
+<body>
+<nav class="nav" aria-label="页面目录">
+  <div class="wrap">
+    <a href="#what">是什么</a><a href="#start">上手 5 步</a><a href="#config">选配置</a><a href="#faq">常见问答</a>
+  </div>
+</nav>
+<div class="wrap">
+<header>
+  <span class="badge">新手入门 · 10 分钟出第一支短剧</span>
+  <h1>爽点厂 <span class="hl">HookForge</span> 快速上手</h1>
+  <p>你不需要会写代码。只要会打字、会选选项，就能把剧本变成能看的短剧视频。这份教程全程用大白话讲，每一步都能跟着做。</p>
+</header>
+<main>
+<section id="what">
+  <h2>它到底能帮我做什么？</h2>
+  <p class="lead">一句话：把你的剧本，自动变成一支支带画面、带配音、带 BGM 的短剧视频。</p>
+  <div class="card">
+    <h3>你只管 3 件事，剩下它自动干</h3>
+    <p style="color:var(--muted);font-size:14px">
+      <span class="tag ok">你写</span>剧本（每集 3~10 场）
+      <span class="tag ok">你选</span>档位 + 画风 + 剧种
+      <span class="tag ok">它干</span>拆镜头 → 画角色 → 生视频 → 配音 → 加 BGM → 拼成片
+    </p>
+    <div class="tip good"><b>放心用：</b>它会根据你的电脑配置自动挑能跑的方案，跑不动会自动降级，不会卡死。第一次哪怕电脑配置低，也能出片。</div>
+  </div>
+</section>
+<section id="start">
+  <h2>上手 5 步（跟着做就行）</h2>
+  <p class="lead">下面每一步都能照做，做完就有成片。</p>
+  <div class="card">
+    <div class="step"><span class="step-num">1</span>
+      <div class="body"><strong>打开一键出片页面</strong>
+      <p>运行 <code>python engine/ui/app.py</code>，浏览器打开 <code>http://127.0.0.1:8787</code>。看到「粘贴你的剧本」那个框，你就对了。</p></div></div>
+    <div class="step"><span class="step-num">2</span>
+      <div class="body"><strong>把剧本贴进去</strong>
+      <p>按「第几场 + 这一幕发生什么」写。写清楚动作和情绪，出片最好看。可以加标题行（# 开头），它会自动跳过。</p>
+      <pre>第1场：男主进屋看到桌上的刀，脸色一变
+第2场：男主抓起刀冲向门口
+第3场：门口遇上反派，两人对峙
+第4场：反转——刀上刻着男主自己的名字</pre></div></div>
+    <div class="step"><span class="step-num">3</span>
+      <div class="body"><strong>选 3 个选项</strong>
+      <p>选「档位」（你的电脑）、选「画风」（画面长什么样）、选「剧种」（决定 BGM 和配音调性）。下面「选配置」里有说明怎么选。</p></div></div>
+    <div class="step"><span class="step-num">4</span>
+      <div class="body"><strong>点「一键出片」</strong>
+      <p>等着就行，大概 30 秒到 2 分钟。页面会一步步显示：拆剧本 → 画角色 → 生视频 → 拼成片，全绿就成功。</p></div></div>
+    <div class="step"><span class="step-num">5</span>
+      <div class="body"><strong>下载成片</strong>
+      <p>成功的成片是个能直接播放的 mp4。点绿色「下载成片」按钮保存，打开看效果。不满意就换画风或剧种再点一次，很快。</p></div></div>
+  </div>
+</section>
+<section id="config">
+  <h2>选配置：3 个选项怎么挑</h2>
+  <p class="lead">挑不出来就选默认（T1 + 日系动漫 + 暗黑惊悚），先出片再调。</p>
+  <div class="card">
+    <h3>档位（你的电脑是哪种）</h3>
+    <table>
+      <tr><th scope="col">选项</th><th scope="col">什么时候选</th></tr>
+      <tr><td><b>T0</b> 无独显</td><td>轻薄本、Mac、没有显卡的电脑。纯用云端出片，最省心但稍慢。</td></tr>
+      <tr><td><b>T1</b> 入门独显</td><td>有 1060、1650 这种入门卡（6GB 显存）。性价比最高，多数人默认选它。</td></tr>
+      <tr><td><b>T2</b> 中端独显</td><td>3060、4060 以上（8~12GB）。画面更细腻，出片更快。</td></tr>
+    </table>
+    <div class="tip"><b>拿不准？</b>电脑越接近"游戏本"，越往 T2 选；越接近"办公本"，越往 T0/T1 选。选高了不会崩，会自动降级；选低了会慢，不会废。</div>
+  </div>
+  <div class="card">
+    <h3>画风（画面长什么样）</h3>
+    <p style="color:var(--muted);font-size:14px">20 种风格，举例：<b>日系动漫</b>（热血向）、<b>中国水墨</b>（古风）、<b>赛博朋克</b>（科幻）、<b>超写实</b>（接近真人）。看你想让短剧画面是什么调性就选哪个。</p>
+  </div>
+  <div class="card">
+    <h3>剧种（决定 BGM 和配音的味道）</h3>
+    <p style="color:var(--muted);font-size:14px">10 种：<b>男频复仇</b>、<b>暗黑惊悚</b>、<b>日常恋爱</b>、<b>动作打斗</b>、<b>家庭温情</b>……选和你故事最像的那个，BGM 会自动配到调上。</p>
+  </div>
+</section>
+<section id="faq">
+  <h2>常见问答（用前 10 秒扫一眼）</h2>
+  <details class="qa"><summary>出片太慢了，正常吗？</summary>
+  <div class="a">正常。T1 一档大约每集（10 个镜头）几分钟。电脑越好越快。第一次跑包含环境自检，会比后面慢一点，后续就快了。</div></details>
+  <details class="qa"><summary>能改剧本吗？改完要重出整集吗？</summary>
+  <div class="a">能改。它支持「断点重出」——只重做你改过的那几个镜头，没改的直接复用，不会整集从头跑，省时间。</div></details>
+  <details class="qa"><summary>电脑配置很低（没显卡）能用吗？</summary>
+  <div class="a">能。选 T0（无独显），它会走云端出片。就是稍慢一点，但画面照样出。</div></details>
+  <details class="qa"><summary>出来的视频想再调（比如换个 BGM）怎么办？</summary>
+  <div class="a">改一下剧种或画风再出一次就行。每个环节都能单独调，不用推倒重来。想看哪一步，在出片结果里点进去单独改。</div></details>
+  <details class="qa"><summary>它不会把我电脑搞崩吧？</summary>
+  <div class="a">不会。它跑之前会先看你显存够不够，不够会自动降到能跑的档位，不会硬跑到内存爆掉。整个过程可以中途停。</div></details>
+</section>
+</main>
+<footer>
+  <p>爽点厂 HookForge · 让每个创作者都能做出自己的短剧</p>
+  <p>遇到问题？看「使用辅助 · 报错自查」或直接提 <a href="https://github.com/Zeon7744/pic-workflow" target="_blank" rel="noopener noreferrer">GitHub Issue</a></p>
+</footer>
+</div>
+<script>
+(function(){try{
+document.querySelectorAll('a[href^="#"]').forEach(function(a){
+a.addEventListener('click',function(e){
+var id=a.getAttribute('href');
+if(id.length>1&&document.querySelector(id)){e.preventDefault();document.querySelector(id).scrollIntoView({behavior:'smooth'});}
+});
+});
+}catch(err){}
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>爽点厂 HookForge · 培训与使用辅助</title>
+<style>
+:root{--bg:#0f1220;--card:#1a1f35;--card2:#141828;--accent:#ff4d6d;--accent2:#4d7cfe;
+--text:#e8eaf2;--muted:#9aa0b5;--ok:#3ddc84;--warn:#ffb020;--r:16px;
+--font:-apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.7}
+.wrap{max-width:940px;margin:0 auto;padding:0 20px}
+header{padding:48px 0 28px;text-align:center}
+.badge{display:inline-block;font-size:13px;color:var(--accent2);border:1px solid rgba(77,124,254,.4);border-radius:999px;padding:5px 14px;margin-bottom:16px}
+h1{font-size:30px;font-weight:800}
+header p{color:var(--muted);font-size:15px;margin-top:10px;max-width:620px;margin-inline:auto}
+section{padding:30px 0}
+section>h2{font-size:21px;font-weight:700;margin-bottom:6px;scroll-margin-top:20px}
+section>.lead{color:var(--muted);font-size:14px;margin-bottom:20px}
+.nav{position:sticky;top:0;z-index:20;background:rgba(15,18,32,.9);backdrop-filter:blur(8px);border-bottom:1px solid #232a45}
+.nav .wrap{display:flex;gap:4px;flex-wrap:wrap;padding:10px 20px}
+.nav a{color:var(--muted);text-decoration:none;font-size:13px;padding:6px 12px;border-radius:8px}
+.nav a:hover{color:var(--text);background:var(--card)}
+.card{background:var(--card);border-radius:var(--r);padding:22px;margin-bottom:14px;border:1px solid #232a45}
+.card h3{font-size:15px;font-weight:600;margin-bottom:8px}
+.card p,.card li{color:var(--muted);font-size:14px}
+.role-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.role{background:var(--card);border-radius:var(--r);padding:20px;border:1px solid #232a45}
+.role .t{font-size:16px;font-weight:700;margin-bottom:6px}
+.role .t span{font-size:12px;color:var(--accent);margin-left:6px}
+.role p{color:var(--muted);font-size:13px;margin-bottom:10px}
+.role ul{list-style:none}
+.role li{font-size:13px;color:var(--muted);padding:4px 0;padding-left:18px;position:relative}
+.role li::before{content:"▸";position:absolute;left:0;color:var(--accent2)}
+.stage{display:flex;gap:0;flex-wrap:wrap;margin:8px 0}
+.stage .s{flex:1;min-width:120px;padding:12px 14px;background:var(--card);border:1px solid #232a45;border-radius:10px;margin:6px}
+.stage .s .n{font-size:11px;color:var(--accent);font-weight:700}
+.stage .s .l{font-size:14px;font-weight:600;margin:4px 0}
+.stage .s .d{font-size:12px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
+th,td{padding:9px 10px;text-align:left;border-bottom:1px solid #232a45}
+th{color:var(--muted);font-size:12px;font-weight:600}
+td{color:var(--muted)}
+td b{color:var(--text)}
+.chk{border:1px solid #232a45;border-radius:10px;margin-bottom:10px;overflow:hidden}
+.chk summary{cursor:pointer;padding:13px 16px;font-size:14px;font-weight:600;list-style:none}
+.chk summary::-webkit-details-marker{display:none}
+.chk .b{padding:0 16px 14px;color:var(--muted);font-size:14px}
+.chk .b code{background:#0c0f1c;padding:2px 6px;border-radius:5px;font-size:12px;color:#c8cde0}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:6px;background:#232a45;color:var(--muted);margin:2px 4px 2px 0}
+.tag.b{color:var(--accent2)}
+footer{padding:36px 0;text-align:center;color:var(--muted);font-size:13px;border-top:1px solid #232a45}
+@media (max-width:640px){h1{font-size:24px}.role-grid{grid-template-columns:1fr}}
+@media print{body{background:#fff;color:#000}.nav{display:none}.card,.role{border:1px solid #ccc}}
+</style>
+</head>
+<body>
+<nav class="nav" aria-label="目录">
+  <div class="wrap">
+    <a href="#role">按角色学习</a><a href="#flow">8 环节人话版</a><a href="#tier">档位怎么选</a><a href="#quick">画风剧种速查</a><a href="#check">报错自查</a>
+  </div>
+</nav>
+<div class="wrap">
+<header>
+  <span class="badge">培训资料 · 使用辅助</span>
+  <h1>爽点厂 HookForge 学习中心</h1>
+  <p>不管你是什么背景，都有对应的学习路径。先看「按角色」找到自己的位置，再翻「8 环节」知道它怎么干活，最后「报错自查」救急。</p>
+</header>
+<main>
+
+<section id="role">
+  <h2>按你的身份，挑一条学习路径</h2>
+  <p class="lead">不同人用这个工具，关心点不一样。对号入座。</p>
+  <div class="role-grid">
+    <div class="role">
+      <div class="t">普通创作者 <span>零基础</span></div>
+      <p>不会写代码，想把故事做成短剧视频。5 分钟上手，先出片再学。</p>
+      <ul>
+        <li>看「快速上手」教程，跟着出第一片</li>
+        <li>学「8 环节人话版」，懂它在干嘛</li>
+        <li>掌握「档位怎么选」，别选错</li>
+        <li>遇报错翻「报错自查」</li>
+      </ul>
+    </div>
+    <div class="role">
+      <div class="t">进阶创作者 <span>会调参</span></div>
+      <p>会写剧本，想让画面/声音更精致。重点学调优。</p>
+      <ul>
+        <li>画风 / 剧种速查，按调性选</li>
+        <li>单环节精调（哪一步不满意改哪一步）</li>
+        <li>断点重出：只重做改过的镜头</li>
+        <li>四维风格矩阵（画风×音乐×声音×BGM）</li>
+      </ul>
+    </div>
+    <div class="role">
+      <div class="t">MCN / 团队 <span>批量出片</span></div>
+      <p>多账号、多剧种、要稳定产出。重点是效率和质量门控。</p>
+      <ul>
+        <li>批量剧本 → 批量出片（剧本库化）</li>
+        <li>质量门控阈值（镜头质检标准）</li>
+        <li>角色一致性检查（同一角色不串脸）</li>
+        <li>多机对比 / 横向迭代（1060 等实机数据）</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="flow">
+  <h2>它到底怎么把剧本变片？（8 环节人话版）</h2>
+  <p class="lead">不用记术语，看懂这 8 步就明白它在干嘛。</p>
+  <div class="card">
+    <div class="stage">
+      <div class="s"><div class="n">1</div><div class="l">拆剧本</div><div class="d">把你的故事切成一个个镜头</div></div>
+      <div class="s"><div class="n">2</div><div class="l">画角色</div><div class="d">生成主要人物形象</div></div>
+      <div class="s"><div class="n">3</div><div class="l">写分镜</div><div class="d">每个镜头怎么拍（景别/动作）</div></div>
+      <div class="s"><div class="n">4</div><div class="l">生视频</div><div class="d">把分镜变成动态画面</div></div>
+      <div class="s"><div class="n">5</div><div class="l">加特效</div><div class="d">画面增强 / 转场</div></div>
+      <div class="s"><div class="n">6</div><div class="l">拼成片</div><div class="d">镜头+配音+BGM 合成</div></div>
+      <div class="s"><div class="n">7</div><div class="l">配乐</div><div class="d">BGM 对齐情绪</div></div>
+      <div class="s"><div class="n">8</div><div class="l">打包</div><div class="d">出能播放的 mp4</div></div>
+    </div>
+    <p style="margin-top:10px">每一步都能单独看、单独改。某一步不满意，重做那一步就行，不用从头来。</p>
+  </div>
+</section>
+
+<section id="tier">
+  <h2>档位怎么选（一表搞定）</h2>
+  <p class="lead">选错了不会崩，会自动降级；但选对出片最快最省钱。</p>
+  <div class="card">
+    <table>
+      <tr><th scope="col">你的情况</th><th scope="col">选</th><th scope="col">说明</th></tr>
+      <tr><td>办公本 / Mac / 没显卡</td><td><b>T0</b></td><td>走云端出片，最省心，稍慢</td></tr>
+      <tr><td>1060 / 1650 / 入门游戏本</td><td><b>T1</b></td><td>性价比之王，多数人默认</td></tr>
+      <tr><td>3060 / 4060 / 中端以上</td><td><b>T2</b></td><td>画面更细，出片更快</td></tr>
+    </table>
+    <p>💡 拿不准就选 T1，跑不动它自动降，跑得完它自动提速，稳。</p>
+  </div>
+</section>
+
+<section id="quick">
+  <h2>画风 & 剧种速查</h2>
+  <p class="lead">不知道选哪个？按你想要的"味道"对号。</p>
+  <div class="card">
+    <h3>画风（画面调性）</h3>
+    <p>
+      <span class="tag b">日系动漫</span><span class="tag b">少年漫画</span><span class="tag b">少女漫画</span>
+      <span class="tag b">中国水墨</span><span class="tag b">国风水墨</span><span class="tag b">写实</span>
+      <span class="tag b">超写实8K</span><span class="tag b">赛博朋克</span><span class="tag b">蒸汽朋克</span>
+      <span class="tag b">暗黑哥特</span><span class="tag b">水彩</span><span class="tag b">像素</span>
+      <span class="tag b">卡通3D</span><span class="tag b">胶片摄影</span><span class="tag b">低多边形</span>
+    </p>
+    <h3 style="margin-top:14px">剧种（BGM / 配音调性）</h3>
+    <p>
+      <span class="tag">轻喜剧</span><span class="tag">日常恋爱</span><span class="tag">男频复仇</span>
+      <span class="tag">暗黑惊悚</span><span class="tag">玄幻武侠</span><span class="tag">虐恋</span>
+      <span class="tag">科幻赛博</span><span class="tag">动作打斗</span><span class="tag">家庭温情</span>
+      <span class="tag">校园青春</span>
+    </p>
+    <p style="margin-top:10px">👉 故事是啥味道，剧种就选啥。复仇选「男频复仇」，甜宠选「日常恋爱」，悬疑选「暗黑惊悚」。</p>
+  </div>
+</section>
+
+<section id="check">
+  <h2>出片报错？先查这张自查卡</h2>
+  <p class="lead">90% 的报错在这 6 条里。对号，照做。</p>
+  <details class="chk"><summary>① 页面打不开 / 转圈不动</summary>
+  <div class="b">先确认服务在跑。终端里 <code>python engine/ui/app.py</code> 有没有报错？有没有装好依赖？没装先 <code>pip install flask</code>。终端正常但浏览器卡，刷新再试。</div></details>
+  <details class="chk"><summary>② 点"一键出片"没反应 / 卡很久</summary>
+  <div class="b">正常出片要 30 秒~2 分钟。第一次跑含环境自检会更久。超过 5 分钟还没动静，看终端有没有红字（报错信息），对照下面 ③④。</div></details>
+  <details class="chk"><summary>③ 某一步显示"失败"（红色 ✗）</summary>
+  <div class="b">看是哪一步：
+    <ul style="list-style:none;margin-top:6px">
+      <li>· 「生视频」失败 → 显存不够，档位调高一档（T1 改 T2）或剧本镜头数减一点</li>
+      <li>· 「配乐」失败 → 换下剧种（BGM 库对应的可能没数据）</li>
+      <li>· 其他环节失败 → 多半是网络（云端出片断网），检查网络后重出</li>
+    </ul>
+  它会自动降级重试，多数情况重试后能过，看最终成片是否 ok。</div></details>
+  <details class="chk"><summary>④ 出片了但画面很糊 / 太快</summary>
+  <div class="b">档位选了 T0/T1 但想要高清 → 换 T2 重出。镜头太长 → 把剧本拆成更短的场景（每场动作集中一点）。</div></details>
+  <details class="chk"><summary>⑤ 角色前后脸不一样（串脸）</summary>
+  <div class="b">这是角色一致性问题。同一角色的特征在剧本里描述保持一致（发型/服饰/配饰固定），不要每场都换形容。进阶可看「角色一致性检查清单」。</div></details>
+  <details class="chk"><summary>⑥ 完全不知道咋回事 / 报了一堆红字</summary>
+  <div class="b">把终端里的报错信息原样复制，发到 <a href="https://github.com/Zeon7744/pic-workflow/issues" target="_blank" rel="noopener noreferrer" style="color:var(--accent2)">GitHub Issue</a>，或直接群里问。别自己瞎猜。</div></details>
+</section>
+</main>
+<footer>
+  <p>爽点厂 HookForge · 学不会可以问，随时都在</p>
+</footer>
+</div>
+<script>
+(function(){try{
+document.querySelectorAll('a[href^="#"]').forEach(function(a){
+a.addEventListener('click',function(e){
+var id=a.getAttribute('href');
+if(id.length>1&&document.querySelector(id)){e.preventDefault();document.querySelector(id).scrollIntoView({behavior:'smooth'});}
+});
+});
+}catch(err){}
+})();
+</script>
+</body>
+</html>
