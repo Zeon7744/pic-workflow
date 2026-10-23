@@ -1,3 +1,7 @@
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+import billing
+
 """pic-workflow PRO 门控
 免费：1 次/天
 Pro：不限 + 角色一致性引擎
@@ -72,3 +76,8 @@ def create_order(plan: str, tenant_id: str = "") -> dict:
         return {"ok": result.get("code") == 0, "result": result}
     except Exception as e:
         return {"ok": False, "error": str(e)}
+
+
+def gate(plan="free"):
+    """PRO 门控：免费 1 次/天，Pro 不限（接 billing.check_access）"""
+    return billing.check_access(plan)
