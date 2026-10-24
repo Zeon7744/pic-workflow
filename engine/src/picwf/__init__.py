@@ -24,6 +24,6 @@ YAML 是数据不是代码——引擎按硬件档位"算"出工作流。
 
 各模块离线可单测，不依赖 torch/CLIP 实模型。
 """
-__version__ = "0.5.0-efficiency-planner-8stage-integration"
+__version__ = "0.5.1-qa-loop-8stage-integration"
 
-from . import capability_runner, model_gateway, param_advisor, model_registry, efficiency_planner
+from . import capability_runner, model_gateway, param_advisor, model_registry, efficiency_planner, qa_loop

@@ -95,8 +95,23 @@ def make_executors(workflow: Dict[str, Any],
         best = plan.get("best") or {}
         chosen_model = best.get("model_id") or "wan13b_gguf_q4_offload_480"
         executed = []
+        qa_decisions = []
         for i, sh in enumerate(shots[:10]):
             out = runner.exec(f"shot_{i+1}", model_impl=chosen_model)
+            # 模拟 QA（真实链路后续由 shot_qa 提供真实 CLIP/时长观测）
+            mock_report = {
+                "passed": bool(out.get("ok")),
+                "route": "pass" if out.get("ok") else "redo_local",
+                "scores": {"alignment_intent": 0.95 if out.get("ok") else 0.7},
+            }
+            decision = None
+            if not mock_report["passed"]:
+                from .qa_loop import decide_qa_loop
+                decision = decide_qa_loop(mock_report, plan=plan,
+                                          current_model=chosen_model,
+                                          attempt=0,
+                                          policy={"escalate_to_cloud": False,
+                                                  "max_retries": 1})
             executed.append({
                 "index": i + 1,
                 "clip": out.get("ok"),
@@ -105,12 +120,18 @@ def make_executors(workflow: Dict[str, Any],
                 "efficiency_score": best.get("score"),
                 "efficiency_gate": plan.get("gate", {}),
                 "fallback_paths": [p.get("model_id") for p in plan.get("paths", [])][:3],
+                "qa_loop_decision": decision,
             })
+            if decision:
+                qa_decisions.append(decision)
+        from .qa_loop import summarize_qa_loop
+        qa_summary = summarize_qa_loop(qa_decisions)
         return {
             "video_clips": executed,
             "clip_count": len(executed),
             "efficiency_best_model": chosen_model,
             "efficiency_plan": plan,
+            "qa_loop_summary": qa_summary,
         }
 
     def _post_assemble(up: Dict[str, Any]) -> Dict[str, Any]:
