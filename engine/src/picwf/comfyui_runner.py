@@ -16,6 +16,12 @@ from typing import Any, Dict, Optional
 
 # ComfyUI 默认端口
 COMFYUI_DEFAULT_URL = "http://127.0.0.1:8188"
+
+# 支持环境变量 COMFYUI_URL 覆盖（白皇在 Windows 桌面端起 8188 后，
+# 跑引擎前 `set COMFYUI_URL=http://127.0.0.1:8188` 即真连本机，免改代码）。
+import os as _os
+COMFYUI_URL_ENV = _os.environ.get("COMFYUI_URL", "").strip()
+
 COMFYUI_HISTORY_LIMIT = 10
 
 
@@ -248,15 +254,18 @@ class ComfyUIRunner:
         }
 
 
-def make_comfyui_runner(base_url: str = COMFYUI_DEFAULT_URL,
-                        timeout_s: float = 120.0,
-                        mock_fallback: bool = True,
-                        workdir: Optional[str] = None,
-                        max_retries: int = 2) -> ComfyUIRunner:
+def make_comfyui_runner(base_url: Optional[str] = None,
+                       timeout_s: float = 120.0,
+                       mock_fallback: bool = True,
+                       workdir: Optional[str] = None,
+                       max_retries: int = 2) -> ComfyUIRunner:
     """工厂：创建 ComfyUIRunner。ComfyUI 不可用时自动 mock 降级。
 
+    base_url 优先级：显式传入 > 环境变量 COMFYUI_URL > 默认 127.0.0.1:8188。
     workdir 提供后启用断点重跑（已完成 tid 复用结果，不重复提交 ComfyUI）。
     """
+    if base_url is None:
+        base_url = COMFYUI_URL_ENV or COMFYUI_DEFAULT_URL
     return ComfyUIRunner(base_url=base_url, timeout_s=timeout_s,
                         mock_fallback=mock_fallback,
                         workdir=workdir, max_retries=max_retries)

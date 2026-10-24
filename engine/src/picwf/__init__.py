@@ -24,4 +24,6 @@ YAML 是数据不是代码——引擎按硬件档位"算"出工作流。
 
 各模块离线可单测，不依赖 torch/CLIP 实模型。
 """
-__version__ = "0.2.0-mvp"
+__version__ = "0.3.0-full-module-advisor"
+
+from . import capability_runner, model_gateway, param_advisor

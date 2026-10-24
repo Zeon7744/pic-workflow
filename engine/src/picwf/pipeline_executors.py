@@ -50,20 +50,39 @@ def make_executors(workflow: Dict[str, Any],
     voice_track = adv_by_id.get("voice", {}).get("track_key", "") or workflow.get("voice", "")
     bgm_track = adv_by_id.get("bgm", {}).get("track_key", "") or workflow.get("bgm", "") or "B08_suspense_cold"
 
-    # video_shot 执行器：用 comfyui_runner 跑
+    # video_shot 执行器：默认走 capability 层（ComfyUI 仅 adapter 之一）
     if runner is None:
         from .comfyui_runner import make_comfyui_runner
         runner = make_comfyui_runner(mock_fallback=True, workdir=workdir)
 
+    def _capability_backend_for(kind: str) -> Dict[str, Any]:
+        from .model_gateway import choose_backend
+        return choose_backend(kind, profile={}, backends={
+            "generic_local": {"kind": "*", "cloud": False, "priority": 20},
+            "cloud_video": {"kind": "video", "cloud": True, "priority": 30},
+            "cloud_audio": {"kind": "audio", "cloud": True, "priority": 30},
+            "mock": {"kind": "*", "cloud": False, "priority": 90},
+        })
+
     def _video_shot(up: Dict[str, Any]) -> Dict[str, Any]:
-        # 取上游分镜提示词 → 跑视频镜头
+        # 取上游分镜提示词 → 能力层决策 → 执行
         shots = (up.get("storyboard_prompt", {}) or {}).get("shots",
                   (up.get("script_struct", {}) or {}).get("shots", []))
         executed = []
         for i, sh in enumerate(shots[:10]):  # 限制 10 镜头/集
-            out = runner.exec(f"shot_{i+1}", model_impl="wan13b_gguf_q4_offload_480")
-            executed.append({"index": i + 1, "clip": out.get("ok"),
-                            "peak_vram": out.get("peak_vram_gb")})
+            decision = _capability_backend_for("video")
+            if decision["backend"] in {"generic_local", "mock"} or decision.get("cloud"):
+                out = runner.exec(f"shot_{i+1}", model_impl="wan13b_gguf_q4_offload_480")
+            else:
+                out = runner.exec(f"shot_{i+1}", model_impl=decision["backend"])
+            executed.append({
+                "index": i + 1,
+                "clip": out.get("ok"),
+                "peak_vram": out.get("peak_vram_gb"),
+                "backend": decision["backend"],
+                "resource_ok": decision.get("resource_ok"),
+                "reason": decision.get("reason"),
+            })
         return {"video_clips": executed, "clip_count": len(executed)}
 
     def _post_assemble(up: Dict[str, Any]) -> Dict[str, Any]:
