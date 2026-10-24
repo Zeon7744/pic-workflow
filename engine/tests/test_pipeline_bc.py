@@ -60,3 +60,26 @@ def test_cli_resume(tmp_path):
                            resume_ids=["script_struct", "character_image"])
     assert "script_struct" in res["skipped"]
     assert res["ok"] is True
+
+def test_cli_exposes_mode_and_delivery_report(tmp_path):
+    script = tmp_path / "script.md"
+    script.write_text("# 江城情缘\n第1场：男主进屋\n第2场：反转真相", encoding="utf-8")
+    out_dir = tmp_path / "out_mode"
+    res = pipeline_cli.run(str(script), tier="T1", scenario="dark_thriller",
+                           ep=3, workdir=str(out_dir), mode="pro")
+    assert res["delivery_readiness"]["ready"] is True
+    import json
+    report = json.load(open(res["report"]))
+    assert report["mode"] == "pro"
+    assert report["mode_overlay"]["mode_label"] == "进阶"
+    assert report["mode_feedback"]["mode"] == "pro"
+    assert report["delivery_readiness"]["checks"]["mode_feedback_visible"] is True
+
+def test_cli_end_to_end_delivery_gaps_are_structured(tmp_path):
+    script = tmp_path / "script.md"
+    script.write_text("第1场：男主进屋", encoding="utf-8")
+    out_dir = tmp_path / "out_gaps"
+    res = pipeline_cli.run(str(script), tier="T1", ep=2, workdir=str(out_dir))
+    dr = res["delivery_readiness"]
+    assert "checks" in dr and "gaps" in dr
+    assert isinstance(dr["ready"], bool)
