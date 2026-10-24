@@ -80,13 +80,17 @@ def make_executors(workflow: Dict[str, Any],
                          quality=0.78, min_vram_gb=6)
 
         local_models = workflow.get("local_models") or []
-        if local_models:
-            reg = build_registry_with_local(
-                local_models,
-                source_dir=workflow.get("local_models_dir", "") or "local",
+        local_dir = workflow.get("local_models_dir", "") or "local"
+        local_registry = reg
+        if local_models or local_dir and local_dir != "local":
+            from .local_model_index import build_hot_registry
+            local_registry = build_hot_registry(
                 base_registry=reg,
+                root_dir=local_dir if local_dir != "local" else "",
                 prefer_local=True,
+                manifest=local_models,
             )
+        reg = local_registry
 
         profile = {"gpu": {"vram_gb": float(workflow.get("free_vram_gb") or 8)}}
         task = {
@@ -94,11 +98,12 @@ def make_executors(workflow: Dict[str, Any],
             "quality_min": 0.8,
             "max_cost": 999.0,
             "max_seconds": 999.0,
-            "prefer_local": bool(local_models),
+            "prefer_local": bool(local_models or (local_dir and local_dir != "local")),
         }
         plan = plan_and_report(reg, profile=profile, task=task)
         plan["local_models_source"] = local_models
-        plan["local_models_dir"] = workflow.get("local_models_dir", "") or "local"
+        plan["local_models_dir"] = local_dir
+        plan["hot_update_enabled"] = bool(local_models or (local_dir and local_dir != "local"))
         return plan
 
     def _video_shot(up: Dict[str, Any]) -> Dict[str, Any]:
@@ -112,6 +117,8 @@ def make_executors(workflow: Dict[str, Any],
         qa_decisions = []
         for i, sh in enumerate(shots[:10]):
             out = runner.exec(f"shot_{i+1}", model_impl=chosen_model)
+            # 保留原字段位，后续可把 hot_update_enabled / local 资产信息写入审计字段
+
             # 模拟 QA（真实链路后续由 shot_qa 提供真实 CLIP/时长观测）
             mock_report = {
                 "passed": bool(out.get("ok")),
@@ -136,6 +143,8 @@ def make_executors(workflow: Dict[str, Any],
                 "efficiency_gate": plan.get("gate", {}),
                 "fallback_paths": [p.get("model_id") for p in plan.get("paths", [])][:3],
                 "qa_loop_decision": decision,
+                "hot_update_enabled": plan.get("hot_update_enabled", False),
+                "local_models_dir": plan.get("local_models_dir", ""),
             })
             if decision:
                 qa_decisions.append(decision)

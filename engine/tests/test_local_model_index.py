@@ -12,6 +12,8 @@ from picwf.local_model_index import (
     index_from_dir_listing,
     build_spec_from_local_file,
     build_registry_with_local,
+    scan_dir_listing,
+    registry_diff,
 )
 from picwf.efficiency_planner import plan_paths
 
@@ -57,9 +59,54 @@ def test_efficiency_planner_can_prefer_local():
     assert plan["prefer_local"] is True
 
 
+def test_scan_dir_listing_reads_new_files_without_code_change(tmp_path=None):
+    """目录新增模型文件后，scan_dir_listing 能自动发现并入 registry。"""
+    import tempfile
+    import os
+    import shutil
+
+    base = tempfile.mkdtemp(prefix="local_model_watch_")
+    try:
+        with open(os.path.join(base, "wan13b_gguf_q4_offload_480.safetensors"), "w") as f:
+            f.write("x")
+        first = scan_dir_listing(base)
+        assert first["file_count"] == 1
+        assert "wan13b_gguf_q4_offload_480" in first["registry"]
+
+        with open(os.path.join(base, "new_flux_local.safetensors"), "w") as f:
+            f.write("x")
+        second = scan_dir_listing(base, refresh=True)
+        assert second["file_count"] == 2
+        assert "new_flux_local" in second["registry"]
+
+        diff = registry_diff(first["registry"], second["registry"])
+        assert diff["added"] == ["new_flux_local"]
+        assert diff["removed"] == []
+    finally:
+        shutil.rmtree(base, ignore_errors=True)
+
+
+def test_pipeline_executors_expose_hot_update_flags():
+    """video_shot 输出暴露 hot_update_enabled / local_models_dir 审计字段。"""
+    import importlib
+    pe = importlib.reload(importlib.import_module("picwf.pipeline_executors"))
+    wf = {"tier": "T1", "style": "S2_real_cinematic", "scenario": "dark_thriller",
+          "episode": 1, "free_vram_gb": 8,
+          "local_models": ["wan13b_gguf_q4_offload_480.safetensors"],
+          "local_models_dir": r"D:\ComfyUI\aki\ComfyUI\models\checkpoints"}
+    ex = pe.make_executors(wf, workdir="/tmp/pe_hot_test")
+    up = {"storyboard_prompt": {"shots": [{"index": 1, "prompt": "雨夜巷尾"}]}}
+    out = ex["video_shot"](up)
+    assert out["efficiency_plan"]["hot_update_enabled"] is True
+    assert out["efficiency_plan"]["local_models_dir"].endswith("checkpoints")
+    assert out["video_clips"][0]["hot_update_enabled"] is True
+
+
 if __name__ == "__main__":
     for name in ("test_spec_inference_from_checkpoints_name",
                  "test_registry_merge_prefers_local",
-                 "test_efficiency_planner_can_prefer_local"):
+                 "test_efficiency_planner_can_prefer_local",
+                 "test_scan_dir_listing_reads_new_files_without_code_change",
+                 "test_pipeline_executors_expose_hot_update_flags"):
         globals()[name]()
         print(f"PASS {name}")

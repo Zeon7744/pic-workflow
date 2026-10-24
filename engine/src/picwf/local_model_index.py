@@ -129,3 +129,71 @@ def build_registry_with_local(models_dir_listing: List[str],
     base = base_registry or {}
     local_specs = index_from_dir_listing(models_dir_listing, source_dir=source_dir)
     return merge_into_registry(base, local_specs, prefer_local=prefer_local)
+
+
+
+def scan_dir_listing(root_dir: str, refresh: bool = False) -> Dict[str, Any]:
+    """扫描本机模型目录（如 D:\ComfyUI\...\checkpoints）。
+
+    返回:
+    {
+      "root_dir": str,
+      "files": [names],
+      "registry": {...},
+      "refreshed_at": 1700000000,
+      "file_count": int,
+    }
+
+    refresh=True 时会重新读取目录并替换缓存（当前实现仍依赖 Python 文件系统；
+    未来可接 inotify/Windows ReadDirectoryChangesW，这里先保留热更新入口）。
+    """
+    import os, time
+
+    files: List[str] = []
+    if os.path.isdir(root_dir):
+        for name in sorted(os.listdir(root_dir)):
+            full = os.path.join(root_dir, name)
+            if os.path.isfile(full) and any(name.lower().endswith(ext) for ext in _EXTS):
+                files.append(name)
+    reg = index_from_dir_listing(files, source_dir=root_dir)
+    return {
+        "root_dir": root_dir,
+        "files": files,
+        "registry": reg,
+        "refreshed_at": int(time.time()),
+        "file_count": len(files),
+        "refresh_supported": True,
+    }
+
+
+def build_hot_registry(base_registry: Dict[str, Dict[str, Any]],
+                       root_dir: str = "",
+                       prefer_local: bool = True,
+                       manifest: Optional[List[str]] = None) -> Dict[str, Dict[str, Any]]:
+    """热更新入口：优先读目录；无目录时回退 manifest。
+
+    目标：新模型落盘后，刷新一次就能进入 registry，无需改代码。
+    """
+    if root_dir:
+        scanned = scan_dir_listing(root_dir, refresh=True)
+        files = scanned["files"]
+    else:
+        files = manifest or []
+    return build_registry_with_local(
+        files,
+        source_dir=root_dir or "manifest",
+        base_registry=base_registry or {},
+        prefer_local=prefer_local,
+    )
+
+
+def registry_diff(previous: Dict[str, Dict[str, Any]],
+                  current: Dict[str, Dict[str, Any]]) -> Dict[str, List[str]]:
+    """比较两次 registry 的模型集合差异，用于热更新日志。"""
+    prev_ids = set(previous.keys())
+    cur_ids = set(current.keys())
+    return {
+        "added": sorted(cur_ids - prev_ids),
+        "removed": sorted(prev_ids - cur_ids),
+        "unchanged": sorted(prev_ids & cur_ids),
+    }
