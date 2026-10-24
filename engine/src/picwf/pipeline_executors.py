@@ -64,26 +64,54 @@ def make_executors(workflow: Dict[str, Any],
             "mock": {"kind": "*", "cloud": False, "priority": 90},
         })
 
+    def _efficiency_plan_for_video(up: Dict[str, Any]) -> Dict[str, Any]:
+        """同一任务多路径择优：资源/成本/速度/质量四维。"""
+        from .model_registry import register_from_matrix, add_custom_model
+        from .efficiency_planner import plan_and_report
+
+        reg = register_from_matrix(matrix)
+        add_custom_model(reg, "cloud_seedance_2", kind="video", cloud=True,
+                         cost=1.8, speed=1.3, quality=0.92, min_vram_gb=0)
+        add_custom_model(reg, "cloud_kling", kind="video", cloud=True,
+                         cost=1.6, speed=1.1, quality=0.89, min_vram_gb=0)
+        add_custom_model(reg, "wan13b_gguf_q4_offload_480", kind="video",
+                         cloud=False, cost=0.4, speed=0.8,
+                         quality=0.78, min_vram_gb=6)
+
+        profile = {"gpu": {"vram_gb": float(workflow.get("free_vram_gb") or 8)}}
+        task = {
+            "kind": "video",
+            "quality_min": 0.8,
+            "max_cost": 999.0,
+            "max_seconds": 999.0,
+        }
+        return plan_and_report(reg, profile=profile, task=task)
+
     def _video_shot(up: Dict[str, Any]) -> Dict[str, Any]:
-        # 取上游分镜提示词 → 能力层决策 → 执行
+        # 取上游分镜提示词 → 效率规划择优 → 执行
         shots = (up.get("storyboard_prompt", {}) or {}).get("shots",
                   (up.get("script_struct", {}) or {}).get("shots", []))
+        plan = _efficiency_plan_for_video(up)
+        best = plan.get("best") or {}
+        chosen_model = best.get("model_id") or "wan13b_gguf_q4_offload_480"
         executed = []
-        for i, sh in enumerate(shots[:10]):  # 限制 10 镜头/集
-            decision = _capability_backend_for("video")
-            if decision["backend"] in {"generic_local", "mock"} or decision.get("cloud"):
-                out = runner.exec(f"shot_{i+1}", model_impl="wan13b_gguf_q4_offload_480")
-            else:
-                out = runner.exec(f"shot_{i+1}", model_impl=decision["backend"])
+        for i, sh in enumerate(shots[:10]):
+            out = runner.exec(f"shot_{i+1}", model_impl=chosen_model)
             executed.append({
                 "index": i + 1,
                 "clip": out.get("ok"),
                 "peak_vram": out.get("peak_vram_gb"),
-                "backend": decision["backend"],
-                "resource_ok": decision.get("resource_ok"),
-                "reason": decision.get("reason"),
+                "backend": chosen_model,
+                "efficiency_score": best.get("score"),
+                "efficiency_gate": plan.get("gate", {}),
+                "fallback_paths": [p.get("model_id") for p in plan.get("paths", [])][:3],
             })
-        return {"video_clips": executed, "clip_count": len(executed)}
+        return {
+            "video_clips": executed,
+            "clip_count": len(executed),
+            "efficiency_best_model": chosen_model,
+            "efficiency_plan": plan,
+        }
 
     def _post_assemble(up: Dict[str, Any]) -> Dict[str, Any]:
         # fx_enhance 透传了 fx_clips（源头 video_shot 的 video_clips）
