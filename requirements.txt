@@ -1,0 +1,4 @@
+# pic-workflow 引擎第三方依赖（锁定到当前可跑通版本）
+# CI (.github/workflows/engine-tests.yml) 使用 pip install -r requirements.txt
+PyYAML==6.0.3
+pytest==9.0.2

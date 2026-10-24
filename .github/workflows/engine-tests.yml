@@ -21,7 +21,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install deps
-        run: pip install --quiet pyyaml pytest
+        run: pip install --quiet -r requirements.txt
 
       - name: Run engine tests
         run: python -m pytest engine/tests/ -q

@@ -6,6 +6,8 @@ import os, sys, tempfile, json
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 from picwf import adaptive
 from picwf.record_metrics import record_step
+import glob as _glob
+_MATRIX_PATH = _glob.glob(os.path.join(os.path.dirname(__file__), "..", "config", "matrix.yaml"))[0]
 
 def _mk_history(workdir):
     """造一批 T1 视频镜头实机指标：本地 wan1.3b Q4 跑挂(OOM) + 迁云端。"""
@@ -62,7 +64,7 @@ def test_apply_matrix_migrate():
     rows = __import__("picwf.record_metrics", fromlist=["load_history"]).load_history(d)
     buckets = adaptive.cluster_history(rows)
     advice = {k: adaptive.advise_for_cell(v) for k, v in buckets.items()}
-    matrix = adaptive._yaml_load(open("/mnt/f/项目/开发/pic/engine/config/matrix.yaml",
+    matrix = adaptive._yaml_load(open(_MATRIX_PATH,
                                       encoding="utf-8").read())
     new = adaptive.apply_advice_to_matrix(matrix, advice)
     # 视频镜头 T1 链首应被提到安全档（cloud/gguf），est_vram 被实测覆盖
@@ -84,7 +86,7 @@ def test_before_after():
     rows = __import__("picwf.record_metrics", fromlist=["load_history"]).load_history(d)
     buckets = adaptive.cluster_history(rows)
     advice = {k: adaptive.advise_for_cell(v) for k, v in buckets.items()}
-    matrix = adaptive._yaml_load(open("/mnt/f/项目/开发/pic/engine/config/matrix.yaml",
+    matrix = adaptive._yaml_load(open(_MATRIX_PATH,
                                       encoding="utf-8").read())
     baa = adaptive.tier_recommend_before_after(matrix, advice)
     assert any(x["migrated"] for x in baa), "应至少一个桶被亲民化迁移"
