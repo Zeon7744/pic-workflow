@@ -90,7 +90,7 @@ def run_pipeline(all_tasks: List[str], workdir: str,
                  node_cfg: Optional[Dict[str, Any]] = None,
                  free_vram_gb: float = 6.0,
                  max_retries: int = 2,
-                 ) -> Dict[str, Any]:
+                 mode: str = "beginner") -> Dict[str, Any]:
     """执行任务管线，支持断点重跑。
 
     all_tasks: 全量任务 id 列表（保持顺序）
@@ -100,6 +100,10 @@ def run_pipeline(all_tasks: List[str], workdir: str,
     """
     os.makedirs(workdir, exist_ok=True)
     st = load_state(workdir) if resume else TaskState()
+    _mode = str(mode or "beginner").lower()
+    if _mode not in {"beginner", "pro", "expert"}:
+        _mode = "beginner"
+    _retries_hint = {"beginner": 1, "pro": 2, "expert": 3}.get(_mode, max_retries)
 
     if resume:
         st.pending = [t for t in all_tasks if t not in st.done and t not in st.results]
@@ -210,4 +214,6 @@ def run_pipeline(all_tasks: List[str], workdir: str,
         "failed": len(st.failed),
         "skipped_reused": len(all_tasks) - len(executed),
         "remaining_failed": list(st.failed),
+        "mode": _mode,
+        "mode_retries_hint": _retries_hint,
     }

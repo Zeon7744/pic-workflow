@@ -52,3 +52,56 @@ def test_dataflow_serializable():
     wf = workflow_gen.generate_workflow("T1")
     text = yaml.safe_dump(wf, allow_unicode=True, sort_keys=False)
     assert "dataflow" in text
+
+def test_mode_overlay_does_not_replace_legacy_workflow_generation():
+    wf_default = workflow_gen.generate_workflow("T1", free_vram_gb=6.0,
+                                                style="S1_anime_jp",
+                                                scenario="dark_thriller",
+                                                ep=10, audio_mode="auto")
+    wf_pro = workflow_gen.generate_workflow("T1", free_vram_gb=6.0,
+                                            style="S1_anime_jp",
+                                            scenario="dark_thriller",
+                                            ep=10, audio_mode="auto", mode="pro")
+    core_keys = ("tier", "style", "nodes", "dataflow", "music", "voice", "bgm")
+    for k in core_keys:
+        assert wf_default.get(k) == wf_pro.get(k), f"mode overlay changed legacy field {k}"
+    assert wf_pro["mode"] == "pro"
+    assert wf_pro["mode_overlay"]["legacy_workflow_preserved"] is True
+    assert wf_pro["mode_overlay"]["params"].get("resolution") == 720
+
+def test_invalid_mode_falls_back_to_beginner_and_legacy_generation_stays_same():
+    wf_bad = workflow_gen.generate_workflow("T1", mode="turbo")
+    wf_beginner = workflow_gen.generate_workflow("T1")
+    assert wf_bad["mode"] == "beginner"
+    assert wf_bad["mode_overlay"]["mode_label"] == "新手"
+    assert [f["id"] for f in wf_bad["dataflow"]] == [f["id"] for f in wf_beginner["dataflow"]]
+
+def test_apply_mode_feedback_updates_overlay_without_touching_legacy_fields():
+    wf = workflow_gen.generate_workflow("T1", free_vram_gb=6.0,
+                                       style="S1_anime_jp",
+                                       scenario="dark_thriller", ep=10,
+                                       audio_mode="auto")
+    before_nodes = [dict(n) for n in wf["nodes"]]
+    before_flow = [dict(f) for f in wf["dataflow"]]
+    fb = {
+        "mode": "pro",
+        "params_used": {"steps": 32, "resolution": 720},
+        "model_id": "wan13b_gguf_q4_offload_480",
+        "qa_pass_rate": 0.9,
+        "local_models_dir": "D:\ComfyUI\aki\ComfyUI\models\checkpoints",
+    }
+    wf2 = workflow_gen.apply_mode_feedback(wf, fb)
+    assert wf2["mode"] == "pro"
+    assert wf2["mode_overlay"]["params"]["steps"] == 32
+    assert wf2["mode_feedback_applied"]["applied"] is True
+    assert wf2["mode_feedback_applied"]["legacy_fields_preserved"] is True
+    assert wf2["nodes"] == before_nodes
+    assert wf2["dataflow"] == before_flow
+
+def test_apply_mode_feedback_empty_feedback_is_noop_for_legacy_fields():
+    wf = workflow_gen.generate_workflow("T1")
+    before = dict(wf)
+    wf2 = workflow_gen.apply_mode_feedback(wf, {})
+    assert wf2["mode_feedback_applied"]["applied"] is False
+    assert wf2["nodes"] == before["nodes"]
+    assert wf2["dataflow"] == before["dataflow"]

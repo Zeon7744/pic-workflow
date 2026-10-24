@@ -29,7 +29,8 @@ def generate_workflow(tier: str, matrix_path: str = MATRIX_PATH_DEFAULT,
                       style: str = "S1_anime_jp",
                       music: str = "", voice: str = "", bgm: str = "",
                       scenario: str = "", ep: int = 0,
-                      audio_mode: str = "auto") -> Dict[str, Any]:
+                      audio_mode: str = "auto",
+                      mode: str = "beginner") -> Dict[str, Any]:
     """生成指定档位 + 画风的工作流。
 
     tier: T0/T1/T2（MVP）
@@ -171,6 +172,8 @@ def generate_workflow(tier: str, matrix_path: str = MATRIX_PATH_DEFAULT,
         "note": "YAML 是数据不是代码；引擎按档位+画风+音频轨裁剪，运行时可再降级",
     }
     _ret.update(_meta_extra)
+    _ret["mode"] = _normalize_mode(mode)
+    _ret["mode_overlay"] = build_mode_overlay(_ret)
     return _ret
 
 
@@ -347,3 +350,64 @@ def generate_and_dump(tier: str, out_path: str,
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(workflow_to_yaml(wf))
     return wf
+
+
+
+def _normalize_mode(mode: str) -> str:
+    m = str(mode or "beginner").lower()
+    return m if m in {"beginner", "pro", "expert"} else "beginner"
+
+
+def build_mode_overlay(workflow: Dict[str, Any]) -> Dict[str, Any]:
+    """三档模式叠加层：不改变原 workflow 生成结果，只补充运行默认值与审计字段。"""
+    from .accessibility_layer import mode_params
+
+    mode = _normalize_mode(workflow.get("mode", "beginner"))
+    ctx = {"tier": workflow.get("tier", "T1")}
+    params = mode_params(mode, ctx).get("params", {})
+    return {
+        "mode": mode,
+        "mode_label": {"beginner": "新手", "pro": "进阶", "expert": "专家"}[mode],
+        "params": params,
+        "legacy_workflow_preserved": True,
+        "note": "三档模式是叠加层；原 tier/style/audio/dataflow 生成逻辑保持不变",
+    }
+
+
+def apply_mode_feedback(workflow: Dict[str, Any],
+                       feedback: Dict[str, Any]) -> Dict[str, Any]:
+    """把运行后沉淀的 mode_feedback 回填回原 workflow，作为下一轮生成依据。"""
+    if not feedback:
+        workflow = dict(workflow)
+        workflow["mode_feedback_applied"] = {"applied": False, "reason": "empty_feedback"}
+        return workflow
+    out = dict(workflow)
+    mode = _normalize_mode(feedback.get("mode", workflow.get("mode", "beginner")))
+    out["mode"] = mode
+    overlay = dict(out.get("mode_overlay") or {})
+    overlay["mode"] = mode
+    overlay["mode_label"] = {"beginner": "新手", "pro": "进阶", "expert": "专家"}[mode]
+    params = dict(overlay.get("params") or {})
+    if feedback.get("params_used"):
+        params.update(feedback.get("params_used") or {})
+    overlay["params"] = params
+    overlay.setdefault("iteration_feedback", [])
+    overlay["iteration_feedback"].append({
+        "schema": feedback.get("schema", "mode_feedback_v1"),
+        "model_id": feedback.get("model_id"),
+        "qa_pass_rate": feedback.get("qa_pass_rate"),
+        "qa_failed": feedback.get("qa_failed"),
+        "local_models_dir": feedback.get("local_models_dir"),
+        "hot_update_enabled": bool(feedback.get("hot_update_enabled")),
+        "resource_ok": feedback.get("resource_ok"),
+        "applied_from": "runtime_mode_feedback",
+    })
+    overlay["legacy_workflow_preserved"] = True
+    out["mode_overlay"] = overlay
+    out["mode_feedback_applied"] = {
+        "applied": True,
+        "mode": mode,
+        "source": feedback.get("feedback_target", "workflow_gen.mode_overlay"),
+        "legacy_fields_preserved": True,
+    }
+    return out

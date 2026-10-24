@@ -64,6 +64,23 @@ def make_executors(workflow: Dict[str, Any],
             "mock": {"kind": "*", "cloud": False, "priority": 90},
         })
 
+    def _collect_mode_feedback(mode, overlay, plan, qa_summary, model_id):
+        """运行模式数据回流：沉淀为可反哺原 workflow 的迭代资产。"""
+        return {
+            "schema": "mode_feedback_v1",
+            "mode": mode,
+            "mode_overlay_applied": bool(overlay),
+            "params_used": (overlay.get("params") if overlay else {}) or {},
+            "model_id": model_id,
+            "qa_pass_rate": qa_summary.get("pass_rate"),
+            "qa_failed": qa_summary.get("failed", 0),
+            "resource_ok": (plan.get("best") or {}).get("resource_ok"),
+            "local_models_dir": plan.get("local_models_dir", ""),
+            "hot_update_enabled": plan.get("hot_update_enabled", False),
+            "feedback_target": "workflow_gen.mode_overlay",
+            "can_feedback_to_original_workflow": True,
+        }
+
     def _efficiency_plan_for_video(up: Dict[str, Any]) -> Dict[str, Any]:
         """同一任务多路径择优：资源/成本/速度/质量四维。"""
         from .model_registry import register_from_matrix, add_custom_model
@@ -151,14 +168,25 @@ def make_executors(workflow: Dict[str, Any],
         from .qa_loop import summarize_qa_loop
         qa_summary = summarize_qa_loop(qa_decisions)
         from .accessibility_layer import cost_visibility, friendly_failure, mode_params
-        raw_mode = str(workflow.get("mode", "beginner")).lower()
+        overlay = workflow.get("mode_overlay") or {}
+        raw_mode = str(workflow.get("mode", overlay.get("mode", "beginner"))).lower()
         mode = raw_mode if raw_mode in {"beginner", "pro", "expert"} else "beginner"
+        feedback = _collect_mode_feedback(mode, overlay, plan, qa_summary, chosen_model)
+        if feedback:
+            try:
+                from .workflow_gen import apply_mode_feedback
+                workflow.clear()
+                workflow.update(apply_mode_feedback(workflow, feedback))
+            except Exception:
+                workflow["mode_feedback"] = feedback
         accessibility = {
             "mode": mode,
             "mode_label": {"beginner": "新手", "pro": "进阶", "expert": "专家"}[mode],
             "params": mode_params(mode, {"tier": workflow.get("tier", "T1")})["params"],
             "cost_panel": cost_visibility(plan),
             "failure_panel": friendly_failure(plan, qa_summary),
+            "mode_overlay": workflow.get("mode_overlay") or overlay,
+            "mode_feedback": feedback,
         }
         return {
             "video_clips": executed,
@@ -167,6 +195,7 @@ def make_executors(workflow: Dict[str, Any],
             "efficiency_plan": plan,
             "qa_loop_summary": qa_summary,
             "accessibility": accessibility,
+            "mode_feedback": feedback,
         }
 
     def _post_assemble(up: Dict[str, Any]) -> Dict[str, Any]:

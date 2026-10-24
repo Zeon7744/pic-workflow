@@ -39,6 +39,23 @@ def test_bgm_track_advised():
     assert res["artifacts"]["bgm_audio"]["bgm_track"]
 
 
+def test_video_shot_feeds_mode_feedback_back_into_workflow_asset():
+    import importlib
+    pe = importlib.reload(importlib.import_module("picwf.pipeline_executors"))
+    wf = {"tier": "T1", "style": "S2_real_cinematic", "scenario": "dark_thriller",
+          "episode": 1, "free_vram_gb": 8, "mode": "pro",
+          "local_models": ["wan13b_gguf_q4_offload_480.safetensors"],
+          "local_models_dir": "D:\ComfyUI\aki\ComfyUI\models\checkpoints"}
+    ex = pe.make_executors(wf, workdir="/tmp/pe_mode_feedback_test")
+    up = {"storyboard_prompt": {"shots": [{"index": 1, "prompt": "雨夜巷尾"}]}}
+    out = ex["video_shot"](up)
+    assert out["accessibility"]["mode_feedback"]["can_feedback_to_original_workflow"] is True
+    assert out["accessibility"]["mode_feedback"]["mode"] == "pro"
+    assert wf["mode"] == "pro"
+    assert wf["mode_overlay"]["iteration_feedback"][-1]["model_id"] == out["accessibility"]["mode_feedback"]["model_id"]
+    assert wf["mode_feedback_applied"]["applied"] is True
+
+
 def test_post_assemble_aggregates():
     _, res = _run_full("第1场：男主进屋\n第2场：对峙")
     pa = res["artifacts"]["post_assemble"]
