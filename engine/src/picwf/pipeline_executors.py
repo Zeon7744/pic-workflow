@@ -150,12 +150,21 @@ def make_executors(workflow: Dict[str, Any],
                 qa_decisions.append(decision)
         from .qa_loop import summarize_qa_loop
         qa_summary = summarize_qa_loop(qa_decisions)
+        from .accessibility_layer import cost_visibility, friendly_failure, mode_params
+        mode = workflow.get("mode", "beginner")
+        accessibility = {
+            "mode": mode,
+            "params": mode_params(mode, {"tier": workflow.get("tier", "T1")})["params"],
+            "cost_panel": cost_visibility(plan),
+            "failure_panel": friendly_failure(plan, qa_summary),
+        }
         return {
             "video_clips": executed,
             "clip_count": len(executed),
             "efficiency_best_model": chosen_model,
             "efficiency_plan": plan,
             "qa_loop_summary": qa_summary,
+            "accessibility": accessibility,
         }
 
     def _post_assemble(up: Dict[str, Any]) -> Dict[str, Any]:

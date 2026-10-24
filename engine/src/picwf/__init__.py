@@ -24,6 +24,6 @@ YAML 是数据不是代码——引擎按硬件档位"算"出工作流。
 
 各模块离线可单测，不依赖 torch/CLIP 实模型。
 """
-__version__ = "0.5.3-local-model-hot-watch"
+__version__ = "0.5.4-accessibility-layer"
 
-from . import capability_runner, model_gateway, param_advisor, model_registry, efficiency_planner, qa_loop, local_model_index
+from . import capability_runner, model_gateway, param_advisor, model_registry, efficiency_planner, qa_loop, local_model_index, accessibility_layer
