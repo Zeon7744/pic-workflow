@@ -142,7 +142,16 @@ def apply_advice_to_matrix(matrix: Dict[str, Any],
             other = [i for i in chain
                      if _impl_class(i.get("impl")) not in ("cloud", "gguf_offload")]
             chain.clear()
-            chain.extend(cloud + safe_local + other + failing_items)
+            # 幂等去重：各分组独立筛选后求并集去重，避免重复项（防串位/丢项）
+            _ordered = cloud + safe_local + other + failing_items
+            _seen_ids = set()
+
+            for _item in _ordered:
+                _k = _item.get('impl') + '|' + str(_item.get('quant_dtype','')) + str(_item.get('resolution',''))
+                if _k in _seen_ids:
+                    continue
+                _seen_ids.add(_k)
+                chain.append(_item)
             node.setdefault("_adaptive", {})[f"{tier}"] = {
                 "migrate": True, "reason": adv.get("migrate_reason"),
                 "demoted": failing, "ts": "applied"}
