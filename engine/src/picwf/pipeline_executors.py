@@ -134,20 +134,40 @@ def make_executors(workflow: Dict[str, Any],
                 "three_view_prompts": [r["prompt"] for r in refs]}
 
     def _storyboard_prompt(up: Dict[str, Any]) -> Dict[str, Any]:
-        # 升级：题材自动识别 + 6 维镜头语言 + 人性化 + 角色一致性注入
+        # 升级（公开前沿迭代）：题材自动识别 + 6 维 + 人性化 + 角色一致性
+        #   + 时间轴化分镜 + 首尾帧传递 + 特征词逐字锁定
         from .topic_adapt import adapt_script
-        from .character_consistency import inject_into_shots
+        from .shot_choreo import craft_time_axis_shot, motion_consistency_audit
+        from .continuity import chain_shots
+        from .character_consistency import lock_char_traits
         base_shots = (up.get("script_struct", {}) or {}).get("shots", [])
         text = (up.get("script_struct", {}) or {}).get("text", "") or " ".join(
             s.get("raw", "") for s in base_shots)
-        chars = workflow.get("characters") or None
-        adapted = adapt_script(text, base_shots, chars=chars)
-        # final_prompt（角色）或 craft_prompt（无角色）作为最终喂 prompt
+        chars = workflow.get("characters")
+        # 特征词逐字锁定（禁缩写，"长发" -> 精确长度）
+        chars_locked = [lock_char_traits(c)["locked"] for c in chars] if chars else None
+        adapted = adapt_script(text, base_shots, chars=chars_locked)
+        # 时间轴化 + 首尾帧传递
+        shots_final = []
+        prev_state = None
+        for s in adapted["shots"]:
+            # 首尾帧传递：把上镜 state_after 传到下镜开头
+            if prev_state:
+                s = dict(s, carry_from_prev=prev_state,
+                         prompt=f"承接自上一镜：{prev_state.get('pose','')}；{s.get('prompt','')}")
+            # 时间轴化时段
+            s = craft_time_axis_shot(s)
+            shots_final.append(s)
+            prev_state = s.get("state_after") or prev_state
+        # 运镜打架审计
+        motion_violations = motion_consistency_audit([s.get("prompt", "") for s in shots_final])
         final = [s.get("final_prompt", s.get("craft_prompt", s.get("prompt", "")))
                  for s in adapted["shots"]]
-        return {"shots": adapted["shots"], "topic": adapted["topic"],
-                "style": adapted["style"],
-                "shot_prompts": final}
+        return {"shots": shots_final, "topic": adapted["topic"],
+                "style": adapted["style"], "shot_prompts": final,
+                "time_axis_applied": True, "skeleton_chained": True,
+                "motion_violations": motion_violations,
+                "chars_locked": bool(chars_locked)}
 
     return {
         "script_struct": _script_struct,

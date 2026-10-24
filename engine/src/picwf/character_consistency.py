@@ -105,6 +105,82 @@ def inject_into_shots(shots: List[Dict[str, Any]], chars: List[Dict[str, Any]],
     return out
 
 
+# ============ 强化：特征词逐字锁定 + 质检帧人脸相似度 ============
+
+# 模糊词黑名单（模型眼里"长发" vs "及腰长发"是两回事，差一个字脸就飘）
+_VAGUE_WORDS = [
+    ("长发", "及腰/及肩/齐耳 长发（写死长度）"),
+    ("短发", "寸头/齐耳/齐眉 短发（写死长度）"),
+    ("年轻", "精确年龄段（如 25-30 岁）"),
+    ("好看", "具体五官（如 窄脸/圆脸 + 眼型 + 眉形）"),
+    ("漂亮", "具体五官 + 肤质"),
+    ("高", "精确身高（如 175cm）"),
+    ("矮", "精确身高（如 160cm）"),
+    ("瘦", "精确体型（如 偏瘦/标准/微胖）"),
+    ("粗", "精确体型"),
+    ("白", "精确肤色（如 冷白/暖白/小麦色）"),
+    ("黑", "精确肤色（如 小麦色/古铜色/黝黑）"),
+]
+
+
+def lock_char_traits(char: Dict[str, Any]) -> Dict[str, Any]:
+    """特征词逐字锁定：把模糊外貌词替换成精确写法。
+
+    返回 {char, fixes:[{field, before, after}], locked:{...}}。
+    公开前沿："长发" 和 "及腰长发" 模型眼里是两回事，差一个字脸就飘。
+    """
+    fixes = []
+    locked = dict(char or {})
+    for field in ["hair", "outfit", "age_band", "height", "build", "skin", "temperament"]:
+        val = str(locked.get(field, ""))
+        for vague, precise in _VAGUE_WORDS:
+            if vague in val:
+                fixes.append({"field": field, "before": val, "after": val.replace(vague, precise)})
+                val = val.replace(vague, precise)
+        locked[field] = val
+    return {"char": char, "fixes": fixes, "locked": locked,
+            "locked_block": build_character_block(locked) if char.get("name") else ""}
+
+
+def face_similarity_gate(ref_face: str, frame_faces: List[Dict[str, Any]],
+                         threshold: float = 0.65) -> Dict[str, Any]:
+    """质检帧人脸相似度打分入口（第三道锁）。
+
+    ref_face: 角色卡正脸参考（路径或 embedding 列表，本函数只接 embedding）。
+    frame_faces: 每帧裁出的脸 [{frame_idx, face_embed, ...}]。
+    threshold: 相似度阈值（公开前沿 0.65，低于进重渲染队列）。
+    返回 {below_threshold:[frame_idx], avg_score, passed}。
+    embedding 缺省时按 0 分处理（触发人工核对）。
+    """
+    ref_emb = None
+    if isinstance(ref_face, list) and ref_face:
+        ref_emb = ref_face
+    below, scores = [], []
+    for ff in frame_faces:
+        if ref_emb is None:
+            score = 0.0
+        else:
+            emb = ff.get("face_embed")
+            if emb is None:
+                score = 0.0
+            else:
+                # 简化：cosine 相似度（本函数不依赖 numpy，做标量归一）
+                try:
+                    import math
+                    dot = sum(a * b for a, b in zip(ref_emb, emb))
+                    na = math.sqrt(sum(a * a for a in ref_emb)) or 1
+                    nb = math.sqrt(sum(b * b for b in emb)) or 1
+                    score = dot / (na * nb)
+                except Exception:
+                    score = 0.0
+        scores.append(score)
+        if score < threshold:
+            below.append(ff.get("frame_idx", len(below)))
+    avg = sum(scores) / len(scores) if scores else 0.0
+    return {"below_threshold": below, "avg_score": round(avg, 4),
+            "passed": not below, "re_render_queue": below}
+
+
 def three_view_anchor_refs(chars: List[Dict[str, Any]], workdir: str) -> List[Dict[str, str]]:
     """每个角色生成三视图参考图的落盘路径锚点（喂 image 环节 reference）。"""
     refs = []
