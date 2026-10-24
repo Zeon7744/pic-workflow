@@ -64,6 +64,27 @@ def choose_backend(kind: str, profile: Dict[str, Any] = None,
     }
 
 
+def rank_model_candidates(registry: Dict[str, Dict[str, Any]] = None,
+                          profile: Dict[str, Any] = None,
+                          kind: str = "image",
+                          strategy: Dict[str, Any] = None,
+                          top_k: int = 3) -> List[Dict[str, Any]]:
+    """model_gateway v2：基于 registry 输出多模型候选排名。
+
+    registry 缺省时，尝试从 matrix.yaml 自动注册；仍失败则回退空 registry。
+    """
+    from .model_registry import register_from_matrix, rank_backends
+    if registry is None:
+        try:
+            import os
+            from .workflow_gen import _load_yaml, MATRIX_PATH_DEFAULT
+            matrix = _load_yaml(MATRIX_PATH_DEFAULT) if os.path.exists(MATRIX_PATH_DEFAULT) else {}
+        except Exception:
+            matrix = {}
+        registry = register_from_matrix(matrix or {})
+    return rank_backends(registry, profile or {}, kind=kind, strategy=strategy, top_k=top_k)
+
+
 def gate_decision(decision: Dict[str, Any],
                   quality_score: Optional[float] = None,
                   quality_threshold: float = 0.8) -> Dict[str, Any]:
