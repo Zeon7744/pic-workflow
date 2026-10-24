@@ -122,13 +122,32 @@ def make_executors(workflow: Dict[str, Any],
                                 shots_per_ep=10)
 
     def _character_image(up: Dict[str, Any]) -> Dict[str, Any]:
-        return {"character_refs": [f"{workdir}/char_{style}.png"]}
+        # 升级：角色一致性引擎 —— 出角色外观锁定块 + 三视图参考图锚点（控不走样）
+        from .character_consistency import three_view_anchor_refs, build_character_block
+        # workflow 可带 characters（list of dict: name/role/gender/age_band/hair/outfit/temperament）
+        chars = workflow.get("characters") or [
+            {"name": workflow.get("hero", "主角"), "role": "主角", "gender": "女性"}]
+        refs = three_view_anchor_refs(chars, workdir)
+        blocks = [build_character_block(c) for c in chars]
+        return {"character_refs": [r["three_view_path"] for r in refs],
+                "char_blocks": blocks, "char_count": len(chars),
+                "three_view_prompts": [r["prompt"] for r in refs]}
 
     def _storyboard_prompt(up: Dict[str, Any]) -> Dict[str, Any]:
-        # B 块：用专业分镜 prompt（script_struct 产物已含 prompt 字段）
-        shots = (up.get("script_struct", {}) or {}).get("shots", [])
-        return {"shots": shots,
-                "shot_prompts": [s.get("prompt", s.get("raw", "")) for s in shots]}
+        # 升级：题材自动识别 + 6 维镜头语言 + 人性化 + 角色一致性注入
+        from .topic_adapt import adapt_script
+        from .character_consistency import inject_into_shots
+        base_shots = (up.get("script_struct", {}) or {}).get("shots", [])
+        text = (up.get("script_struct", {}) or {}).get("text", "") or " ".join(
+            s.get("raw", "") for s in base_shots)
+        chars = workflow.get("characters") or None
+        adapted = adapt_script(text, base_shots, chars=chars)
+        # final_prompt（角色）或 craft_prompt（无角色）作为最终喂 prompt
+        final = [s.get("final_prompt", s.get("craft_prompt", s.get("prompt", "")))
+                 for s in adapted["shots"]]
+        return {"shots": adapted["shots"], "topic": adapted["topic"],
+                "style": adapted["style"],
+                "shot_prompts": final}
 
     return {
         "script_struct": _script_struct,
