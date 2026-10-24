@@ -12,5 +12,5 @@ python -m pic_workflow --input "02_图像/sample.png" --output "out/"
 ```
 
 ## 3. 收款与门控
-- Free ¥0（1 次/天）；Pro ¥99/月；爱发电 https://afdian.com/@Zeon7744
+- Free ¥0（1 次/天）；Pro ¥99/月；面包多 Pay https://mbd.com/@Zeon7744
 - 冒烟：`bash smoke_test.sh`
