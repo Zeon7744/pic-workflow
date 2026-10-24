@@ -59,10 +59,23 @@ def test_pipeline_executors_expose_accessibility_layer():
     assert "failure_panel" in out["accessibility"]
 
 
+def test_pipeline_executors_normalizes_invalid_mode_to_beginner():
+    import importlib
+    pe = importlib.reload(importlib.import_module("picwf.pipeline_executors"))
+    wf = {"tier": "T1", "style": "S2_real_cinematic", "scenario": "dark_thriller",
+          "episode": 1, "free_vram_gb": 8, "mode": "unknown_mode"}
+    ex = pe.make_executors(wf, workdir="/tmp/pe_acc_mode_fallback")
+    up = {"storyboard_prompt": {"shots": [{"index": 1, "prompt": "雨夜巷尾"}]}}
+    out = ex["video_shot"](up)
+    assert out["accessibility"]["mode"] == "beginner"
+    assert out["accessibility"]["mode_label"] == "新手"
+
+
 if __name__ == "__main__":
     for name in ("test_mode_params_scale_by_level",
                  "test_cost_visibility_exports_options",
                  "test_friendly_failure_gives_human_reason_and_fallbacks",
-                 "test_pipeline_executors_expose_accessibility_layer"):
+                 "test_pipeline_executors_expose_accessibility_layer",
+                 "test_pipeline_executors_normalizes_invalid_mode_to_beginner"):
         globals()[name]()
         print(f"PASS {name}")

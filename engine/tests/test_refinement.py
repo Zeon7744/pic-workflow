@@ -65,4 +65,4 @@ def test_score_shot_backcompat_no_tier():
 # ---------- 方向 3：__init__ 模块契约 ----------
 def test_package_contract_version():
     import picwf
-    assert picwf.__version__ == "0.5.4-accessibility-layer"
+    assert picwf.__version__ == "0.5.5-3mode-entry"

@@ -151,9 +151,11 @@ def make_executors(workflow: Dict[str, Any],
         from .qa_loop import summarize_qa_loop
         qa_summary = summarize_qa_loop(qa_decisions)
         from .accessibility_layer import cost_visibility, friendly_failure, mode_params
-        mode = workflow.get("mode", "beginner")
+        raw_mode = str(workflow.get("mode", "beginner")).lower()
+        mode = raw_mode if raw_mode in {"beginner", "pro", "expert"} else "beginner"
         accessibility = {
             "mode": mode,
+            "mode_label": {"beginner": "新手", "pro": "进阶", "expert": "专家"}[mode],
             "params": mode_params(mode, {"tier": workflow.get("tier", "T1")})["params"],
             "cost_panel": cost_visibility(plan),
             "failure_panel": friendly_failure(plan, qa_summary),
