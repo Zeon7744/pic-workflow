@@ -119,3 +119,81 @@ def build_profile() -> Dict[str, Any]:
         "storage": detect_storage(),
         "cpu_count": os.cpu_count(),
     }
+
+
+def pascal_launch_advice(profile: Dict[str, Any]) -> Dict[str, Any]:
+    """Pascal(1060/1070/1080, CC 6.1) 专属 ComfyUI 启动建议。
+
+    2026-10-24 1060 实机踩坑结论固化：
+    - Torch cu129/cu130 在 Pascal CC 6.1 报 "CUDA error: no kernel image is available"
+    - 必须用 cu126 兼容版；启动注入 TORCH_CUDA_ARCH_LIST=6.1 / NVIDIA_TF32_OVERRIDE=0
+    - 新版 ComfyUI 的 --cuda 与 --cuda-device/--cuda-malloc 歧义，不传
+    - 整合包 checkpoints 为空时出图报 "model not in []"，需预放 SD1.5 底模
+    """
+    gpu = profile.get("gpu", {})
+    arch = gpu.get("arch")
+    cc = str(gpu.get("cc") or "")
+    is_pascal = arch == "Pascal" or cc.startswith("6.1")
+    drv = str(gpu.get("driver_version") or "")
+    # 驱动支持的最高 CUDA（nvidia-smi 的 Driver Version 可粗推；这里给保守阈值）
+    advice = {
+        "is_pascal": is_pascal,
+        "recommended_cuda": "cu126" if is_pascal else "cu126+",
+        "forbidden_cuda": (["cu129", "cu130"] if is_pascal else []),
+        "env": {
+            "TORCH_CUDA_ARCH_LIST": "6.1" if is_pascal else "7.5+",
+            "NVIDIA_TF32_OVERRIDE": "0" if is_pascal else "unset",
+        },
+        "drop_arg": ["--cuda"] if is_pascal else [],
+        "require_base_model": "SD1.5 v1-5-pruned-emaonly.safetensors in models/checkpoints/",
+        "kernel_selfcheck": "python -c \"import torch; print(torch.version.cuda, torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'no-gpu')\"",
+        "driver_version": drv,
+        "notes": []
+    }
+    if is_pascal:
+        advice["notes"].append(
+            "Pascal CC 6.1 + cu129/cu130 会报 'no kernel image'；务必换 cu126 兼容版并注入上述 env")
+    if drv and _drv_below(drv, "530"):
+        advice["notes"].append(
+            "驱动 %s 较老，建议升到 ≥530 以稳定支持 cu126" % drv)
+    return advice
+
+
+def _drv_below(drv: str, threshold: str) -> bool:
+    """比较驱动主版本号是否低于阈值（取首段数字）。"""
+    m = re.match(r"(\d+)", str(drv))
+    m2 = re.match(r"(\d+)", threshold)
+    if not m or not m2:
+        return False
+    return int(m.group(1)) < int(m2.group(1))
+
+
+def kernel_selfcheck() -> Dict[str, Any]:
+    """跑一条最小 CUDA kernel 调用，提前暴露 Pascal 'no kernel image' 问题。
+
+    返回 {ok, cuda_version, device, error}。无 torch/GPU 时 ok=False 并给 reason。
+    """
+    out: Dict[str, Any] = {"ok": False, "cuda_version": None, "device": None, "error": None}
+    try:
+        import torch  # type: ignore
+    except ImportError:
+        out["error"] = "torch not installed"
+        return out
+    if not torch.cuda.is_available():
+        out["error"] = "cuda not available (driver/GPU)"
+        return out
+    try:
+        cc = torch.cuda.get_device_capability(0)
+        out["cuda_version"] = torch.version.cuda
+        out["device"] = torch.cuda.get_device_name(0)
+        out["cc"] = f"{cc[0]}.{cc[1]}"
+        # 触发一次真实 kernel：分配张量并做 matmul（Pascal 无 kernel 时这里会抛）
+        a = torch.randn(4, 4, device="cuda")
+        a @ a
+        out["ok"] = True
+        out["error"] = None
+        return out
+    except Exception as e:
+        out["error"] = str(e)
+        out["ok"] = False
+        return out

@@ -137,11 +137,14 @@ def apply_advice_to_matrix(matrix: Dict[str, Any],
             safe_local = [i for i in chain
                           if _impl_class(i.get("impl")) == "gguf_offload"
                           and i.get("impl") != failing]
+            # 跑挂的实现单独拎出，放到全链最尾（不和其他非gguf实现混排）
+            failing_items = [i for i in chain if i.get("impl") == failing]
             other = [i for i in chain
                      if _impl_class(i.get("impl")) not in ("cloud", "gguf_offload")
-                     or i.get("impl") == failing]
+                     and i.get("impl") != failing]
+            # 顺序：cloud(链首兜底) + 未挂的安全gguf + 其他实现 + 跑挂的本地(链尾)
             chain.clear()
-            chain.extend(cloud + safe_local + other)
+            chain.extend(cloud + safe_local + other + failing_items)
             node.setdefault("_adaptive", {})[f"{tier}"] = {
                 "migrate": True, "reason": adv.get("migrate_reason"),
                 "demoted": failing, "ts": "applied"}

@@ -1,35 +1,52 @@
 # ComfyUI T1 档启动配置（6-8GB，开发机 GTX 1060 6GB Pascal 验证主力）
 # 特点：GGUF Q4 量化 + CPU offload + VAE Tiling + --lowvram
+# 2026-10-24 1060 实机补记（秋葉 v3.2 整合包 + 577 驱动 + Torch cu129 踩坑结论）：
+#   - Pascal(1060) CC 6.1 在 Torch cu129+ 报 "no kernel image available"，必须用 cu126 兼容版
+#   - 新版 ComfyUI 的 --cuda 参数会与 --cuda-device/--cuda-malloc 歧义，已移除
+#   - 启动需注入 TORCH_CUDA_ARCH_LIST=6.1 / NVIDIA_TF32_OVERRIDE=0 兜底
 name: "comfyui_T1"
 tier: T1
 launch:
   entrypoint: "python main.py"
+  env:                      # 启动前注入的环境变量（Pascal 1060 专属）
+    - "TORCH_CUDA_ARCH_LIST=6.1"     # 强制按 1060 CC 6.1 编译目标，防 no kernel image
+    - "NVIDIA_TF32_OVERRIDE=0"       # Pascal 不支持 TF32，显式关闭
   args:
     - "--lowvram"
     - "--use-pytorch-cross-attention"
     - "--fp16-vae"
     - "--high-ram"          # 32GB 内存时启用，省显存
-    - "--cuda"
+    # 注意：不传 --cuda（新版 ComfyUI 与 --cuda-device/--cuda-malloc 歧义，省略默认走 GPU）
     # Pascal(1060) 不支持 FP8/SageAttention，这里关闭
     # SageAttention 开关：false（T1 Pascal 不支持）
+torch_cuda:
+  recommended: "cu126"      # 1060 Pascal 实测必须 cu126（cu129/cu130 报 no kernel image）
+  forbidden:
+    - "cu129"
+    - "cu130"
+  fallback: "cu121 或 cu118（更保守的老驱动）"
 attention:
-  type: "pytorch_cross_attention"   # T1 用 PyTorch 交叉注意力（SageAttention 不可用）
+  type: "pytorch_cross_attention"
   sage: false
 quantization:
   dtype: "gguf"
-  precision: "Q4_K_M"              # 4bit 量化
-  offload: true                    # 权重 offload 到 CPU，运行时分批上 GPU
-  vram_budget_gb: 5.0             # 1060 实际可用 ~5.5GB，留 0.5 余量
+  precision: "Q4_K_M"
+  offload: true
+  vram_budget_gb: 5.0
 resolution:
-  image: 512                        # SD1.5
-  video: 480                        # Wan1.3B 480P
+  image: 512
+  video: 480
 vae:
-  tiling: true                     # VAE Tiling 防 OOM
+  tiling: true
   tile_size: 512
 models:
   text_to_image: {path: "models/checkpoints/sd15.safetensors", quant: "Q4_K_M"}
   text_to_video: {path: "models/gguf/Wan2.1-T2V-1.3B-q4.gguf", offload: true}
   tts: {path: "models/gguf/GPT-SoVITS-q4.gguf", offload: true}
+required_base_model:        # 整合包必须预装或手动放的底模（checkpoints 不能为空）
+  min: "SD1.5 v1-5-pruned-emaonly.safetensors (~2GB, 放 models/checkpoints/)"
+  why: "秋葉整合包不预装底模，checkpoints 为空时出图报 'model not in []'"
 fallback:
+  - "no kernel image（Pascal+cu129+）-> 换 cu126 兼容版，启动注入 TORCH_CUDA_ARCH_LIST=6.1"
   - "offload 不够 -> --cpu（纯 CPU 出草图）"
   - "仍 OOM -> 切云端 Seedream/Kling API"
