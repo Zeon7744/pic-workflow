@@ -56,6 +56,7 @@ def decide_qa_loop(report: Dict[str, Any],
     gate = plan.get("gate", {})
     paths = plan.get("paths", [])
     current_score = (report.get("scores") or {}).get("alignment_intent", 0.0)
+    prefer_local = bool(pol.get("prefer_local", True))
 
     # 通过：直接接受
     if report.get("passed") and report.get("route") == "pass":

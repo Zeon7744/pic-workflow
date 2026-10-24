@@ -68,6 +68,7 @@ def make_executors(workflow: Dict[str, Any],
         """同一任务多路径择优：资源/成本/速度/质量四维。"""
         from .model_registry import register_from_matrix, add_custom_model
         from .efficiency_planner import plan_and_report
+        from .local_model_index import build_registry_with_local
 
         reg = register_from_matrix(matrix)
         add_custom_model(reg, "cloud_seedance_2", kind="video", cloud=True,
@@ -78,14 +79,27 @@ def make_executors(workflow: Dict[str, Any],
                          cloud=False, cost=0.4, speed=0.8,
                          quality=0.78, min_vram_gb=6)
 
+        local_models = workflow.get("local_models") or []
+        if local_models:
+            reg = build_registry_with_local(
+                local_models,
+                source_dir=workflow.get("local_models_dir", "") or "local",
+                base_registry=reg,
+                prefer_local=True,
+            )
+
         profile = {"gpu": {"vram_gb": float(workflow.get("free_vram_gb") or 8)}}
         task = {
             "kind": "video",
             "quality_min": 0.8,
             "max_cost": 999.0,
             "max_seconds": 999.0,
+            "prefer_local": bool(local_models),
         }
-        return plan_and_report(reg, profile=profile, task=task)
+        plan = plan_and_report(reg, profile=profile, task=task)
+        plan["local_models_source"] = local_models
+        plan["local_models_dir"] = workflow.get("local_models_dir", "") or "local"
+        return plan
 
     def _video_shot(up: Dict[str, Any]) -> Dict[str, Any]:
         # 取上游分镜提示词 → 效率规划择优 → 执行
@@ -111,7 +125,8 @@ def make_executors(workflow: Dict[str, Any],
                                           current_model=chosen_model,
                                           attempt=0,
                                           policy={"escalate_to_cloud": False,
-                                                  "max_retries": 1})
+                                                  "max_retries": 1,
+                                                  "prefer_local": bool(workflow.get("local_models"))})
             executed.append({
                 "index": i + 1,
                 "clip": out.get("ok"),

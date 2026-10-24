@@ -37,7 +37,12 @@ def plan_paths(registry: Dict[str, Dict[str, Any]],
         if sc["speed"] > 0 and (1.0 / sc["speed"]) > max_s:
             continue
         scored.append(sc)
-    scored.sort(key=lambda x: (-x["score"], x["id"]))
+    prefer_local = bool(task.get("prefer_local", False))
+    scored.sort(key=lambda x: (
+        0 if (prefer_local and not x.get("cloud")) else 1,
+        -x["score"],
+        x["id"],
+    ))
 
     paths = [
         {
@@ -59,6 +64,7 @@ def plan_paths(registry: Dict[str, Dict[str, Any]],
         "best_path": best["path_id"] if best else None,
         "fallback_cloud": bool(best and best["cloud"]) if best else False,
         "reason": "resource_cost_speed_quality_balanced" if best else "no_candidate",
+        "prefer_local": bool(task.get("prefer_local", False)),
     }
     return {
         "kind": kind,
@@ -66,6 +72,7 @@ def plan_paths(registry: Dict[str, Dict[str, Any]],
         "paths": paths,
         "best": best,
         "gate": gate,
+        "prefer_local": bool(task.get("prefer_local", False)),
     }
 
 def to_dashboard(plan: Dict[str, Any]) -> Dict[str, Any]:
@@ -90,4 +97,6 @@ def plan_and_report(registry: Dict[str, Dict[str, Any]],
     plan = plan_paths(registry, profile=profile, task=task, top_k=3)
     dash = to_dashboard(plan)
     plan["dashboard"] = dash
+    plan["prefer_local"] = bool((task or {}).get("prefer_local", False))
     return plan
+

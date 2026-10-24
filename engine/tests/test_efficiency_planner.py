@@ -67,3 +67,20 @@ def test_pipeline_executors_use_efficiency_plan():
     assert out["efficiency_best_model"], "video_shot 必须给出效率最优模型"
     assert "efficiency_plan" in out
     assert out["efficiency_plan"]["gate"]["has_path"] is True
+
+
+def test_pipeline_executors_use_local_model_index_when_provided():
+    """workflow 提供 local_models 时，video_shot 执行链路会使用本地模型资产。"""
+    import importlib
+    pe = importlib.reload(importlib.import_module("picwf.pipeline_executors"))
+    wf = {"tier": "T1", "style": "S2_real_cinematic", "scenario": "dark_thriller",
+          "episode": 1, "free_vram_gb": 8, "local_models": [
+              "wan13b_gguf_q4_offload_480.safetensors"],
+          "local_models_dir": r"D:\ComfyUI\aki\ComfyUI\models\checkpoints"}
+    ex = pe.make_executors(wf, workdir="/tmp/pe_local_test")
+    up = {"storyboard_prompt": {"shots": [{"index": 1, "prompt": "雨夜巷尾"}]}}
+    out = ex["video_shot"](up)
+    assert out["efficiency_plan"]["local_models_source"] == [
+        "wan13b_gguf_q4_offload_480.safetensors"]
+    assert out["efficiency_plan"]["local_models_dir"].endswith("checkpoints")
+    assert out["efficiency_plan"]["prefer_local"] is True
