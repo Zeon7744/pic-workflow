@@ -1,4 +1,4 @@
-version: 0.2.0
+version: 0.3.0
 default_policy:
   philosophy: 低配优先跑通率，不追峰值画质
   low_tiers_prefer:
@@ -700,7 +700,7 @@ music_tracks:
     - 100
     - 130
     instruments: 萨克斯/钢琴/低音提琴
-    mood:"慵懒都市": null
+    mood: 慵懒都市
     scenes: 都市/情感/高级感
   M4_rock_electric:
     label: 电摇滚
@@ -709,7 +709,7 @@ music_tracks:
     - 120
     - 150
     instruments: 电吉他/鼓/贝斯
-    mood:"热血爆发": null
+    mood: 热血爆发
     scenes: 战斗/逆袭/燃
   M5_classical_orch:
     label: 古典管弦
@@ -718,7 +718,7 @@ music_tracks:
     - 70
     - 130
     instruments: 弦乐四重奏/铜管
-    mood:"史诗悲壮": null
+    mood: 史诗悲壮
     scenes: 大场面/高潮/悲剧
   M6_hiphop_4beat:
     label: 嘻哈4拍
@@ -727,7 +727,7 @@ music_tracks:
     - 85
     - 140
     instruments: 808鼓/人声采样
-    mood:"态度街头": null
+    mood: 态度街头
     scenes: 反转/炫/爽点
   M7_lofi_chill:
     label: lofi慵懒
@@ -736,7 +736,7 @@ music_tracks:
     - 60
     - 85
     instruments: 钢琴loops/黑胶噪声
-    mood:"治愈怀旧": null
+    mood: 治愈怀旧
     scenes: 日常/回忆/慢节奏
   M8_electronic_dance:
     label: 电子舞曲
@@ -744,8 +744,8 @@ music_tracks:
     bpm:
     - 120
     - 140
-    instruments:"合成器/4-on-floor鼓": null
-    mood:"律动时尚": null
+    instruments: 合成器/4-on-floor鼓
+    mood: 律动时尚
     scenes: 都市/夜/时尚
   M9_synthwave:
     label: 合成器波
@@ -753,8 +753,8 @@ music_tracks:
     bpm:
     - 100
     - 120
-    instruments:"复古合成器/琶音": null
-    mood:"复古未来": null
+    instruments: 复古合成器/琶音
+    mood: 复古未来
     scenes: 赛博/近未来/追车
   M10_orchestral_epic:
     label: 史诗管弦
@@ -763,7 +763,7 @@ music_tracks:
     - 90
     - 140
     instruments: 全编制管弦+定音鼓
-    mood:"宏大宿命": null
+    mood: 宏大宿命
     scenes: 大战/王权/宿命
   M11_horror_drone:
     label: 恐怖低频
@@ -772,7 +772,7 @@ music_tracks:
     - 40
     - 60
     instruments: 低频drone/不协和音
-    mood:"压迫恐怖": null
+    mood: 压迫恐怖
     scenes: 惊悚/恐怖/悬疑
   M12_suspense_strings:
     label: 悬疑弦乐
@@ -781,7 +781,7 @@ music_tracks:
     - 60
     - 100
     instruments: 弦乐震音/单簧管
-    mood:"紧张悬念": null
+    mood: 紧张悬念
     scenes: 悬疑/反转/危机
   M13_funny_quirky:
     label: 轻快俏皮
@@ -789,283 +789,283 @@ music_tracks:
     bpm:
     - 110
     - 140
-    instruments:"木琴/单簧管/拨弦": null
-    mood:"喜剧喜感": null
+    instruments: 木琴/单簧管/拨弦
+    mood: 喜剧喜感
     scenes: 搞笑/轻松/日常
   M14_ballet_classical:
-    label:"芭蕾古典": null
-    key:"大调": null
+    label: 芭蕾古典
+    key: 大调
     bpm:
     - 70
     - 90
-    instruments:"钢琴/弦乐": null
-    mood:"优雅纯真": null
-    scenes:"婚礼/纯洁/童年": null
+    instruments: 钢琴/弦乐
+    mood: 优雅纯真
+    scenes: 婚礼/纯洁/童年
   M15_blues_slow:
-    label:"蓝调慢板": null
-    key:"小调蓝调": null
+    label: 蓝调慢板
+    key: 小调蓝调
     bpm:
     - 60
     - 80
-    instruments:"滑棒吉他/人声": null
-    mood:"沧桑怀旧": null
-    scenes:"中年/往事/孤独": null
+    instruments: 滑棒吉他/人声
+    mood: 沧桑怀旧
+    scenes: 中年/往事/孤独
   M16_reggaeton:
-    label:"雷鬼顿": null
-    key:"小调": null
+    label: 雷鬼顿
+    key: 小调
     bpm:
     - 90
     - 100
-    instruments:"dembow鼓/合成器": null
-    mood:"热辣动感": null
-    scenes:"夜店/热/性感": null
+    instruments: dembow鼓/合成器
+    mood: 热辣动感
+    scenes: 夜店/热/性感
   M17_world_ethnic:
-    label:"世界民族": null
-    key:"民族调": null
+    label: 世界民族
+    key: 民族调
     bpm:
     - 80
     - 120
-    instruments:"民族乐器/手鼓": null
-    mood:"异域风情": null
-    scenes:"异域/探险/文化": null
+    instruments: 民族乐器/手鼓
+    mood: 异域风情
+    scenes: 异域/探险/文化
   M18_indian_raga:
-    label:"印度拉格": null
-    key:"拉格调式": null
+    label: 印度拉格
+    key: 拉格调式
     bpm:
     - 60
     - 100
-    instruments:"西塔琴/塔布拉鼓": null
-    mood:"神秘灵性": null
-    scenes:"异域/神秘/修行": null
+    instruments: 西塔琴/塔布拉鼓
+    mood: 神秘灵性
+    scenes: 异域/神秘/修行
   M19_industrial:
-    label:"工业金属": null
-    key:"小调": null
+    label: 工业金属
+    key: 小调
     bpm:
     - 120
     - 160
-    instruments:"失真吉他/机械节拍": null
-    mood:"硬核压迫": null
-    scenes:"科幻/工业/反派": null
+    instruments: 失真吉他/机械节拍
+    mood: 硬核压迫
+    scenes: 科幻/工业/反派
   M20_ambient_space:
-    label:"氛围太空": null
-    key:"无调": null
+    label: 氛围太空
+    key: 无调
     bpm:
     - 40
     - 70
-    instruments:"合成器pad/混响": null
-    mood:"空灵辽阔": null
-    scenes:"梦境/太空/意识流": null
+    instruments: 合成器pad/混响
+    mood: 空灵辽阔
+    scenes: 梦境/太空/意识流
   M21_celtic_folk:
-    label:"凯尔特民谣": null
-    key:"大调": null
+    label: 凯尔特民谣
+    key: 大调
     bpm:
     - 100
     - 130
-    instruments:"风笛/竖琴/宝思兰琴": null
-    mood:"自由旷野": null
-    scenes:"旅行/旷野/自由": null
+    instruments: 风笛/竖琴/宝思兰琴
+    mood: 自由旷野
+    scenes: 旅行/旷野/自由
   M22_samba_latino:
-    label:"拉丁桑巴": null
-    key:"大调": null
+    label: 拉丁桑巴
+    key: 大调
     bpm:
     - 120
     - 150
-    instruments:"桑巴鼓/小军鼓": null
-    mood:"热情奔放": null
-    scenes:"热/庆典/热烈": null
+    instruments: 桑巴鼓/小军鼓
+    mood: 热情奔放
+    scenes: 热/庆典/热烈
   M23_eb_90s:
-    label:"90年代R&B": null
-    key:"小调": null
+    label: 90年代R&B
+    key: 小调
     bpm:
     - 80
     - 100
-    instruments:"缓速R&B鼓/弦乐": null
-    mood:"复古深情": null
-    scenes:"怀旧/情感/深情": null
+    instruments: 缓速R&B鼓/弦乐
+    mood: 复古深情
+    scenes: 怀旧/情感/深情
   M24_rock_c90s:
-    label:"90年代摇滚": null
-    key:"小调": null
+    label: 90年代摇滚
+    key: 小调
     bpm:
     - 110
     - 140
-    instruments:"摇滚吉他/贝斯": null
-    mood:"叛逆怀旧": null
-    scenes:"怀旧/叛逆/青春": null
+    instruments: 摇滚吉他/贝斯
+    mood: 叛逆怀旧
+    scenes: 怀旧/叛逆/青春
   M25_classical_piano:
-    label:"古典钢琴": null
-    key:"大小调": null
+    label: 古典钢琴
+    key: 大小调
     bpm:
     - 60
     - 120
-    instruments:"独奏钢琴": null
-    mood:"纯净抒情": null
-    scenes:"情感/独处/治愈": null
+    instruments: 独奏钢琴
+    mood: 纯净抒情
+    scenes: 情感/独处/治愈
   M26_orchestral_west:
-    label:"西部管弦": null
-    key:"大调": null
+    label: 西部管弦
+    key: 大调
     bpm:
     - 80
     - 120
-    instruments:"管乐/原声吉他": null
-    mood:"辽阔荒原": null
-    scenes:"荒野/英雄/旅程": null
+    instruments: 管乐/原声吉他
+    mood: 辽阔荒原
+    scenes: 荒野/英雄/旅程
   M27_haunting_gothic:
-    label:"阴森哥特": null
-    key:"小调": null
+    label: 阴森哥特
+    key: 小调
     bpm:
     - 50
     - 80
-    instruments:"低音提琴/钟琴": null
-    mood:"阴森诡谲": null
-    scenes:"哥特/黑暗/灵异": null
+    instruments: 低音提琴/钟琴
+    mood: 阴森诡谲
+    scenes: 哥特/黑暗/灵异
   M28_anime_jpop:
-    label:"动漫流行": null
-    key:"大调": null
+    label: 动漫流行
+    key: 大调
     bpm:
     - 120
     - 150
-    instruments:"电吉他+合成器+鼓": null
-    mood:"热血青春": null
-    scenes:"动漫/校园/成长": null
+    instruments: 电吉他+合成器+鼓
+    mood: 热血青春
+    scenes: 动漫/校园/成长
   M29_sad_piano_ballad:
-    label:"悲伤钢琴": null
-    key:"小调": null
+    label: 悲伤钢琴
+    key: 小调
     bpm:
     - 60
     - 80
-    instruments:"钢琴+弦乐群": null
-    mood:"催泪虐心": null
-    scenes:"虐心/离别/悲剧": null
+    instruments: 钢琴+弦乐群
+    mood: 催泪虐心
+    scenes: 虐心/离别/悲剧
   M30_corporate_soft:
-    label:"轻快广告": null
-    key:"大调": null
+    label: 轻快广告
+    key: 大调
     bpm:
     - 110
     - 130
-    instruments:"拨弦+轻鼓+合成器": null
-    mood:"明快正向": null
-    scenes:"广告/日常/正向": null
+    instruments: 拨弦+轻鼓+合成器
+    mood: 明快正向
+    scenes: 广告/日常/正向
 voice_tracks:
   V1_male_young_cool:
-    label:"青年男·冷": null
-    desc:"25-35岁男声，低沉平稳，气少，冷感": null
-    role:"男主/冷峻/反派": null
+    label: 青年男·冷
+    desc: 25-35岁男声，低沉平稳，气少，冷感
+    role: 男主/冷峻/反派
   V2_male_young_warm:
-    label:"青年男·暖": null
-    desc:"20-30岁男声，明亮有磁性，气息足": null
-    role:"男主/暖/邻家": null
+    label: 青年男·暖
+    desc: 20-30岁男声，明亮有磁性，气息足
+    role: 男主/暖/邻家
   V3_male_mature_grave:
-    label:"成熟男·厚": null
-    desc:"40+男声，胸腔共鸣厚，有威严": null
-    role:"长辈/权威/大佬": null
+    label: 成熟男·厚
+    desc: 40+男声，胸腔共鸣厚，有威严
+    role: 长辈/权威/大佬
   V4_male_old_withered:
-    label:"老者·沙": null
-    desc:"60+男声，沙哑带颤，气声多": null
-    role:"老者/智者/反派": null
+    label: 老者·沙
+    desc: 60+男声，沙哑带颤，气声多
+    role: 老者/智者/反派
   V5_female_young_clear:
-    label:"青年女·清": null
-    desc:"20-30女声，清亮高亢，气声适中": null
-    role:"女主/灵动": null
+    label: 青年女·清
+    desc: 20-30女声，清亮高亢，气声适中
+    role: 女主/灵动
   V6_female_young_soft:
-    label:"青年女·柔": null
-    desc:"20-30女声，温柔绵软，气息细腻": null
-    role:"女主/甜/治愈": null
+    label: 青年女·柔
+    desc: 20-30女声，温柔绵软，气息细腻
+    role: 女主/甜/治愈
   V7_female_mature_steady:
-    label:"成熟女·稳": null
-    desc:"30-45女声，沉稳有力，质感厚": null
-    role:"女强人/母亲": null
+    label: 成熟女·稳
+    desc: 30-45女声，沉稳有力，质感厚
+    role: 女强人/母亲
   V8_female_old_gentle:
-    label:"老年女·慈": null
-    desc:"60+女声，沙哑含慈，气声多": null
-    role:"祖母/长辈": null
+    label: 老年女·慈
+    desc: 60+女声，沙哑含慈，气声多
+    role: 祖母/长辈
   V9_child_boy:
-    label:"男童": null
-    desc:"8-12岁男孩，明亮稚嫩，高音": null
-    role:"少年/童角": null
+    label: 男童
+    desc: 8-12岁男孩，明亮稚嫩，高音
+    role: 少年/童角
   V10_child_girl:
-    label:"女童": null
-    desc:"6-10岁女孩，清亮甜软": null
-    role:"少女/童角": null
+    label: 女童
+    desc: 6-10岁女孩，清亮甜软
+    role: 少女/童角
   V11_boy_teen:
-    label:"少年": null
-    desc:"13-17岁男，变声期后清亮": null
-    role:"少年": null
+    label: 少年
+    desc: 13-17岁男，变声期后清亮
+    role: 少年
   V12_girl_teen:
-    label:"少女": null
-    desc:"13-17岁女，清亮带少年感": null
-    role:"少女": null
+    label: 少女
+    desc: 13-17岁女，清亮带少年感
+    role: 少女
   V13_robot_cold:
-    label:"机械·冷": null
-    desc:"合成器电子音色，无气声，机械感": null
-    role:"AI/机器/科技": null
+    label: 机械·冷
+    desc: 合成器电子音色，无气声，机械感
+    role: AI/机器/科技
   V14_robot_warm:
-    label:"机械·暖": null
-    desc:"合成器带人味，柔和电子": null
-    role:"AI萌/机器": null
+    label: 机械·暖
+    desc: 合成器带人味，柔和电子
+    role: AI萌/机器
   V15_narrator_male:
-    label:"男旁白": null
-    desc:"40岁男，中性音色，节奏稳，叙述感强": null
-    role:"旁白": null
+    label: 男旁白
+    desc: 40岁男，中性音色，节奏稳，叙述感强
+    role: 旁白
   V16_narrator_female:
-    label:"女旁白": null
-    desc:"35岁女，中性偏柔，叙述清晰": null
-    role:"旁白": null
+    label: 女旁白
+    desc: 35岁女，中性偏柔，叙述清晰
+    role: 旁白
   V17_dialect_cn_nor:
-    label:"北方方言": null
-    desc:"东北/中原官话，硬朗直爽": null
-    role:"喜剧/接地气": null
+    label: 北方方言
+    desc: 东北/中原官话，硬朗直爽
+    role: 喜剧/接地气
   V18_dialect_cn_south:
-    label:"南方方言": null
-    desc:"吴语/粤语/闽南，软糯/铿锵": null
-    role:"地域角色": null
+    label: 南方方言
+    desc: 吴语/粤语/闽南，软糯/铿锵
+    role: 地域角色
   V19_dialect_cn_west:
-    label:"西南方言": null
-    desc:"川渝话，软中带硬，带调": null
-    role:"喜剧/市井": null
+    label: 西南方言
+    desc: 川渝话，软中带硬，带调
+    role: 喜剧/市井
   V20_vtuber_male:
-    label:"虚拟男": null
-    desc:"二次元男声，带少年气，甜感": null
-    role:"虚拟人/偶像": null
+    label: 虚拟男
+    desc: 二次元男声，带少年气，甜感
+    role: 虚拟人/偶像
   V21_vtuber_female:
-    label:"虚拟女": null
-    desc:"二次元女声，甜软，元气": null
-    role:"虚拟人/偶像": null
+    label: 虚拟女
+    desc: 二次元女声，甜软，元气
+    role: 虚拟人/偶像
   V22_whisper_soft:
-    label:"耳语·柔": null
-    desc:"贴耳气声，极低音量，亲密感": null
-    role:"亲密/耳语": null
+    label: 耳语·柔
+    desc: 贴耳气声，极低音量，亲密感
+    role: 亲密/耳语
   V23_roar_power:
-    label:"怒吼·强": null
-    desc:"胸腔爆发，高音撕吼，力量感": null
-    role:"爆发/怒吼": null
+    label: 怒吼·强
+    desc: 胸腔爆发，高音撕吼，力量感
+    role: 爆发/怒吼
   V24_breathy_throat:
-    label:"气声·喉": null
-    desc:"喉音重，气声多，沧桑": null
-    role:"沧桑/重伤": null
+    label: 气声·喉
+    desc: 喉音重，气声多，沧桑
+    role: 沧桑/重伤
   V25_bubble_soft:
-    label:"气泡音": null
-    desc:"低频气泡，喉音颗粒感，慵懒": null
-    role:"慵懒/性感": null
+    label: 气泡音
+    desc: 低频气泡，喉音颗粒感，慵懒
+    role: 慵懒/性感
   V26_reverb_space:
-    label:"混响·空": null
-    desc:"大混响，空间感，空灵": null
-    role:"梦境/幻觉": null
+    label: 混响·空
+    desc: 大混响，空间感，空灵
+    role: 梦境/幻觉
   V27_metal_harsh:
-    label:"金属·粗": null
-    desc:"金属质感，粗粝压迫": null
-    role:"反派/压迫": null
+    label: 金属·粗
+    desc: 金属质感，粗粝压迫
+    role: 反派/压迫
   V28_wood_warm:
-    label:"木质·暖": null
-    desc:"温暖木质感，中频厚": null
-    role:"温和/治愈": null
+    label: 木质·暖
+    desc: 温暖木质感，中频厚
+    role: 温和/治愈
   V29_low_bass_deep:
-    label:"低音·沉": null
-    desc:"超低音，胸腔共鸣，压迫感": null
-    role:"大佬/反派": null
+    label: 低音·沉
+    desc: 超低音，胸腔共鸣，压迫感
+    role: 大佬/反派
   V30_high_bright:
-    label:"高音·亮": null
-    desc:"超高音，清亮尖锐": null
-    role:"激昂/情绪": null
+    label: 高音·亮
+    desc: 超高音，清亮尖锐
+    role: 激昂/情绪
   v_shousheng_men:
     label: 青涩少年男声
   v_zhoushang_wen:
@@ -1104,305 +1104,305 @@ voice_tracks:
     label: 梦幻少女女声
 bgm_tracks:
   B01_battle_ramp:
-    label:"战斗升级": null
-    func:"对决高燃": null
-    music_ref:"M4/M10": null
-    dur:"30-60s": null
-    scene:"打斗/反杀": null
+    label: 战斗升级
+    func: 对决高燃
+    music_ref: M4/M10
+    dur: 30-60s
+    scene: 打斗/反杀
   B02_chase_urgent:
-    label:"追逐紧迫": null
-    func:"紧张追戏": null
-    music_ref:"M9/M12": null
-    dur:"20-40s": null
-    scene:"追车/逃离": null
+    label: 追逐紧迫
+    func: 紧张追戏
+    music_ref: M9/M12
+    dur: 20-40s
+    scene: 追车/逃离
   B03_confession:
-    label:"告白": null
-    func:"情感升温": null
-    music_ref:"M14/M25": null
-    dur:"20-30s": null
-    scene:"表白/心动": null
+    label: 告白
+    func: 情感升温
+    music_ref: M14/M25
+    dur: 20-30s
+    scene: 表白/心动
   B04_plot_twist:
-    label:"反转": null
-    func:"意外冲击": null
-    music_ref:"M12/M11": null
-    dur:"5-10s": null
-    scene:"剧情反转": null
+    label: 反转
+    func: 意外冲击
+    music_ref: M12/M11
+    dur: 5-10s
+    scene: 剧情反转
   B05_climax_peak:
-    label:"高潮峰值": null
-    func:"情绪顶点": null
-    music_ref:"M5/M10": null
-    dur:"30-60s": null
-    scene:"全剧高潮": null
+    label: 高潮峰值
+    func: 情绪顶点
+    music_ref: M5/M10
+    dur: 30-60s
+    scene: 全剧高潮
   B06_tragedy_sad:
-    label:"虐心": null
-    func:"悲伤催泪": null
-    music_ref:"M29": null
-    dur:"30-60s": null
-    scene:"虐心/离别": null
+    label: 虐心
+    func: 悲伤催泪
+    music_ref: M29
+    dur: 30-60s
+    scene: 虐心/离别
   B07_daily_light:
-    label:"日常轻快": null
-    func:"过渡铺垫": null
-    music_ref:"M2/M13": null
-    dur:"15-30s": null
-    scene:"日常/生活": null
+    label: 日常轻快
+    func: 过渡铺垫
+    music_ref: M2/M13
+    dur: 15-30s
+    scene: 日常/生活
   B08_suspense_cold:
-    label:"悬疑冷峻": null
-    func:"悬念积累": null
-    music_ref:"M11/M12": null
-    dur:"20-40s": null
-    scene:"悬疑/危机": null
+    label: 悬疑冷峻
+    func: 悬念积累
+    music_ref: M11/M12
+    dur: 20-40s
+    scene: 悬疑/危机
   B09_horror_deep:
-    label:"恐怖深底": null
-    func:"压迫惊吓": null
-    music_ref:"M11/M27": null
-    dur:"20-60s": null
-    scene:"恐怖/惊悚": null
+    label: 恐怖深底
+    func: 压迫惊吓
+    music_ref: M11/M27
+    dur: 20-60s
+    scene: 恐怖/惊悚
   B10_funny_relax:
-    label:"搞笑放松": null
-    func:"喜感调节": null
-    music_ref:"M13/M30": null
-    dur:"10-30s": null
-    scene:"搞笑/轻松": null
+    label: 搞笑放松
+    func: 喜感调节
+    music_ref: M13/M30
+    dur: 10-30s
+    scene: 搞笑/轻松
   B11_lyric_soft:
-    label:"抒情柔": null
-    func:"情感铺陈": null
-    music_ref:"M2/M7": null
-    dur:"30-60s": null
-    scene:"抒情/独白": null
+    label: 抒情柔
+    func: 情感铺陈
+    music_ref: M2/M7
+    dur: 30-60s
+    scene: 抒情/独白
   B12_ambience_bg:
-    label:"氛围底": null
-    func:"背景铺陈": null
-    music_ref:"M20/M8": null
-    dur:"30-90s": null
-    scene:"场景氛围": null
+    label: 氛围底
+    func: 背景铺陈
+    music_ref: M20/M8
+    dur: 30-90s
+    scene: 场景氛围
   B13_transition_cue:
-    label:"过场": null
-    func:"转场衔接": null
-    music_ref:"M7/M30": null
-    dur:"5-10s": null
-    scene:"镜头转场": null
+    label: 过场
+    func: 转场衔接
+    music_ref: M7/M30
+    dur: 5-10s
+    scene: 镜头转场
   B14_opening_theme:
-    label:"片头": null
-    func:"开场定调": null
-    music_ref:"M4/M28": null
-    dur:"20-30s": null
-    scene:"每集片头": null
+    label: 片头
+    func: 开场定调
+    music_ref: M4/M28
+    dur: 20-30s
+    scene: 每集片头
   B15_ending_theme:
-    label:"片尾": null
-    func:"收尾情感": null
-    music_ref:"M25/M29": null
-    dur:"30-60s": null
-    scene:"每集片尾": null
+    label: 片尾
+    func: 收尾情感
+    music_ref: M25/M29
+    dur: 30-60s
+    scene: 每集片尾
   B16_countdown:
-    label:"倒计时": null
-    func:"紧张铺垫": null
-    music_ref:"M12": null
-    dur:"10-20s": null
-    scene:"生死倒计时": null
+    label: 倒计时
+    func: 紧张铺垫
+    music_ref: M12
+    dur: 10-20s
+    scene: 生死倒计时
   B17_flashback:
-    label:"闪回": null
-    func:"记忆回溯": null
-    music_ref:"M7/M23": null
-    dur:"15-30s": null
-    scene:"回忆/闪回": null
+    label: 闪回
+    func: 记忆回溯
+    music_ref: M7/M23
+    dur: 15-30s
+    scene: 回忆/闪回
   B18_dream_like:
-    label:"梦境": null
-    func:"虚幻迷离": null
-    music_ref:"M20": null
-    dur:"20-40s": null
-    scene:"做梦/幻觉": null
+    label: 梦境
+    func: 虚幻迷离
+    music_ref: M20
+    dur: 20-40s
+    scene: 做梦/幻觉
   B19_reality_gnd:
-    label:"现实": null
-    func:"落地清醒": null
-    music_ref:"M2/M26": null
-    dur:"15-30s": null
-    scene:"现实/清醒": null
+    label: 现实
+    func: 落地清醒
+    music_ref: M2/M26
+    dur: 15-30s
+    scene: 现实/清醒
   B20_memory_warm:
-    label:"回忆暖": null
-    func:"温情往事": null
-    music_ref:"M23/M25": null
-    dur:"30-60s": null
-    scene:"温暖回忆": null
+    label: 回忆暖
+    func: 温情往事
+    music_ref: M23/M25
+    dur: 30-60s
+    scene: 温暖回忆
   B21_standoff:
-    label:"对峙": null
-    func:"剑拔弩张": null
-    music_ref:"M12/M19": null
-    dur:"20-40s": null
-    scene:"双方对峙": null
+    label: 对峙
+    func: 剑拔弩张
+    music_ref: M12/M19
+    dur: 20-40s
+    scene: 双方对峙
   B22_reconcile:
-    label:"和解": null
-    func:"冰释情感": null
-    music_ref:"M25/M29": null
-    dur:"30-60s": null
-    scene:"和解/释怀": null
+    label: 和解
+    func: 冰释情感
+    music_ref: M25/M29
+    dur: 30-60s
+    scene: 和解/释怀
   B23_battle_full:
-    label:"全战": null
-    func:"大战": null
-    music_ref:"M4/M10": null
-    dur:"30-60s": null
-    scene:"大规模战斗": null
+    label: 全战
+    func: 大战
+    music_ref: M4/M10
+    dur: 30-60s
+    scene: 大规模战斗
   B24_victory:
-    label:"胜利": null
-    func:"凯旋": null
-    music_ref:"M5/M28": null
-    dur:"20-40s": null
-    scene:"胜利/成功": null
+    label: 胜利
+    func: 凯旋
+    music_ref: M5/M28
+    dur: 20-40s
+    scene: 胜利/成功
   B25_defeat_bitter:
-    label:"失败苦": null
-    func:"败北": null
-    music_ref:"M29/M15": null
-    dur:"20-40s": null
-    scene:"失败/挫折": null
+    label: 失败苦
+    func: 败北
+    music_ref: M29/M15
+    dur: 20-40s
+    scene: 失败/挫折
   B26_hope_rise:
-    label:"希望升起": null
-    func:"转机": null
-    music_ref:"M28/M30": null
-    dur:"20-40s": null
-    scene:"转机/希望": null
+    label: 希望升起
+    func: 转机
+    music_ref: M28/M30
+    dur: 20-40s
+    scene: 转机/希望
   B27_despair_dark:
-    label:"绝望暗": null
-    func:"谷底": null
-    music_ref:"M11/M27": null
-    dur:"30-60s": null
-    scene:"绝望/低谷": null
+    label: 绝望暗
+    func: 谷底
+    music_ref: M11/M27
+    dur: 30-60s
+    scene: 绝望/低谷
   B28_tense_quiet:
-    label:"紧张静": null
-    func:"无声压迫": null
-    music_ref:"M20/M11": null
-    dur:"20-40s": null
-    scene:"安静紧张": null
+    label: 紧张静
+    func: 无声压迫
+    music_ref: M20/M11
+    dur: 20-40s
+    scene: 安静紧张
   B29_relax_calm:
-    label:"舒缓": null
-    func:"平息": null
-    music_ref:"M7/M25": null
-    dur:"30-60s": null
-    scene:"平静/舒缓": null
+    label: 舒缓
+    func: 平息
+    music_ref: M7/M25
+    dur: 30-60s
+    scene: 平静/舒缓
   B30_mystery_cold:
-    label:"神秘冷": null
-    func:"谜团": null
-    music_ref:"M12/M27": null
-    dur:"20-40s": null
-    scene:"谜团/神秘": null
+    label: 神秘冷
+    func: 谜团
+    music_ref: M12/M27
+    dur: 20-40s
+    scene: 谜团/神秘
   B31_glory_grand:
-    label:"华丽": null
-    func:"高光": null
-    music_ref:"M5/M26": null
-    dur:"30-60s": null
-    scene:"高光/荣耀": null
+    label: 华丽
+    func: 高光
+    music_ref: M5/M26
+    dur: 30-60s
+    scene: 高光/荣耀
   B32_plain_simple:
-    label:"朴素": null
-    func:"生活": null
-    music_ref:"M2/M21": null
-    dur:"15-30s": null
-    scene:"朴素生活": null
+    label: 朴素
+    func: 生活
+    music_ref: M2/M21
+    dur: 15-30s
+    scene: 朴素生活
   B33_mourn_solemn:
-    label:"悲壮": null
-    func:"悼念": null
-    music_ref:"M29/M5": null
-    dur:"30-60s": null
-    scene:"悼念/牺牲": null
+    label: 悲壮
+    func: 悼念
+    music_ref: M29/M5
+    dur: 30-60s
+    scene: 悼念/牺牲
   B34_cheer_merry:
-    label:"欢快": null
-    func:"喜庆": null
-    music_ref:"M13/M22": null
-    dur:"20-40s": null
-    scene:"喜庆/热闹": null
+    label: 欢快
+    func: 喜庆
+    music_ref: M13/M22
+    dur: 20-40s
+    scene: 喜庆/热闹
   B35_sorrow_soft:
-    label:"忧伤": null
-    func:"低回": null
-    music_ref:"M25/M29": null
-    dur:"30-60s": null
-    scene:"忧伤/失落": null
+    label: 忧伤
+    func: 低回
+    music_ref: M25/M29
+    dur: 30-60s
+    scene: 忧伤/失落
   B36_romantic_warm:
-    label:"浪漫暖": null
-    func:"甜蜜": null
-    music_ref:"M14/M23": null
-    dur:"30-60s": null
-    scene:"浪漫/甜蜜": null
+    label: 浪漫暖
+    func: 甜蜜
+    music_ref: M14/M23
+    dur: 30-60s
+    scene: 浪漫/甜蜜
   B37_passion_fiery:
-    label:"激情": null
-    func:"炽热": null
-    music_ref:"M4/M22": null
-    dur:"20-40s": null
-    scene:"激情/冲动": null
+    label: 激情
+    func: 炽热
+    music_ref: M4/M22
+    dur: 20-40s
+    scene: 激情/冲动
   B38_cold_static:
-    label:"冷静": null
-    func:"克制": null
-    music_ref:"M25/M20": null
-    dur:"20-40s": null
-    scene:"冷静/克制": null
+    label: 冷静
+    func: 克制
+    music_ref: M25/M20
+    dur: 20-40s
+    scene: 冷静/克制
   B39_impulse_rush:
-    label:"冲动": null
-    func:"爆发": null
-    music_ref:"M4/M19": null
-    dur:"10-20s": null
-    scene:"冲动/爆发": null
+    label: 冲动
+    func: 爆发
+    music_ref: M4/M19
+    dur: 10-20s
+    scene: 冲动/爆发
   B40_lonely_empty:
-    label:"孤独": null
-    func:"空寂": null
-    music_ref:"M20/M29": null
-    dur:"30-60s": null
-    scene:"孤独/空寂": null
+    label: 孤独
+    func: 空寂
+    music_ref: M20/M29
+    dur: 30-60s
+    scene: 孤独/空寂
   B41_reunion_warm:
-    label:"团聚": null
-    func:"重逢": null
-    music_ref:"M25/M14": null
-    dur:"30-60s": null
-    scene:"团聚/重逢": null
+    label: 团聚
+    func: 重逢
+    music_ref: M25/M14
+    dur: 30-60s
+    scene: 团聚/重逢
   B42_separation_sad:
-    label:"分离": null
-    func:"别离": null
-    music_ref:"M29/M15": null
-    dur:"30-60s": null
-    scene:"分离/别离": null
+    label: 分离
+    func: 别离
+    music_ref: M29/M15
+    dur: 30-60s
+    scene: 分离/别离
   B43_meeting_fate:
-    label:"相遇": null
-    func:"初见": null
-    music_ref:"M14/M25": null
-    dur:"20-40s": null
-    scene:"初见/命运": null
+    label: 相遇
+    func: 初见
+    music_ref: M14/M25
+    dur: 20-40s
+    scene: 初见/命运
   B44_growth_up:
-    label:"成长": null
-    func:"蜕变向上": null
-    music_ref:"M28/M5": null
-    dur:"30-60s": null
-    scene:"成长/蜕变": null
+    label: 成长
+    func: 蜕变向上
+    music_ref: M28/M5
+    dur: 30-60s
+    scene: 成长/蜕变
   B45_transform_evol:
-    label:"蜕变": null
-    func:"质变": null
-    music_ref:"M4/M10": null
-    dur:"30-60s": null
-    scene:"蜕变/进化": null
+    label: 蜕变
+    func: 质变
+    music_ref: M4/M10
+    dur: 30-60s
+    scene: 蜕变/进化
   B46_redemption_soft:
-    label:"救赎": null
-    func:"感化": null
-    music_ref:"M25/M14": null
-    dur:"30-60s": null
-    scene:"救赎/感化": null
+    label: 救赎
+    func: 感化
+    music_ref: M25/M14
+    dur: 30-60s
+    scene: 救赎/感化
   B47_destruction_harsh:
-    label:"毁灭": null
-    func:"崩塌": null
-    music_ref:"M19/M10": null
-    dur:"30-60s": null
-    scene:"毁灭/崩塌": null
+    label: 毁灭
+    func: 崩塌
+    music_ref: M19/M10
+    dur: 30-60s
+    scene: 毁灭/崩塌
   B48_rebirth_light:
-    label:"重生": null
-    func:"破晓": null
-    music_ref:"M28/M5": null
-    dur:"30-60s": null
-    scene:"重生/破晓": null
+    label: 重生
+    func: 破晓
+    music_ref: M28/M5
+    dur: 30-60s
+    scene: 重生/破晓
   B49_work_routine:
-    label:"工作": null
-    func:"日常节奏": null
-    music_ref:"M2/M30": null
-    dur:"15-30s": null
-    scene:"工作/学习": null
+    label: 工作
+    func: 日常节奏
+    music_ref: M2/M30
+    dur: 15-30s
+    scene: 工作/学习
   B50_travel_wind:
-    label:"旅行": null
-    func:"在路上": null
-    music_ref:"M2/M21": null
-    dur:"30-60s": null
-    scene:"旅行/路上": null
+    label: 旅行
+    func: 在路上
+    music_ref: M2/M21
+    dur: 30-60s
+    scene: 旅行/路上
 scenario_resource_map:
   light_comedy:
     label: 轻喜剧
@@ -2019,3 +2019,902 @@ nodes:
     T5:
     - impl: ffmpeg_pil_batch
       estimated_vram_need_gb: 0
+shot_patterns:
+  SP1_extreme_closeup:
+    label: 极特写
+    shot_size: 极特写
+    camera_move: 固定
+    est_s: 2.0
+    beats:
+    - hook
+    - payoff
+    intensity: 5
+    note: 只给一个关键细节：眼神、手、物件，直接制造疑问
+  SP2_closeup:
+    label: 特写
+    shot_size: 特写
+    camera_move: 固定
+    est_s: 3.0
+    beats:
+    - payoff
+    - sweet
+    intensity: 4
+    note: 情绪落点特写，爽点兑现后给脸部反应
+  SP3_medium_closeup:
+    label: 近景
+    shot_size: 近景
+    camera_move: 固定
+    est_s: 4.0
+    beats:
+    - setup
+    - escalate
+    intensity: 3
+    note: 对话常规景别，交待人物状态
+  SP4_medium:
+    label: 中景
+    shot_size: 中景
+    camera_move: 固定
+    est_s: 5.0
+    beats:
+    - setup
+    - escalate
+    intensity: 3
+    note: 带一点环境的关系镜，交代空间
+  SP5_full:
+    label: 全景
+    shot_size: 全景
+    camera_move: 固定
+    est_s: 6.0
+    beats:
+    - setup
+    - twist
+    intensity: 2
+    note: 完整人物动作，交代场面调度
+  SP6_wide:
+    label: 远景
+    shot_size: 远景
+    camera_move: 固定
+    est_s: 8.0
+    beats:
+    - setup
+    intensity: 2
+    note: 环境优先，用于转场喘息或交代地点
+  SP7_over_shoulder:
+    label: 过肩
+    shot_size: 过肩
+    camera_move: 固定
+    est_s: 5.0
+    beats:
+    - escalate
+    - twist
+    intensity: 3
+    note: 对话过肩，制造压迫与潜台词
+  SP8_pov:
+    label: 主观视角
+    shot_size: 主观
+    camera_move: 固定
+    est_s: 3.5
+    beats:
+    - hook
+    intensity: 4
+    note: 观众代入主角视角，用于恐惧与发现
+    intent:
+    - danger
+  SP9_follow:
+    label: 跟拍
+    shot_size: 中景
+    camera_move: 跟
+    est_s: 6.0
+    beats:
+    - setup
+    - escalate
+    intensity: 3
+    note: 跟随主角移动，制造节奏推进
+  SP10_orbit:
+    label: 环绕
+    shot_size: 中景
+    camera_move: 环绕
+    est_s: 5.0
+    beats:
+    - payoff
+    - twist
+    intensity: 4
+    note: 环绕主角，突出高光时刻
+  SP11_push_in:
+    label: 推镜
+    shot_size: 近景
+    camera_move: 推
+    est_s: 4.0
+    beats:
+    - payoff
+    intensity: 5
+    note: 缓慢推近情绪峰值，配合 BGM 推进
+  SP12_pull_out:
+    label: 拉镜
+    shot_size: 全景
+    camera_move: 拉
+    est_s: 5.0
+    beats:
+    - twist
+    - cliff
+    intensity: 4
+    note: 拉开揭示格局，反转后抽离
+  SP13_handheld:
+    label: 手持
+    shot_size: 中景
+    camera_move: 固定
+    est_s: 4.5
+    beats:
+    - escalate
+    intensity: 4
+    note: 手持晃动制造失控与紧张
+    intent:
+    - danger
+  SP14_low_angle:
+    label: 仰拍
+    shot_size: 中景
+    camera_move: 固定
+    est_s: 4.0
+    beats:
+    - payoff
+    intensity: 4
+    note: 仰拍强化压迫与威势
+    intent:
+    - power_show
+  SP15_high_angle:
+    label: 俯拍
+    shot_size: 全景
+    camera_move: 固定
+    est_s: 4.0
+    beats:
+    - escalate
+    intensity: 3
+    note: 俯拍削弱主体，表现弱势与受辱
+    intent:
+    - humiliation
+    - defeat
+  SP16_insert:
+    label: 插入镜头
+    shot_size: 特写
+    camera_move: 固定
+    est_s: 1.5
+    beats:
+    - hook
+    - twist
+    intensity: 3
+    note: 道具/文件/手机屏幕插入，碎片信息
+  SP17_two_shot:
+    label: 双人同框
+    shot_size: 中景
+    camera_move: 固定
+    est_s: 6.0
+    beats:
+    - sweet
+    - escalate
+    intensity: 3
+    note: 两人同框，对比关系温度
+  SP18_rack_focus:
+    label: 变焦对焦
+    shot_size: 中景
+    camera_move: 拉
+    est_s: 4.0
+    beats:
+    - twist
+    - payoff
+    intensity: 4
+    note: 前景失焦转后景主体，视觉反转
+  SP19_crane_down:
+    label: 摇臂下降
+    shot_size: 全景
+    camera_move: 拉
+    est_s: 7.0
+    beats:
+    - cliff
+    - twist
+    intensity: 4
+    note: 摇臂降下收束场景，用于段落落幕
+  SP20_static_wide:
+    label: 固定远景
+    shot_size: 远景
+    camera_move: 固定
+    est_s: 10.0
+    beats:
+    - cliff
+    intensity: 3
+    note: 人物离场远去，留白制造余韵与悬念
+  SP21_beat_reverse:
+    label: 反打
+    shot_size: 近景
+    camera_move: 固定
+    est_s: 3.5
+    beats:
+    - escalate
+    - twist
+    intensity: 3
+    note: 对话反打，正反情绪对比
+  SP22_dutch_angle:
+    label: 斜角
+    shot_size: 中景
+    camera_move: 固定
+    est_s: 4.0
+    beats:
+    - twist
+    intensity: 4
+    note: 荷兰角制造不安与失衡
+    intent:
+    - danger
+  SP23_whip_pan:
+    label: 甩镜
+    shot_size: 中景
+    camera_move: 摇
+    est_s: 1.5
+    beats:
+    - escalate
+    - payoff
+    intensity: 5
+    note: 甩镜转场，压缩时间、提速爽感
+  SP24_insert_reaction:
+    label: 反应特写
+    shot_size: 特写
+    camera_move: 固定
+    est_s: 2.0
+    beats:
+    - payoff
+    - sweet
+    - twist
+    intensity: 4
+    note: 他人反应替代主角表达，画面即台词
+platform_profiles:
+  redfruit:
+    label: 红果短剧
+    aspect_ratio: '9:16'
+    resolution: 1080x1920
+    fps: 30
+    min_duration_s: 30
+    max_duration_s: 180
+    max_file_mb: 200
+    title_max_len: 30
+    subtitle_safe_area:
+      top: 0.1
+      bottom: 0.2
+      left: 0.06
+      right: 0.06
+    pace_profile: PC3_balanced
+    note: 红果主推 1-3 分钟竖屏集，首帧即封面
+    primary_hooks:
+    - conflict_open
+    - public_humiliation
+    - reverse_open
+    - money_shock
+    platform_tags:
+    - urban
+    - revenge
+    - face_slap
+  douyin:
+    label: 抖音
+    aspect_ratio: '9:16'
+    resolution: 1080x1920
+    fps: 30
+    min_duration_s: 15
+    max_duration_s: 600
+    max_file_mb: 500
+    title_max_len: 55
+    subtitle_safe_area:
+      top: 0.15
+      bottom: 0.22
+      left: 0.08
+      right: 0.08
+    pace_profile: PC4_fast_payoff
+    note: 前 3 秒定生死，冲突前置
+    primary_hooks:
+    - conflict_open
+    - power_show
+    - countdown
+    - dark_horse
+    platform_tags:
+    - urban
+    - face_slap
+    - comedy
+  kuaishou:
+    label: 快手
+    aspect_ratio: '9:16'
+    resolution: 1080x1920
+    fps: 30
+    min_duration_s: 15
+    max_duration_s: 600
+    max_file_mb: 500
+    title_max_len: 55
+    subtitle_safe_area:
+      top: 0.15
+      bottom: 0.2
+      left: 0.08
+      right: 0.08
+    pace_profile: PC4_fast_payoff
+    note: 生活化强，共情与打脸更吃香
+    primary_hooks:
+    - conflict_open
+    - public_humiliation
+    - power_show
+    platform_tags:
+    - urban
+    - rural
+    - revenge
+  shipinhao:
+    label: 微信视频号
+    aspect_ratio: '9:16'
+    resolution: 1080x1920
+    fps: 30
+    min_duration_s: 15
+    max_duration_s: 900
+    max_file_mb: 500
+    title_max_len: 22
+    subtitle_safe_area:
+      top: 0.14
+      bottom: 0.2
+      left: 0.08
+      right: 0.08
+    pace_profile: PC3_balanced
+    note: 社交推荐为主，悬念留人
+    primary_hooks:
+    - conflict_open
+    - suspense_line
+    - money_shock
+    platform_tags:
+    - urban
+    - ceo
+    - face_slap
+  kuaishou_short:
+    label: 快手短剧
+    aspect_ratio: '9:16'
+    resolution: 1080x1920
+    fps: 30
+    min_duration_s: 30
+    max_duration_s: 180
+    max_file_mb: 200
+    title_max_len: 30
+    subtitle_safe_area:
+      top: 0.1
+      bottom: 0.2
+      left: 0.06
+      right: 0.06
+    pace_profile: PC3_balanced
+    note: 短剧分账通道，与红果同期投喂
+    primary_hooks:
+    - conflict_open
+    - reverse_open
+    - identity_tease
+    platform_tags:
+    - urban
+    - revenge
+    - rebirth
+  bilibili:
+    label: 哔哩哔哩
+    aspect_ratio: '16:9'
+    resolution: 1920x1080
+    fps: 30
+    min_duration_s: 30
+    max_duration_s: 1800
+    max_file_mb: 2048
+    title_max_len: 80
+    subtitle_safe_area:
+      top: 0.08
+      bottom: 0.12
+      left: 0.05
+      right: 0.05
+    pace_profile: PC9_emotional
+    note: 横屏长视频，容忍铺垫，重叙事完整
+    primary_hooks:
+    - suspense_line
+    - mystery_reveal
+    - cold_open_question
+    platform_tags:
+    - mystery
+    - suspense
+    - rebirth
+  xhs:
+    label: 小红书
+    aspect_ratio: '9:16'
+    resolution: 1080x1440
+    fps: 30
+    min_duration_s: 15
+    max_duration_s: 300
+    max_file_mb: 500
+    title_max_len: 20
+    subtitle_safe_area:
+      top: 0.12
+      bottom: 0.2
+      left: 0.08
+      right: 0.08
+    pace_profile: PC2_daily
+    note: 3:4 竖版，封面带字，反常日常更抓人
+    primary_hooks:
+    - tease_romance
+    - nostalgic_hook
+    - money_shock
+    platform_tags:
+    - romance
+    - sweet
+    - urban
+  youtube_shorts:
+    label: YouTube Shorts
+    aspect_ratio: '9:16'
+    resolution: 1080x1920
+    fps: 30
+    min_duration_s: 15
+    max_duration_s: 180
+    max_file_mb: 500
+    title_max_len: 100
+    subtitle_safe_area:
+      top: 0.12
+      bottom: 0.22
+      left: 0.1
+      right: 0.1
+    pace_profile: PC4_fast_payoff
+    note: 强钩子，跨语种靠画面说话
+    primary_hooks:
+    - conflict_open
+    - reverse_open
+    - dark_horse
+    platform_tags:
+    - urban
+    - revenge
+    - ceo
+hook_patterns:
+  conflict_open:
+    label: 冲突直给
+    hook_type: conflict_open
+    beat: hook
+    deadline_s: 3
+    score_floor: 75
+    tags:
+    - revenge
+    - face_slap
+    promise: 冲突会被正面解决
+    emotion: 愤怒/紧张
+    desc: 第一帧就是对峙/冲突，不给任何铺垫
+    hook_3s: 第一帧直接给对峙动作，一句狠话落地
+    hook_15s: 15 秒内必须给出对立面和主角的应对
+  suspense_line:
+    label: 悬念台词
+    hook_type: suspense_line
+    beat: hook
+    deadline_s: 3
+    score_floor: 72
+    tags:
+    - mystery
+    - suspense
+    promise: 这句台词的含义会在剧中揭晓
+    emotion: 好奇/不安
+    desc: 一句反常台词配异常画面
+    hook_3s: 一句没头没尾的话，制造信息缺口
+    hook_15s: 15 秒内必须给出一个待解的疑问
+  reverse_open:
+    label: 倒叙
+    hook_type: reverse_open
+    beat: hook
+    deadline_s: 3
+    score_floor: 78
+    tags:
+    - revenge
+    - rebirth
+    - time_travel
+    promise: 讲述结果是怎么来的
+    emotion: 震撼/解气
+    desc: 先给结果（打脸/身死），再倒回起因
+    hook_3s: 先给结局碎片，再回到起点
+    hook_15s: 15 秒内必须暗示这一切将反转
+  public_humiliation:
+    label: 当众受辱
+    hook_type: public_humiliation
+    beat: hook
+    deadline_s: 3
+    score_floor: 74
+    tags:
+    - face_slap
+    - revenge
+    promise: 主角会找回场子
+    emotion: 憋屈/愤怒
+    desc: 主角被当众羞辱，激发报复欲
+    hook_3s: 当众被踩，一句戳痛点台词
+    hook_15s: 15 秒内必须让观众站到主角一边
+  mystery_reveal:
+    label: 抛出谜团
+    hook_type: mystery_reveal
+    beat: hook
+    deadline_s: 5
+    score_floor: 70
+    tags:
+    - mystery
+    - rebirth
+    promise: 谜团会被解开
+    emotion: 震惊/好奇
+    desc: 出现无法解释的异常（重生的证据/不该存在的物件）
+    hook_3s: 抛一个无法解释的物件或画面
+    hook_15s: 15 秒内必须给出一条可查线索
+  betrayal_tease:
+    label: 背叛一闪
+    hook_type: betrayal_tease
+    beat: hook
+    deadline_s: 5
+    score_floor: 70
+    tags:
+    - romance
+    - revenge
+    promise: 背叛者会付出代价
+    emotion: 愤怒/心疼
+    desc: 背叛瞬间一闪而过，不解释
+    hook_3s: 一个不该出现的名字或背影
+    hook_15s: 15 秒内必须让观众怀疑一个具体的人
+  power_show:
+    label: 实力碾压
+    hook_type: power_show
+    beat: hook
+    deadline_s: 3
+    score_floor: 73
+    tags:
+    - ceo
+    - rebirth
+    - urban
+    promise: 这份实力会用于反击
+    emotion: 爽/惊讶
+    desc: 主角展露与身份不符的能力或身份
+    hook_3s: 对方势力瞬间压制全场
+    hook_15s: 15 秒内必须展示一次压倒性的能力
+  dark_horse:
+    label: 黑马暗示
+    hook_type: dark_horse
+    beat: hook
+    deadline_s: 5
+    score_floor: 66
+    tags:
+    - urban
+    - revenge
+    promise: 逆袭会发生
+    emotion: 期待
+    desc: 平凡主角被暗示将逆袭
+    hook_3s: 全场最弱的人露出锋芒
+    hook_15s: 15 秒内必须让主角完成一次反击
+  tease_romance:
+    label: 暧昧撩拨
+    hook_type: tease_romance
+    beat: hook
+    deadline_s: 5
+    score_floor: 64
+    tags:
+    - romance
+    - sweet
+    promise: 关系会有进展
+    emotion: 心动/甜
+    desc: 高甜互动片段，制造 CP 期待
+    hook_3s: 一次不动声色的靠近
+    hook_15s: 15 秒内必须给出一个暧昧信号
+  danger_warning:
+    label: 危险预警
+    hook_type: danger_warning
+    beat: hook
+    deadline_s: 3
+    score_floor: 72
+    tags:
+    - suspense
+    - mystery
+    promise: 危机会被化解或升级
+    emotion: 紧张/揪心
+    desc: 性命攸关的危机瞬间
+    hook_3s: 危险逼近的明示信号
+    hook_15s: 15 秒内必须让危险真实发生一次
+  money_shock:
+    label: 数字冲击
+    hook_type: money_shock
+    beat: hook
+    deadline_s: 3
+    score_floor: 68
+    tags:
+    - urban
+    - ceo
+    - revenge
+    promise: 这笔钱会改变局面
+    emotion: 惊讶/不服
+    desc: 巨额账单/赔偿/彩礼数字特写
+    hook_3s: 一个超出常理的数字
+    hook_15s: 15 秒内必须让这个数字与主角产生关系
+  identity_tease:
+    label: 身份临界
+    hook_type: identity_tease
+    beat: hook
+    deadline_s: 5
+    score_floor: 69
+    tags:
+    - face_slap
+    - mystery
+    promise: 身份会曝光
+    emotion: 紧张/期待
+    desc: 身份即将暴露的瞬间
+    hook_3s: 有人叫出了主角的真名
+    hook_15s: 15 秒内必须让身份悬念成立一次
+  weird_normal:
+    label: 反常日常
+    hook_type: weird_normal
+    beat: hook
+    deadline_s: 5
+    score_floor: 64
+    tags:
+    - suspense
+    - comedy
+    promise: 反常点会被解释
+    emotion: 不安/好奇
+    desc: 一切正常但有一处不对劲
+    hook_3s: 一个不正常但不解释的细节
+    hook_15s: 15 秒内必须让不正常被合理化一次
+  countdown:
+    label: 限时倒计时
+    hook_type: countdown
+    beat: hook
+    deadline_s: 3
+    score_floor: 71
+    tags:
+    - suspense
+    - revenge
+    promise: 倒计时结束前会有结果
+    emotion: 紧迫
+    desc: 倒计时/限时任务制造紧迫
+    hook_3s: 倒计时开始，只给数字
+    hook_15s: 15 秒内必须让倒计时带来一次选择
+  nostalgic_hook:
+    label: 旧物回忆
+    hook_type: nostalgic_hook
+    beat: hook
+    deadline_s: 5
+    score_floor: 62
+    tags:
+    - sweet
+    - nostalgia
+    promise: 回忆会牵出往事真相
+    emotion: 怀念/酸涩
+    desc: 旧物/旧照切入，触发情感共鸣
+    hook_3s: 一段熟悉到刺痛的旧物/旧歌
+    hook_15s: 15 秒内必须让旧物牵出一段关系
+  cold_open_question:
+    label: 冷开场提问
+    hook_type: cold_open_question
+    beat: hook
+    deadline_s: 3
+    score_floor: 67
+    tags:
+    - mystery
+    - revenge
+    promise: 问题会被回答
+    emotion: 好奇
+    desc: 开场即抛一个问题，答案在后面
+    hook_3s: 一个没有答案的质问
+    hook_15s: 15 秒内必须让这个质问指向一个敌人
+pace_profiles:
+  PC1_slow_burn:
+    label: 慢燃
+    target_episode_s: 150
+    cut_per_min: 12
+    payoff_per_ep: 3
+    sweet_per_ep: 1
+    shot_avg_s: 6.0
+    intensity: 2
+    bgm_pref: B28_tense_quiet
+    note: 长铺垫慢推进，文艺向，靠氛围留人
+    style_pref: S16_film_photo
+    hook_types:
+    - nostalgic_hook
+    - mystery_reveal
+    - suspense_line
+    shot_patterns:
+    - SP6_wide
+    - SP19_crane_down
+    - SP1_extreme_closeup
+    scenarios:
+    - romance_sad
+    - school_youth
+    - family_warm
+  PC2_daily:
+    label: 日常
+    target_episode_s: 90
+    cut_per_min: 18
+    payoff_per_ep: 3
+    sweet_per_ep: 1
+    shot_avg_s: 3.5
+    intensity: 2
+    bgm_pref: B07_daily_light
+    note: 生活流轻喜剧，节奏松，靠对话与反应
+    style_pref: S4_realistic
+    hook_types:
+    - conflict_open
+    - weird_normal
+    - dark_horse
+    shot_patterns:
+    - SP3_medium_closeup
+    - SP4_medium
+    - SP24_insert_reaction
+    scenarios:
+    - light_comedy
+    - daily_romance
+    - family_warm
+  PC3_balanced:
+    label: 均衡
+    target_episode_s: 120
+    cut_per_min: 20
+    payoff_per_ep: 3
+    sweet_per_ep: 1
+    shot_avg_s: 4.0
+    intensity: 3
+    bgm_pref: B19_reality_gnd
+    note: 通用档：铺垫与爽点配比均衡
+    style_pref: S4_realistic
+    hook_types:
+    - conflict_open
+    - public_humiliation
+    - tease_romance
+    shot_patterns:
+    - SP4_medium
+    - SP2_closeup
+    - SP17_two_shot
+    scenarios:
+    - male_revenge
+    - daily_romance
+    - school_youth
+  PC4_fast_payoff:
+    label: 快爽
+    target_episode_s: 90
+    cut_per_min: 32
+    payoff_per_ep: 4
+    sweet_per_ep: 1
+    shot_avg_s: 2.5
+    intensity: 4
+    bgm_pref: B39_impulse_rush
+    note: 短平快爽剧向，爽点密度高、切镜勤
+    style_pref: S6_shounen_manga
+    hook_types:
+    - conflict_open
+    - power_show
+    - countdown
+    shot_patterns:
+    - SP23_whip_pan
+    - SP9_follow
+    - SP11_push_in
+    scenarios:
+    - male_revenge
+    - urban_rooftop_night
+    - light_comedy
+  PC5_revenge:
+    label: 复仇
+    target_episode_s: 120
+    cut_per_min: 26
+    payoff_per_ep: 4
+    sweet_per_ep: 1
+    shot_avg_s: 3.5
+    intensity: 5
+    bgm_pref: B23_battle_full
+    note: 打脸复仇专用，冲突升级快、卡点重
+    style_pref: S26_neon_hongkong
+    hook_types:
+    - reverse_open
+    - public_humiliation
+    - money_shock
+    shot_patterns:
+    - SP11_push_in
+    - SP14_low_angle
+    - SP18_rack_focus
+    scenarios:
+    - male_revenge
+    - modern_office_loft
+    - wedding_banquet_hall
+  PC6_romance:
+    label: 甜宠
+    target_episode_s: 110
+    cut_per_min: 18
+    payoff_per_ep: 3
+    sweet_per_ep: 2
+    shot_avg_s: 4.5
+    intensity: 2
+    bgm_pref: B36_romantic_warm
+    note: 甜点密度加倍，冲突让位于关系推进
+    style_pref: S13_watercolor
+    hook_types:
+    - tease_romance
+    - nostalgic_hook
+    - identity_tease
+    shot_patterns:
+    - SP2_closeup
+    - SP3_medium_closeup
+    - SP17_two_shot
+    scenarios:
+    - daily_romance
+    - romance_sad
+    - school_youth
+  PC7_suspense:
+    label: 悬疑
+    target_episode_s: 120
+    cut_per_min: 22
+    payoff_per_ep: 3
+    sweet_per_ep: 1
+    shot_avg_s: 4.0
+    intensity: 4
+    bgm_pref: B08_suspense_cold
+    note: 信息缺口驱动，节奏跟着谜题收紧
+    style_pref: S23_noir_detective
+    hook_types:
+    - suspense_line
+    - mystery_reveal
+    - betrayal_tease
+    shot_patterns:
+    - SP6_wide
+    - SP12_pull_out
+    - SP22_dutch_angle
+    scenarios:
+    - dark_thriller
+    - horrified_ward
+    - underwater_deep
+  PC8_comedy:
+    label: 喜剧
+    target_episode_s: 80
+    cut_per_min: 28
+    payoff_per_ep: 3
+    sweet_per_ep: 1
+    shot_avg_s: 2.0
+    intensity: 3
+    bgm_pref: B10_funny_relax
+    note: 高切镜快反应，抖包袱密度高
+    style_pref: S25_clay_stopmotion
+    hook_types:
+    - conflict_open
+    - dark_horse
+    - weird_normal
+    shot_patterns:
+    - SP3_medium_closeup
+    - SP13_handheld
+    - SP24_insert_reaction
+    scenarios:
+    - light_comedy
+    - family_warm
+    - daily_romance
+  PC9_emotional:
+    label: 催泪
+    target_episode_s: 150
+    cut_per_min: 14
+    payoff_per_ep: 3
+    sweet_per_ep: 2
+    shot_avg_s: 6.5
+    intensity: 3
+    bgm_pref: B41_reunion_warm
+    note: 长镜情绪流，靠表演与留白打动人
+    style_pref: S3_cn_shuimo
+    hook_types:
+    - nostalgic_hook
+    - cold_open_question
+    - suspense_line
+    shot_patterns:
+    - SP1_extreme_closeup
+    - SP6_wide
+    - SP20_static_wide
+    scenarios:
+    - romance_sad
+    - family_warm
+    - ancient_palace_hall
+  PC10_battle:
+    label: 动作
+    target_episode_s: 100
+    cut_per_min: 30
+    payoff_per_ep: 4
+    sweet_per_ep: 1
+    shot_avg_s: 2.5
+    intensity: 5
+    bgm_pref: B01_battle_ramp
+    note: 打斗追逐专用，短镜连切推高刺激
+    style_pref: S21_wuxia_samurai
+    hook_types:
+    - power_show
+    - dark_horse
+    - identity_tease
+    shot_patterns:
+    - SP14_low_angle
+    - SP19_crane_down
+    - SP10_orbit
+    scenarios:
+    - action_battle
+    - fantasy_wuxia
+    - ancient_palace_hall

@@ -2,9 +2,38 @@
 
 > pic-workflow 变更日志（Keep a Changelog 结构，随 patch/feat/chore commit 补充）
 
-## [Unreleased] — 2026-10-24
+## [Unreleased] — 2026-10-25
 
-本周三端巡检自动补全（billing 收款层 / paywall 门控 / 文档 / 冒烟测试）
+### 0.5.13 — 叙事结构层 + 平台交付层（能力超前）
+
+矩阵扩 4 个新维度 + 新增 3 个能力模块，补齐"整集怎么排"这一层
+（此前只有单镜层 `shot_choreo` / 镜间层 `transition_design` / 成片层 `multimodal_qa`）。
+
+**新增能力模块**
+- `narrative_architect`：集级 beat sheet + 钩子开篇 + 爽点排布 + 叙事质检
+  （7 种节拍角色、3 秒/15 秒双层钩子、≥3 爽点 + 1 甜点铁律校验）
+- `hook_engine`：16 类钩子的生成 / 五维评分 / A-B-C 备选 / 发布闸门
+- `platform_spec`：8 平台（红果/抖音/快手/视频号/哔哩/小红书/YouTube Shorts 等）
+  成片合规校验 + ffmpeg 导出参数规划 + 批量分发
+
+**矩阵 0.2.0 → 0.3.0（4 个新维度）**
+- `shot_patterns` 24 镜型（景别/运镜/时长/节拍/强度）
+- `platform_profiles` 8 平台档案（画幅/分辨率/时长/安全区/主钩子/节奏档）
+- `hook_patterns` 16 钩子（节拍/3 秒 + 15 秒双层指令/情绪/承诺/门槛分）
+- `pace_profiles` 10 节奏档（切镜密度/爽点密度/目标集长/画风/BGM/镜型/题材）
+
+四维互为交叉引用：平台 → 节奏档 + 钩子；节奏档 → BGM + 画风 + 钩子 + 镜型 + 题材；
+镜型 → 叙事节拍。任一处改名都会悬空，由 `config_validator` 在 CI 阶段拦住。
+
+**修复**
+- `matrix.yaml` 音轨维度畸形 key（`label:"战斗升级": null` 这类）导致
+  voice/bbgm 两维字段整体丢失、`combo_optimizer` 情绪匹配永久失效 → 全量还原
+- `shot_patterns.beats` 混用叙事节拍与戏剧意图 → 拆分 `beats` / `intent`
+- `config_validator` 新维度校验：必备字段 / 互指 / 编号连续 / 数值区间 /
+  3 秒钩子铁律 / 每集爽点铁律
+
+**测试**：新增 40 项（`test_narrative_layer.py` 17 + `test_matrix_expand.py` 23），
+全量 275 passed / 4 skipped，matrix validator 零 error 零 warning。
 
 ## 近期变更摘要
 

@@ -18,14 +18,17 @@ YAML 是数据不是代码——引擎按硬件档位"算"出工作流。
         record_metrics.record_step        实机指标采集
   对标  benchmark_advisory.run            4 参照物 6 维超越分
         resource_profiler                 实机省钱测算
+  叙事  narrative_architect.episode_architect  集级 beat sheet+爽点排布+叙事质检
+        hook_engine.hook_gate               16 类钩子评分+发布闸门
+  平台  platform_spec.check_compliance     8 平台成片合规校验+导出参数规划
   校验  config_validator.validate_matrix  matrix 结构+交叉引用校验（CI）
   编排  orchestrator.run_pipeline         8 环节断点重跑 + 指标采集
   探测  hw_probe                          硬件探测
 
 各模块离线可单测，不依赖 torch/CLIP 实模型。
 """
-__version__ = "0.5.12-six-dimension-expand"
+__version__ = "0.5.13-narrative-platform-expand"
 
-from . import capability_runner, model_gateway, param_advisor, model_registry, efficiency_planner, qa_loop, local_model_index, accessibility_layer, comfyui_feedback, workflow_explorer, cross_episode_memory, transition_design, multimodal_qa, resource_allocator, compat_layer, compliance_checker, observability, lora_train, clip_qa_bridge
+from . import capability_runner, model_gateway, param_advisor, model_registry, efficiency_planner, qa_loop, local_model_index, accessibility_layer, comfyui_feedback, workflow_explorer, cross_episode_memory, transition_design, multimodal_qa, resource_allocator, compat_layer, compliance_checker, observability, lora_train, clip_qa_bridge, narrative_architect, hook_engine, platform_spec
 from .workflow_gen import apply_mode_feedback
 from .workflow_explorer import explore_and_learn, apply_exploration_results, run_exploration_batch
