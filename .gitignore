@@ -18,3 +18,4 @@ kfs/
 *.log
 __pycache__/
 .ssh-mirror/
+praise_ledger.jsonl
