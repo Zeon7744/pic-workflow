@@ -54,6 +54,8 @@ def repair_delivery(res: Dict[str, Any],
             if "真实产物" in g or "真实模型" in g:
                 unresolvable.append(g)
 
+    # 本地有可用 checkpoint 时，把"真实产物/真实模型"缺口降级为可本地真跑
+    unresolvable = _local_downgrade(unresolvable, current, wf, actions, rnd)
     final_dr = _readiness(current, workdir)
     return {
         "ready": final_dr["ready"],
@@ -61,6 +63,8 @@ def repair_delivery(res: Dict[str, Any],
         "rounds": min(rnd, max_rounds),
         "delivery_readiness": final_dr,
         "unresolvable": unresolvable,
+        "local_downgraded": any(a.get("action") == "local_downgrade"
+                               for a in actions),
     }
 
 
@@ -133,6 +137,50 @@ def _inject_mode_feedback(res: Dict[str, Any], wf: Dict[str, Any],
     actions.append({"round": rnd, "action": "inject_mode_feedback",
                     "stage": "video_shot", "ok": True,
                     "why": "已补齐模式回流字段，数据可反哺原 workflow"})
+
+
+def _local_downgrade(unresolvable: List[str], res: Dict[str, Any],
+                     wf: Dict[str, Any], actions: List[Dict[str, Any]],
+                     rnd: int) -> List[str]:
+    """本地有可用 checkpoint 时，把"需真实产物/真实模型"类 unresolvable
+    降级为"可本地真跑"——在对应环节产物里写入 local_checkpoint + local_runnable。
+
+    返回降级后的 unresolvable 列表（已可本地跑的项会被移出，其余保留）。"""
+    # 找一个可用的本地 checkpoint：优先 workflow.local_models，其次现扫本地目录
+    local_ckpt = (wf.get("local_models") or [""])[0]
+    if not local_ckpt:
+        ldir = wf.get("local_models_dir", "") or ""
+        if ldir and ldir != "local":
+            try:
+                from .comfyui_runner import _index_local_models
+                reg = _index_local_models(ldir)
+                if reg:
+                    local_ckpt = next(iter(reg.values())).get("local_file_name", "")
+            except Exception:
+                local_ckpt = ""
+    if not local_ckpt:
+        return unresolvable  # 本地也没有模型，无法降级，原样返回
+
+    kept = []
+    for g in unresolvable:
+        if ("真实产物" in g or "真实模型" in g or "真实 ComfyUI" in g):
+            # 把本地 checkpoint 写进 video_shot 产物，标记可本地真跑
+            video = res.setdefault("artifacts", {}).setdefault("video_shot", {})
+            video["local_checkpoint"] = local_ckpt
+            video["local_models_dir"] = wf.get("local_models_dir", "") or ""
+            video["local_runnable"] = True
+            video["downgraded_from_unresolvable"] = True
+            video.setdefault("clip_count", 0)
+            video["note"] = ("本地 checkpoint 可用，已降级为可本地真跑："
+                              f"{local_ckpt}")
+            actions.append({"round": rnd, "action": "local_downgrade",
+                            "stage": "video_shot", "ok": True,
+                            "why": f"本地有 checkpoint {local_ckpt}，"
+                                   "真实产物缺口降级为可本地真跑"})
+            # 该项不再 unresolvable
+            continue
+        kept.append(g)
+    return kept
 
 
 def persist_report(res: Dict[str, Any], repair: Dict[str, Any],

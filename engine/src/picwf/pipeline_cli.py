@@ -30,7 +30,8 @@ def run(script_path: str, tier: str = "T1", style: str = "S1_anime_jp",
         free_vram_gb: float = 6.0, audio_mode: str = "auto",
         workdir: str = "./_pipe_cli", resume_ids: List[str] = None,
         mode: str = "beginner",
-        auto_repair: bool = True) -> Dict[str, Any]:
+        auto_repair: bool = True,
+        local_models_dir: str = "") -> Dict[str, Any]:
     """一条命令端到端出片：剧本 → 8 环节 → 成片，并透传三档模式。"""
     auto_repair_flag = bool(auto_repair)
     os.makedirs(workdir, exist_ok=True)
@@ -39,6 +40,8 @@ def run(script_path: str, tier: str = "T1", style: str = "S1_anime_jp",
                            scenario=scenario, ep=ep, audio_mode=audio_mode,
                            mode=mode)
     wf["episode"] = ep
+    if local_models_dir:
+        wf["local_models_dir"] = local_models_dir
     ex = make_executors(wf, workdir=workdir)
     res = run_pipeline_8stage(wf, ex,
                               upstream_inputs={"script_struct": {"text": script_text}},
@@ -59,6 +62,7 @@ def run(script_path: str, tier: str = "T1", style: str = "S1_anime_jp",
             "actions": repair.get("actions"),
             "unresolvable": repair.get("unresolvable"),
             "delivery_readiness": repair.get("delivery_readiness"),
+            "local_downgraded": repair.get("local_downgraded", False),
         }
         # 修复后的 artifacts 已写回 res，交付体检以修复后为准
         res["delivery_readiness"] = repair.get("delivery_readiness", _delivery_readiness(res))
@@ -141,12 +145,17 @@ def main(argv=None) -> int:
     ap.add_argument("--mode", default="beginner", help="运行模式：beginner/pro/expert")
     ap.add_argument("--no-auto-repair", action="store_true",
                     help="关闭缺口自动修复（默认开启）")
+    ap.add_argument("--local-models-dir", default="",
+                    help="本地模型目录（如 D:\\ComfyUI\\...\\checkpoints），"
+                         "有真实 checkpoint 时注入实跑 prompt，可把"
+                         "真实产物缺口降级为本地可跑")
     args = ap.parse_args(argv)
     res = run(args.script, tier=args.tier, style=args.style,
               scenario=args.scenario, ep=args.ep, free_vram_gb=args.free_vram_gb,
               audio_mode=args.audio_mode, workdir=args.workdir,
               resume_ids=args.resume, mode=args.mode,
-              auto_repair=not args.no_auto_repair)
+              auto_repair=not args.no_auto_repair,
+              local_models_dir=args.local_models_dir)
     # 打印执行摘要
     print(f"✓ 出片完成: {res['final_video']}")
     print(f"  环节序: {res['order']}")
@@ -164,7 +173,9 @@ def main(argv=None) -> int:
         print(f"  自动修复: {'达成可交付' if ar.get('ready') else '仍有不可修复项'} "
               f"（动作 {len(ar.get('actions', []))} 个，轮次 {ar.get('rounds')}）")
         for u in ar.get("unresolvable", []):
-            print(f"    - 需实跑: {u}")
+            print(f"    - 仍需实跑: {u}")
+        if ar.get("local_downgraded"):
+            print(f"    - 已本地降级: 真实产物缺口转本地 checkpoint 可跑")
     print(f"  报告: {res['report']}")
     return 0 if res["ok"] else 1
 

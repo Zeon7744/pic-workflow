@@ -73,12 +73,16 @@ class ComfyUIRunner:
                  timeout_s: float = 120.0,
                  mock_fallback: bool = True,
                  workdir: Optional[str] = None,
-                 max_retries: int = 2):
+                 max_retries: int = 2,
+                 local_models_dir: Optional[str] = None):
         self.base_url = base_url.rstrip("/")
         self.timeout_s = timeout_s
         self.mock_fallback = mock_fallback
         self.workdir = workdir
         self.max_retries = max_retries
+        self.local_models_dir = local_models_dir
+        # 本地模型索引：扫描 D:\ComfyUI\...\checkpoints 等目录，注入真跑 prompt
+        self.local_models = _index_local_models(local_models_dir)
         self._completed: Dict[str, Dict[str, Any]] = {}  # 断点：tid -> 结果
         self._service = detect_comfyui_service(base_url)
         self._mock_mode = not self._service["available"] and mock_fallback
@@ -157,11 +161,18 @@ class ComfyUIRunner:
         """
         import urllib.request
         # 构造 ComfyUI prompt（MVP：简化为单节点）
+        # 本地模型目录有真实 checkpoint 时，把它注入 prompt，让 ComfyUI 加载真模型
+        ckpt = _pick_local_checkpoint(self.local_models, model_impl)
         prompt = {
             "shot_id": tid,
             "model_impl": model_impl,
+            "local_checkpoint": ckpt,
+            "local_models_dir": self.local_models_dir or "",
             "nodes": {
-                "1": {"class_type": model_impl, "inputs": {"shot_id": tid}}
+                "1": {
+                    "class_type": model_impl,
+                    "inputs": {"shot_id": tid, "ckpt_name": ckpt},
+                }
             },
             "class_type": "RunPrompt",
         }
@@ -212,6 +223,8 @@ class ComfyUIRunner:
                         "peak_vram_gb": peak_vram,
                         "shot_elapsed_s": elapsed,
                         "comfyui_prompt_id": prompt_id,
+                        "local_checkpoint": ckpt,
+                        "local_models_dir": self.local_models_dir or "",
                     }
             except Exception:
                 pass
@@ -245,30 +258,62 @@ class ComfyUIRunner:
             # 12GB 模型在 6GB 卡上 OOM
             raise MemoryError(
                 f"CUDA out of memory: {model_impl} 需 12GB > 6GB free")
+        _ckpt = _pick_local_checkpoint(self.local_models, model_impl)
         return {
             "ok": True,
             "model_impl": model_impl,
             "peak_vram_gb": 4.0,
             "shot_elapsed_s": 54.0,  # 1060 T1 实测基线
             "mock": True,
+            "local_checkpoint": _ckpt,
+            "local_models_dir": self.local_models_dir or "",
         }
+
+
+def _index_local_models(local_models_dir):
+    """扫描本地模型目录，返回 {model_id: spec}；目录不存在/不可读返回空 dict。"""
+    if not local_models_dir:
+        return {}
+    try:
+        from .local_model_index import scan_dir_listing
+        scanned = scan_dir_listing(local_models_dir, refresh=True)
+        return scanned.get("registry", {})
+    except Exception:
+        return {}
+
+
+def _pick_local_checkpoint(local_models, model_impl):
+    """为 model_impl 挑一个本地真实 checkpoint 名（找不到则原样用 model_impl）。"""
+    if not local_models:
+        return model_impl
+    # 优先精确匹配 model_impl
+    if model_impl in local_models:
+        return local_models[model_impl].get("local_file_name", model_impl)
+    # 否则取第一个 video/image 类本地模型
+    for mid, spec in local_models.items():
+        return spec.get("local_file_name", mid)
+    return model_impl
 
 
 def make_comfyui_runner(base_url: Optional[str] = None,
                        timeout_s: float = 120.0,
                        mock_fallback: bool = True,
                        workdir: Optional[str] = None,
-                       max_retries: int = 2) -> ComfyUIRunner:
+                       max_retries: int = 2,
+                       local_models_dir: Optional[str] = None) -> ComfyUIRunner:
     """工厂：创建 ComfyUIRunner。ComfyUI 不可用时自动 mock 降级。
 
     base_url 优先级：显式传入 > 环境变量 COMFYUI_URL > 默认 127.0.0.1:8188。
     workdir 提供后启用断点重跑（已完成 tid 复用结果，不重复提交 ComfyUI）。
+    local_models_dir 提供后扫描该目录（如 D:\ComfyUI\...\checkpoints），
+    把真实 checkpoint 注入每次实跑 prompt，让本地模型资产真正参与出片。
     """
     if base_url is None:
         base_url = COMFYUI_URL_ENV or COMFYUI_DEFAULT_URL
     return ComfyUIRunner(base_url=base_url, timeout_s=timeout_s,
                         mock_fallback=mock_fallback,
-                        workdir=workdir, max_retries=max_retries)
+                        workdir=workdir, max_retries=max_retries,
+                        local_models_dir=local_models_dir)
 
 
 def main(argv=None):
@@ -280,6 +325,8 @@ def main(argv=None):
     p.add_argument("--mock", action="store_true",
                    help="强制 mock 模式（不连 ComfyUI）")
     p.add_argument("--shot", default="shot_test_1", help="测试镜头 id")
+    p.add_argument("--local-models-dir", default=None,
+                   help="本地模型目录（如 D:\\ComfyUI\\...\\checkpoints）")
     args = p.parse_args(argv)
 
     # 探测
@@ -291,13 +338,19 @@ def main(argv=None):
 
     # 跑 1 镜头：--mock 强制 mock；不传则自动探测（不可用降级 mock）
     if args.mock:
-        runner = ComfyUIRunner(base_url=args.url, mock_fallback=False)
+        runner = ComfyUIRunner(base_url=args.url, mock_fallback=False,
+                               local_models_dir=args.local_models_dir)
         runner._mock_mode = True  # 强制 mock
         print("\n模式: mock（强制）")
     else:
-        runner = ComfyUIRunner(base_url=args.url, mock_fallback=True)
+        runner = ComfyUIRunner(base_url=args.url, mock_fallback=True,
+                               local_models_dir=args.local_models_dir)
         print(f"\n模式: {'mock（自动降级）' if runner.is_mock else 'comfyui 实跑'}")
+        if args.local_models_dir:
+            print(f"  本地模型目录: {args.local_models_dir}（索引到 {len(runner.local_models)} 个 checkpoint）")
     out = runner.exec(args.shot, model_impl="wan13b_gguf_q4_offload_480")
+    if out.get("local_checkpoint"):
+        print(f"  本地 checkpoint: {out['local_checkpoint']}")
     print(f"  结果: {json.dumps(out, ensure_ascii=False)}")
     return 0
 

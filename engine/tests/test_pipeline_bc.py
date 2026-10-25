@@ -139,3 +139,59 @@ def test_cli_can_disable_auto_repair(tmp_path):
                            workdir=str(out), auto_repair=False)
     # 关闭时报告仍保留交付体检，但不写 auto_repair 动作块
     assert "auto_repair" not in res
+
+
+def test_local_models_dir_injects_real_checkpoint_into_runner(tmp_path):
+    """本地模型目录有真实 checkpoint 时，runner 应索引到并注入 prompt。"""
+    from picwf.comfyui_runner import ComfyUIRunner, make_comfyui_runner
+    models_dir = tmp_path / "checkpoints"
+    models_dir.mkdir()
+    # 造一个真实 checkpoint 文件
+    (models_dir / "sdxl_base.safetensors").write_text("dummy")
+    runner = make_comfyui_runner(mock_fallback=True, workdir=str(tmp_path),
+                                 local_models_dir=str(models_dir))
+    # 索引到本地 checkpoint
+    assert len(runner.local_models) >= 1, "应索引到本地 checkpoint"
+    # 真跑 prompt 应带 local_checkpoint
+    out = runner.exec("shot_test_1", model_impl="sdxl_base")
+    assert out.get("local_checkpoint"), "prompt 应注入本地 checkpoint 名"
+    assert out.get("local_models_dir") == str(models_dir)
+
+
+def test_local_models_dir_missing_falls_back_cleanly(tmp_path):
+    """本地目录不存在时，索引为空、不报错，prompt 回退占位 model_impl。"""
+    from picwf.comfyui_runner import make_comfyui_runner
+    runner = make_comfyui_runner(mock_fallback=True, workdir=str(tmp_path),
+                                 local_models_dir=str(tmp_path / "not_exist_dir"))
+    assert runner.local_models == {}, "目录不存在应索引为空"
+    out = runner.exec("shot_test_1", model_impl="wan13b")
+    assert out.get("local_checkpoint") == "wan13b", "无本地模型时回退 model_impl"
+
+
+def test_auto_repair_downgrades_unresolvable_when_local_checkpoint(tmp_path):
+    """本地有 checkpoint 时，真实产物类 unresolvable 应降级为可本地真跑。"""
+    from picwf import auto_repair as ar
+    res = {"ok": True, "order": ["video_shot"], "completed": ["video_shot"],
+           "failed": {}, "artifacts": {"video_shot": {"clip_count": 0}}}
+    wf = {"local_models": ["sdxl_base.safetensors"],
+          "local_models_dir": "D:\\ComfyUI\\models"}
+    actions = []
+    kept = ar._local_downgrade(["视频镜头未产生真实产物，只能作为流程预演交付"],
+                               res, wf, actions, 1)
+    # 真实产物缺口被本地降级，unresolvable 不再保留
+    assert "视频镜头未产生真实产物" not in " ".join(kept)
+    video = res["artifacts"]["video_shot"]
+    assert video.get("local_runnable") is True
+    assert video.get("local_checkpoint") == "sdxl_base.safetensors"
+    assert any(a.get("action") == "local_downgrade" for a in actions)
+
+
+def test_auto_repair_keeps_unresolvable_when_no_local_model(tmp_path):
+    """本地无 checkpoint 时，unresolvable 原样保留，不误降级。"""
+    from picwf import auto_repair as ar
+    res = {"ok": True, "artifacts": {"video_shot": {"clip_count": 0}}}
+    wf = {"local_models": [], "local_models_dir": ""}
+    actions = []
+    kept = ar._local_downgrade(["视频镜头未产生真实产物，只能作为流程预演交付"],
+                               res, wf, actions, 1)
+    assert "视频镜头未产生真实产物" in " ".join(kept), "无本地模型应保留 unresolvable"

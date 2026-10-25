@@ -51,9 +51,22 @@ def make_executors(workflow: Dict[str, Any],
     bgm_track = adv_by_id.get("bgm", {}).get("track_key", "") or workflow.get("bgm", "") or "B08_suspense_cold"
 
     # video_shot 执行器：默认走 capability 层（ComfyUI 仅 adapter 之一）
+    # 有本地模型目录（D:\ComfyUI\...\checkpoints）时注入真 checkpoint 参与实跑
     if runner is None:
         from .comfyui_runner import make_comfyui_runner
-        runner = make_comfyui_runner(mock_fallback=True, workdir=workdir)
+        _local_dir = workflow.get("local_models_dir", "") or ""
+        _has_local = bool(workflow.get("local_models"))
+        runner = make_comfyui_runner(
+            mock_fallback=True,
+            workdir=workdir,
+            local_models_dir=_local_dir if (_local_dir and _local_dir != "local") else "",
+        )
+        if _has_local or runner.local_models:
+            # 把本地索引到的 checkpoint 名写回 workflow.local_models，供 efficiency_planner prefer_local
+            if runner.local_models:
+                workflow.setdefault("local_models", [
+                    sp.get("local_file_name") for sp in runner.local_models.values()
+                ])
 
     def _capability_backend_for(kind: str) -> Dict[str, Any]:
         from .model_gateway import choose_backend
