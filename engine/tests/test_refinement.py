@@ -64,5 +64,10 @@ def test_score_shot_backcompat_no_tier():
 
 # ---------- 方向 3：__init__ 模块契约 ----------
 def test_package_contract_version():
+    """校验 picwf.__version__ 符合 X.Y.Z(-tag)? 契约格式（不锁定具体值，
+    避免每次版本推进都要改测试）。"""
+    import re
     import picwf
-    assert picwf.__version__ == "0.5.8-local-models-realrun"
+    assert picwf.__version__, "picwf.__version__ 不可为空"
+    m = re.match(r"^\d+\.\d+\.\d+(-[A-Za-z0-9._-]+)?$", picwf.__version__)
+    assert m, f"picwf.__version__={picwf.__version__!r} 不符合 X.Y.Z 契约格式"
