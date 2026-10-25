@@ -12,4 +12,4 @@ pic-workflow/
 ## 数据流
 1. engine 读图片素材 → 编排工作流 → 生成视频/成片
 2. 每次生成前走 billing.check_access('free','use') 门控（1 次/天）
-3. 超限 402 + 升级链接（爱发电 https://afdian.com/@Zeon7744）
+3. 超限 402 + 升级链接（面包多 Pay https://mbd.com/@Zeon7744）
