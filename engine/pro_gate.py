@@ -22,7 +22,7 @@ PLAN_RULES = {
 # 面包多 Pay收款配置（env 注入，不入库）
 MBD_APP_ID = os.environ.get("MBD_APP_ID", "0c59dda8a1bb11f19b9552540025c377")
 MBD_API_KEY   = os.environ.get("MBD_API_KEY", "")
-MBD_GATEWAY_URL    = os.environ.get("MBD_GATEWAY_URL", "https://mbd.pub/@Zeon7744
+MBD_GATEWAY_URL    = os.environ.get("MBD_GATEWAY_URL", "https://mbd.pub/@Zeon7744")
 
 
 def check(plan: str, tenant_id: str = "") -> dict:
@@ -38,7 +38,7 @@ def check(plan: str, tenant_id: str = "") -> dict:
             return {
                 "allowed": False,
                 "reason": "free_daily_limit_reached (1/天)，升级 Pro 解锁",
-                "upgrade_url": "https://mbd.pub/@Zeon7744
+                "upgrade_url": "https://mbd.pub/@Zeon7744",
                 "remaining": 0,
                 "character_consistency": False,
             }

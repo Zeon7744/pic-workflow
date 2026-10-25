@@ -26,7 +26,7 @@ spec = importlib.util.spec_from_file_location("billing", "billing.py")
 mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
 _reg = getattr(mod, "_REGISTRY", None) or getattr(mod, "_GATEWAYS", None)
 gw = _reg["mbd"]()
-o = gw.create_order("t1", 100, "smoke", "free")
+o = gw.create_order("free", 100, {"smoke": "t1"})
 assert o["status"] == "created_pending_key", o
 assert "MBD_API_KEY" in o.get("needs_secret", []), o
 q = gw.query_callback("x")
@@ -52,3 +52,21 @@ assert params["amount_total"] == 100, "1 元 = 100 分"
 print(f"OK: 1元首单参数 amount_total=100分 out_trade_no={out_trade_no} 已生成签名")
 print("OK: MBD_API_KEY 未配时 MbdGateway.create_order 走'待开通'降级路径，行为对齐 noop")
 PYEOF_MBD
+
+# ── 第三条通道 praise（支付宝/微信个人赞赏码）降级验证 ─────────────────────
+echo "==> [praise] 赞赏码网关未配码值降级验证（created_pending_key + needs_secret）"
+python3 - <<'PYEOF_PRAISE'
+import importlib.util, os, sys
+os.environ.pop("PRAISE_ALIPAY_QR", None); os.environ.pop("PRAISE_WX_QR", None)
+spec = importlib.util.spec_from_file_location("billing", "billing.py")
+mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+gws = getattr(mod, "_REGISTRY", None) or getattr(mod, "_GATEWAYS", None)
+assert "praise" in gws, "praise 网关未登记"
+gw = gws["praise"]()
+o = gw.create_order("free", 300, {"smoke": "t1"})
+assert o["status"] == "created_pending_key", o
+assert o["needs_secret"] == ["PRAISE_ALIPAY_QR"], o
+q = gw.query_callback(o["order_id"])
+assert q["status"] in ("awaiting_manual_recon", "paid", "not_found"), q
+print(f"OK: praise 降级 status={o['status']} needs={o['needs_secret']}")
+PYEOF_PRAISE
