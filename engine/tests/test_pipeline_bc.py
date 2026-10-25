@@ -83,3 +83,59 @@ def test_cli_end_to_end_delivery_gaps_are_structured(tmp_path):
     dr = res["delivery_readiness"]
     assert "checks" in dr and "gaps" in dr
     assert isinstance(dr["ready"], bool)
+
+def test_auto_repair_closes_mode_feedback_gap(tmp_path):
+    """模式回流缺口可被自动修复：修复后 video_shot 带上 mode_feedback。"""
+    import importlib
+    ar = importlib.import_module("picwf.auto_repair")
+    res = {"ok": True, "order": ["video_shot"],
+           "completed": ["video_shot"], "failed": {},
+           "artifacts": {"video_shot": {"clip_count": 1,
+                                         "video_clips": [{"index": 1, "clip": True}]}}}
+    wf = {"mode": "pro", "mode_overlay": {"mode": "pro", "params": {"resolution": 720}}}
+    actions = []
+    ar._inject_mode_feedback(res, wf, actions, 1)
+    # 回流字段被自动补
+    assert "mode_feedback" in res["artifacts"]["video_shot"]
+    assert res["artifacts"]["video_shot"]["mode_feedback"]["mode"] == "pro"
+    assert any(a.get("action") == "inject_mode_feedback" for a in actions)
+
+
+def test_auto_repair_reports_unresolvable_model_runs():
+    """不可自动修复的缺口（需真实模型）如实标注，不伪造成功。"""
+    import importlib
+    ar = importlib.import_module("picwf.auto_repair")
+    res = {"ok": True, "order": ["video_shot"],
+           "completed": ["video_shot"], "failed": {},
+           "artifacts": {"video_shot": {"clip_count": 0,
+                                         "mode_feedback": {"mode": "beginner"}}}}
+    wf = {"mode": "beginner", "mode_overlay": {"mode": "beginner"}}
+    repair = ar.repair_delivery(res, wf, {}, "/tmp/arx", max_rounds=1)
+    # 视频未产生真实产物属需实跑项，应进入 unresolvable
+    assert any("真实产物" in u or "真实模型" in u for u in repair["unresolvable"])
+
+
+def test_cli_auto_repair_populated_and_persisted(tmp_path):
+    """CLI 主链路默认开启自动修复，报告里含 auto_repair 字段。"""
+    script = tmp_path / "s.md"
+    script.write_text("# 江城\n第1场：男主进屋\n第2场：反转", encoding="utf-8")
+    out = tmp_path / "out_ar"
+    res = pipeline_cli.run(str(script), tier="T1", ep=3,
+                           workdir=str(out), mode="pro", auto_repair=True)
+    assert "auto_repair" in res, "CLI 应默认产出 auto_repair 块"
+    ar = res["auto_repair"]
+    assert "ready" in ar and "actions" in ar
+    import json
+    rpt = json.load(open(res["report"]))
+    assert "auto_repair" in rpt
+    assert rpt["auto_repair"]["rounds"] >= 1
+
+
+def test_cli_can_disable_auto_repair(tmp_path):
+    script = tmp_path / "s2.md"
+    script.write_text("第1场：男主进屋", encoding="utf-8")
+    out = tmp_path / "out_no_ar"
+    res = pipeline_cli.run(str(script), tier="T1", ep=2,
+                           workdir=str(out), auto_repair=False)
+    # 关闭时报告仍保留交付体检，但不写 auto_repair 动作块
+    assert "auto_repair" not in res

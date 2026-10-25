@@ -29,8 +29,10 @@ def run(script_path: str, tier: str = "T1", style: str = "S1_anime_jp",
         scenario: str = "dark_thriller", ep: int = 10,
         free_vram_gb: float = 6.0, audio_mode: str = "auto",
         workdir: str = "./_pipe_cli", resume_ids: List[str] = None,
-        mode: str = "beginner") -> Dict[str, Any]:
+        mode: str = "beginner",
+        auto_repair: bool = True) -> Dict[str, Any]:
     """一条命令端到端出片：剧本 → 8 环节 → 成片，并透传三档模式。"""
+    auto_repair_flag = bool(auto_repair)
     os.makedirs(workdir, exist_ok=True)
     script_text = _read_script(script_path)
     wf = generate_workflow(tier, free_vram_gb=free_vram_gb, style=style,
@@ -46,19 +48,48 @@ def run(script_path: str, tier: str = "T1", style: str = "S1_anime_jp",
     video_art = res.get("artifacts", {}).get("video_shot", {})
     if isinstance(video_art, dict):
         mode_feedback = video_art.get("mode_feedback", {}) or {}
+    # 自动修复：基于交付缺口尝试补产物/重跑/补回流，修复后再体检
+    auto_repair_report = {}
+    if auto_repair_flag:
+        from .auto_repair import repair_delivery, persist_report
+        repair = repair_delivery(res, wf, ex, workdir, max_rounds=2)
+        auto_repair_report = {
+            "ready": repair.get("ready"),
+            "rounds": repair.get("rounds"),
+            "actions": repair.get("actions"),
+            "unresolvable": repair.get("unresolvable"),
+            "delivery_readiness": repair.get("delivery_readiness"),
+        }
+        # 修复后的 artifacts 已写回 res，交付体检以修复后为准
+        res["delivery_readiness"] = repair.get("delivery_readiness", _delivery_readiness(res))
+    else:
+        res["delivery_readiness"] = _delivery_readiness(res)
+
+    report_path = os.path.join(workdir, "pipeline_report.json")
+    if auto_repair_flag:
+        from .auto_repair import persist_report
+        # 先合并模式层字段
+        res.setdefault("mode", wf.get("mode"))
+        res.setdefault("mode_overlay", wf.get("mode_overlay"))
+        res.setdefault("mode_feedback", mode_feedback)
+        persist_report(res, auto_repair_report, workdir, report_path)
+        res["report"] = report_path
+        res["final_video"] = res["artifacts"].get("package_publish", {}).get("final_video", "")
+        res["auto_repair"] = auto_repair_report
+        return res
+
     report_payload = {"ok": res["ok"], "order": res["order"],
                       "completed": res["completed"], "failed": res["failed"],
                       "artifacts": res["artifacts"],
                       "mode": wf.get("mode"),
                       "mode_overlay": wf.get("mode_overlay"),
                       "mode_feedback": mode_feedback,
-                      "delivery_readiness": _delivery_readiness(res)}
-    report_path = os.path.join(workdir, "pipeline_report.json")
+                      "delivery_readiness": res["delivery_readiness"]}
     with open(report_path, "w", encoding="utf-8") as f:
         json.dump(report_payload, f, ensure_ascii=False, indent=2)
     res["report"] = report_path
     res["final_video"] = res["artifacts"].get("package_publish", {}).get("final_video", "")
-    res["delivery_readiness"] = report_payload["delivery_readiness"]
+    res["delivery_readiness"] = res["delivery_readiness"]
     return res
 
 
@@ -108,11 +139,14 @@ def main(argv=None) -> int:
     ap.add_argument("--workdir", default="./_pipe_cli", help="产物输出目录")
     ap.add_argument("--resume", nargs="*", default=None, help="断点：已完成的环节 id")
     ap.add_argument("--mode", default="beginner", help="运行模式：beginner/pro/expert")
+    ap.add_argument("--no-auto-repair", action="store_true",
+                    help="关闭缺口自动修复（默认开启）")
     args = ap.parse_args(argv)
     res = run(args.script, tier=args.tier, style=args.style,
               scenario=args.scenario, ep=args.ep, free_vram_gb=args.free_vram_gb,
               audio_mode=args.audio_mode, workdir=args.workdir,
-              resume_ids=args.resume, mode=args.mode)
+              resume_ids=args.resume, mode=args.mode,
+              auto_repair=not args.no_auto_repair)
     # 打印执行摘要
     print(f"✓ 出片完成: {res['final_video']}")
     print(f"  环节序: {res['order']}")
@@ -125,6 +159,12 @@ def main(argv=None) -> int:
         print(f"  可交付: {'是' if dr['ready'] else '否'}")
         if dr.get("gaps"):
             print(f"  缺口: {', '.join(dr['gaps'])}")
+    if "auto_repair" in res:
+        ar = res["auto_repair"]
+        print(f"  自动修复: {'达成可交付' if ar.get('ready') else '仍有不可修复项'} "
+              f"（动作 {len(ar.get('actions', []))} 个，轮次 {ar.get('rounds')}）")
+        for u in ar.get("unresolvable", []):
+            print(f"    - 需实跑: {u}")
     print(f"  报告: {res['report']}")
     return 0 if res["ok"] else 1
 
