@@ -18,3 +18,11 @@ kfs/
 *.log
 __pycache__/
 .ssh-mirror/
+_matrix_report.json
+_push.py
+_push.txt
+_full.txt
+_f.txt
+_s6.txt
+_sig*.txt
+val*.txt
