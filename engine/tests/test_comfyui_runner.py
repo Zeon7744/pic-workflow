@@ -25,11 +25,11 @@ class TestComfyUIRunner:
     """ComfyUI runner 接 orchestrator 真链路。"""
 
     def test_detect_service_returns_structured(self):
-        """detect_comfyui_service 返回结构正确（cloud 沙箱无 ComfyUI 服务）。"""
-        svc = cr.detect_comfyui_service()
+        """detect_comfyui_service 返回结构正确（用必失败端口，环境无关）。"""
+        svc = cr.detect_comfyui_service("http://127.0.0.1:59999")
         assert "available" in svc and "url" in svc and "gpu" in svc and "error" in svc
-        # cloud 沙箱无 127.0.0.1:8188 服务，应 available=False
-        assert svc["available"] is False, f"cloud 沙箱应探测失败，实际 {svc}"
+        # 59999 端口无服务，必探测失败
+        assert svc["available"] is False, f"无服务应探测失败，实际 {svc}"
         assert svc["error"], "探测失败应有 error 信息"
 
     def test_mock_mode_success(self):
@@ -82,10 +82,12 @@ class TestComfyUIRunner:
         assert learned["dark_thriller::T1"]["samples"] == 10
         assert learned["dark_thriller::T1"]["oom_rate"] == 0.0
 
-    def test_runner_backward_compat_default_args(self):
-        """ComfyUIRunner 默认参数（不连 ComfyUI）可用。"""
+    def test_runner_backward_compat_default_args(self, monkeypatch):
+        """ComfyUIRunner 默认参数（强制 ComfyUI 不可用）自动 mock，环境无关。"""
+        monkeypatch.setattr(cr, "detect_comfyui_service",
+                           lambda *a, **k: {"available": False, "url": "x",
+                                             "gpu": {}, "error": "offline"})
         runner = cr.make_comfyui_runner()
-        # cloud 沙箱无 ComfyUI 服务，应自动 mock
         assert runner.is_mock is True, "ComfyUI 不可用应自动 mock"
         out = runner.exec("shot_x", model_impl="wan13b_gguf_q4_offload_480")
         assert out["ok"] is True

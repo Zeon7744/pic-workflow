@@ -51,16 +51,28 @@ def test_run_full_pipeline():
 
 
 def test_download_safe_path_only(tmp_path):
-    # 合法 /tmp/hookforge_ui_* 路径
-    td = tmp_path if str(tmp_path).startswith("/tmp") else Path("/tmp") / "hookforge_ui_test_dl"
-    import tempfile
-    if not td.name.startswith("hookforge_ui"):
-        td = Path(tempfile.mkdtemp(prefix="hookforge_ui_"))
+    # 合法：UI 临时工作目录（tempdir/hookforge_ui_*）内的文件可下载
+    # name 传相对临时根目录的路径，跨平台安全（避免绝对路径盘符/反斜杠进 URL）
+    import tempfile, os
+    troot = os.path.join(tempfile.gettempdir(), "hookforge_ui_")
+    td = Path(tempfile.mkdtemp(prefix="hookforge_ui_"))
+    rel_dirname = td.name  # 形如 hookforge_ui_abc123
     vid = td / "out" / "final.mp4"
     vid.parent.mkdir(parents=True, exist_ok=True)
     vid.write_bytes(b"mp4")
-    r = _client().get(f"/download/{vid.as_posix().lstrip('/')}")
+    rel = f"{rel_dirname}/out/final.mp4"
+    r = _client().get(f"/download/{rel}")
     assert r.status_code == 200
-    # 越权路径必须拒
+    # 越权路径（逃出 UI 临时目录）被拒绝
+    r2 = _client().get("/download/etc/passwd")
+    assert r2.status_code == 400
+    import tempfile, os
+    td = Path(tempfile.mkdtemp(prefix="hookforge_ui_"))
+    vid = td / "out" / "final.mp4"
+    vid.parent.mkdir(parents=True, exist_ok=True)
+    vid.write_bytes(b"mp4")
+    r = _client().get(f"/download/{vid}")
+    assert r.status_code == 200
+    # 越权路径（逃出 UI 临时目录）被拒绝
     r2 = _client().get("/download/etc/passwd")
     assert r2.status_code == 400

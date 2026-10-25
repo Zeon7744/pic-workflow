@@ -111,14 +111,21 @@ def run():
     })
 
 
+def _ui_tmp_prefix():
+    """UI 临时工作目录前缀（跨平台）：以运行时 tempdir 为安全边界，防路径越权。"""
+    import tempfile
+    return os.path.join(tempfile.gettempdir(), "hookforge_ui_")
+
+
 @app.route("/download/<path:name>")
 def download(name):
-    """成片下载（仅允许 UI 临时产物 /tmp/hookforge_ui_* 内的文件）。"""
-    # 路由参数可能带或不带前导斜杠，统一成绝对路径
-    safe = os.path.abspath(name if name.startswith("/") else "/" + name)
-    # 安全校验：必须在 /tmp/hookforge_ui_* 临时产物目录内
-    norm = os.path.normpath(safe)
-    if not norm.startswith("/tmp/hookforge_ui_"):
+    """只允许下载 UI 临时工作目录（tempdir/hookforge_ui_*）内的文件。
+    name 形如 hookforge_ui_<id>/out/final.mp4，相对系统 tempdir 解析（跨平台一致）。"""
+    import tempfile, re
+    tdir = tempfile.gettempdir()
+    norm = os.path.normpath(os.path.join(tdir, name))
+    # 边界：必须落在 <tempdir>/hookforge_ui_* 内
+    if not re.match(r"^" + re.escape(os.path.join(tdir, "hookforge_ui_")), norm):
         return jsonify({"ok": False, "error": "路径不合法"}), 400
     if not os.path.exists(norm):
         return jsonify({"ok": False, "error": "文件不存在"}), 404

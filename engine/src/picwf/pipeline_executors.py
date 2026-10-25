@@ -232,8 +232,7 @@ def make_executors(workflow: Dict[str, Any],
                 "clip_count": asm_res.get("clip_count", len(clips_raw)),
                 "music": music_track, "voice": voice_track, "bgm": bgm_track,
                 "duration_s": asm_res.get("duration_s", 0),
-                "assembled": asm_res.get("ok", False),
-                "assembled_ffmpeg": asm_res.get("ffmpeg", False)}
+        "assembled": bool(asm_res.get("ok") or asm_res.get("assembled_video") or assembled_path),                "assembled_ffmpeg": asm_res.get("ffmpeg", False)}
 
     def _bgm_audio(up: Dict[str, Any]) -> Dict[str, Any]:
         # B 轨真建议（advise_tracks 出 B08_suspense_cold）

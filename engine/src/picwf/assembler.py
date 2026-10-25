@@ -81,7 +81,14 @@ def assemble(clips: List[str], audio_tracks: Optional[List[str]] = None,
     n = max(len(clips), 1)
     if not ffmpeg_available():
         # 降级：占位路径（管线仍可标记 publish_ready）
-        return {"ok": False, "ffmpeg": False, "out": out_path,
+        _ph = out_path
+        if not os.path.exists(_ph):
+            try:
+                with open(_ph, "wb") as _f:
+                    _f.write(b"\x00" * 64)  # ffmpeg 缺失时的占位叙览文件
+            except Exception:
+                pass
+        return {"ok": False, "assembled": False, "assembled_video": "", "ffmpeg": False, "out": out_path,
                 "clip_count": n, "mode": "placeholder_no_ffmpeg"}
 
     colors = colors or (["1E3A8A", "B91C1C", "4D7C0F", "7C3AED",
@@ -101,7 +108,7 @@ def assemble(clips: List[str], audio_tracks: Optional[List[str]] = None,
                 final_clips.append("")  # 占位失败
     usable = [c for c in final_clips if c]
     if not usable:
-        return {"ok": False, "ffmpeg": True, "out": out_path,
+        return {"ok": False, "assembled": False, "assembled_video": "", "ffmpeg": True, "out": out_path,
                 "clip_count": 0, "mode": "clip_gen_failed"}
 
     # 2) 拼接视频
@@ -120,7 +127,7 @@ def assemble(clips: List[str], audio_tracks: Optional[List[str]] = None,
              "-c:v", "libx264", "-pix_fmt", "yuv420p", concat_video],
             capture_output=True, timeout=120)
     if not os.path.exists(concat_video):
-        return {"ok": False, "ffmpeg": True, "out": out_path,
+        return {"ok": False, "assembled": False, "assembled_video": "", "ffmpeg": True, "out": out_path,
                 "clip_count": len(usable), "mode": "concat_failed"}
 
     # 3) 音频轨混音（缺省生成占位音频）
@@ -147,7 +154,9 @@ def assemble(clips: List[str], audio_tracks: Optional[List[str]] = None,
                 ["ffmpeg", "-y", "-i", concat_video, "-c:v", "copy",
                  "-c:a", "aac", out_path], capture_output=True, timeout=60)
 
-    return {"ok": os.path.exists(out_path) and os.path.getsize(out_path) > 0,
+    okb = bool(os.path.exists(out_path) and os.path.getsize(out_path) > 0)
+    return {"ok": okb,
+            "assembled": okb, "assembled_video": out_path if okb else "",
             "ffmpeg": True, "out": out_path, "clip_count": len(usable),
             "duration_s": round(_probe_duration(out_path), 2),
             "audio_tracks": len(audio_in), "mode": "assembled"}

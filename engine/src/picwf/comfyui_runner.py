@@ -81,7 +81,7 @@ class ComfyUIRunner:
         self.workdir = workdir
         self.max_retries = max_retries
         self.local_models_dir = local_models_dir
-        # 本地模型索引：扫描 D:\ComfyUI\...\checkpoints 等目录，注入真跑 prompt
+        # 本地模型索引：扫描 D:\\ComfyUI\...\checkpoints 等目录，注入真跑 prompt
         self.local_models = _index_local_models(local_models_dir)
         self._completed: Dict[str, Dict[str, Any]] = {}  # 断点：tid -> 结果
         self._service = detect_comfyui_service(base_url)
@@ -160,21 +160,39 @@ class ComfyUIRunner:
         重试：网络抖动自动重试 max_retries 次（不消耗 orchestrator 的失败路由配额）。
         """
         import urllib.request
-        # 构造 ComfyUI prompt（MVP：简化为单节点）
-        # 本地模型目录有真实 checkpoint 时，把它注入 prompt，让 ComfyUI 加载真模型
-        ckpt = _pick_local_checkpoint(self.local_models, model_impl)
+        # 构造真实可执行的 ComfyUI 文生图工作流：
+        # 本地模型目录有真 checkpoint → CheckpointLoaderSimple 加载真模型
+        #   → CLIPTextEncode(正/负) + EmptyLatentImage → KSampler → VAEDecode → SaveImage
+        # 没有本地 checkpoint → 回退 ComfyUI 默认 SD1.5 基础 checkpoint
+        ckpt = _pick_real_checkpoint(self.local_models, model_impl)
+        seed = int.from_bytes(tid.encode("utf-8")[:4], "big") % 4294967296
         prompt = {
-            "shot_id": tid,
-            "model_impl": model_impl,
-            "local_checkpoint": ckpt,
-            "local_models_dir": self.local_models_dir or "",
-            "nodes": {
-                "1": {
-                    "class_type": model_impl,
-                    "inputs": {"shot_id": tid, "ckpt_name": ckpt},
-                }
-            },
-            "class_type": "RunPrompt",
+            "1": {"class_type": "CheckpointLoaderSimple",
+                  "inputs": {"ckpt_name": ckpt}},
+            "2": {"class_type": "CLIPTextEncode",
+                  "inputs": {"text": "screenshot, cinematic, short drama, 4k, detailed, anime",
+                              "clip": ["1", 1]}},
+            "3": {"class_type": "CLIPTextEncode",
+                  "inputs": {"text": "lowres, blurry, distorted, watermark",
+                              "clip": ["1", 1]}},
+            "4": {"class_type": "EmptyLatentImage",
+                  "inputs": {"width": 512, "height": 512, "batch_size": 1}},
+            "5": {"class_type": "KSampler",
+                  "inputs": {"model": ["1", 0],
+                              "seed": seed,
+                              "steps": 12,
+                              "cfg": 7.0,
+                              "sampler_name": "euler",
+                              "scheduler": "normal",
+                              "positive": ["2", 0],
+                              "negative": ["3", 0],
+                              "latent_image": ["4", 0],
+                              "denoise": 1.0}},
+            "6": {"class_type": "VAEDecode",
+                  "inputs": {"samples": ["5", 0], "vae": ["1", 2]}},
+            "7": {"class_type": "SaveImage",
+                  "inputs": {"images": ["6", 0],
+                              "filename_prefix": f"picwf_{model_impl}_{tid}"}},
         }
         t0 = time.time()
         last_err = None
@@ -282,17 +300,26 @@ def _index_local_models(local_models_dir):
         return {}
 
 
-def _pick_local_checkpoint(local_models, model_impl):
-    """为 model_impl 挑一个本地真实 checkpoint 名（找不到则原样用 model_impl）。"""
+DEFAULT_CHECKPOINT = "v1-5-pruned-emaonly-fp16.safetensors"
+
+
+def _pick_real_checkpoint(local_models, model_impl):
+    """挑一个 ComfyUI 真能加载的 checkpoint 名。
+
+    优先级：精确匹配 model_impl > 第一个本地模型 > ComfyUI 默认 SD1.5 基础。
+    返回的 ckpt_name 必须是 CheckpointLoaderSimple 能加载的真文件名。
+    """
     if not local_models:
-        return model_impl
-    # 优先精确匹配 model_impl
+        return DEFAULT_CHECKPOINT
     if model_impl in local_models:
         return local_models[model_impl].get("local_file_name", model_impl)
-    # 否则取第一个 video/image 类本地模型
     for mid, spec in local_models.items():
         return spec.get("local_file_name", mid)
-    return model_impl
+    return DEFAULT_CHECKPOINT
+
+
+# 向后兼容别名
+_pick_local_checkpoint = _pick_real_checkpoint
 
 
 def make_comfyui_runner(base_url: Optional[str] = None,
@@ -305,7 +332,7 @@ def make_comfyui_runner(base_url: Optional[str] = None,
 
     base_url 优先级：显式传入 > 环境变量 COMFYUI_URL > 默认 127.0.0.1:8188。
     workdir 提供后启用断点重跑（已完成 tid 复用结果，不重复提交 ComfyUI）。
-    local_models_dir 提供后扫描该目录（如 D:\ComfyUI\...\checkpoints），
+    local_models_dir 提供后扫描该目录（如 D:\\ComfyUI\...\checkpoints），
     把真实 checkpoint 注入每次实跑 prompt，让本地模型资产真正参与出片。
     """
     if base_url is None:

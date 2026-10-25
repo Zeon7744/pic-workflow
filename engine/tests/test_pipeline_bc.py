@@ -46,7 +46,7 @@ def test_cli_end_to_end(tmp_path):
     assert res["report"]
     # 报告已落盘
     import json
-    r = json.load(open(res["report"]))
+    r = json.load(open(res["report"], encoding="utf-8"))
     assert r["artifacts"]["package_publish"]["publish_ready"] is True
     assert len(r["completed"]) == len(r["order"])
 
@@ -69,7 +69,7 @@ def test_cli_exposes_mode_and_delivery_report(tmp_path):
                            ep=3, workdir=str(out_dir), mode="pro")
     assert res["delivery_readiness"]["ready"] is True
     import json
-    report = json.load(open(res["report"]))
+    report = json.load(open(res["report"], encoding="utf-8"))
     assert report["mode"] == "pro"
     assert report["mode_overlay"]["mode_label"] == "进阶"
     assert report["mode_feedback"]["mode"] == "pro"
@@ -126,7 +126,7 @@ def test_cli_auto_repair_populated_and_persisted(tmp_path):
     ar = res["auto_repair"]
     assert "ready" in ar and "actions" in ar
     import json
-    rpt = json.load(open(res["report"]))
+    rpt = json.load(open(res["report"], encoding="utf-8"))
     assert "auto_repair" in rpt
     assert rpt["auto_repair"]["rounds"] >= 1
 
@@ -141,31 +141,40 @@ def test_cli_can_disable_auto_repair(tmp_path):
     assert "auto_repair" not in res
 
 
-def test_local_models_dir_injects_real_checkpoint_into_runner(tmp_path):
-    """本地模型目录有真实 checkpoint 时，runner 应索引到并注入 prompt。"""
-    from picwf.comfyui_runner import ComfyUIRunner, make_comfyui_runner
+def test_local_models_dir_injects_real_checkpoint_into_runner(tmp_path, monkeypatch):
+    """本地模型目录有真实 checkpoint 时，runner 应索引到并注入 prompt。
+
+    强制 mock 路径（隔离 ComfyUI 服务），只验证"本地模型 → prompt 注入"逻辑。
+    """
+    from picwf import comfyui_runner as cr
+    from picwf.comfyui_runner import make_comfyui_runner
+    monkeypatch.setattr(cr, "detect_comfyui_service",
+                       lambda *a, **k: {"available": False, "url": "x",
+                                        "gpu": {}, "error": "offline"})
     models_dir = tmp_path / "checkpoints"
     models_dir.mkdir()
-    # 造一个真实 checkpoint 文件
     (models_dir / "sdxl_base.safetensors").write_text("dummy")
     runner = make_comfyui_runner(mock_fallback=True, workdir=str(tmp_path),
                                  local_models_dir=str(models_dir))
-    # 索引到本地 checkpoint
     assert len(runner.local_models) >= 1, "应索引到本地 checkpoint"
-    # 真跑 prompt 应带 local_checkpoint
     out = runner.exec("shot_test_1", model_impl="sdxl_base")
-    assert out.get("local_checkpoint"), "prompt 应注入本地 checkpoint 名"
+    assert out.get("local_checkpoint") == "sdxl_base.safetensors", "prompt 应注入本地 checkpoint 名"
     assert out.get("local_models_dir") == str(models_dir)
 
 
-def test_local_models_dir_missing_falls_back_cleanly(tmp_path):
-    """本地目录不存在时，索引为空、不报错，prompt 回退占位 model_impl。"""
-    from picwf.comfyui_runner import make_comfyui_runner
+def test_local_models_dir_missing_falls_back_cleanly(tmp_path, monkeypatch):
+    """本地目录不存在时，索引为空、不报错，prompt 回退默认 checkpoint。"""
+    from picwf import comfyui_runner as cr
+    from picwf.comfyui_runner import make_comfyui_runner, DEFAULT_CHECKPOINT
+    monkeypatch.setattr(cr, "detect_comfyui_service",
+                       lambda *a, **k: {"available": False, "url": "x",
+                                        "gpu": {}, "error": "offline"})
     runner = make_comfyui_runner(mock_fallback=True, workdir=str(tmp_path),
                                  local_models_dir=str(tmp_path / "not_exist_dir"))
     assert runner.local_models == {}, "目录不存在应索引为空"
     out = runner.exec("shot_test_1", model_impl="wan13b")
-    assert out.get("local_checkpoint") == "wan13b", "无本地模型时回退 model_impl"
+    # 无本地模型时回退 ComfyUI 默认 SD1.5 基础 checkpoint
+    assert out.get("local_checkpoint") == DEFAULT_CHECKPOINT, "无本地模型应回退默认 checkpoint"
 
 
 def test_auto_repair_downgrades_unresolvable_when_local_checkpoint(tmp_path):

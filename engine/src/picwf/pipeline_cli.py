@@ -66,6 +66,16 @@ def run(script_path: str, tier: str = "T1", style: str = "S1_anime_jp",
         }
         # 修复后的 artifacts 已写回 res，交付体检以修复后为准
         res["delivery_readiness"] = repair.get("delivery_readiness", _delivery_readiness(res))
+        # 学习闭环：ComfyUI 实跑真数据 → matrix.adaptive.yaml，引擎自我迭代
+        try:
+            from .comfyui_feedback import learn_from_comfyui_runs
+            _pkg = os.path.dirname(os.path.abspath(__file__))
+            _matrix = os.path.normpath(os.path.join(_pkg, "..", "..", "config", "matrix.yaml"))
+            _adapt = os.path.join(workdir, "matrix.adaptive.yaml")
+            learn_report = learn_from_comfyui_runs(workdir, _matrix, _adapt)
+        except Exception as _e:
+            learn_report = {"applied": False, "note": "学习回流未执行: " + type(_e).__name__}
+        res["learn_loop"] = learn_report
     else:
         res["delivery_readiness"] = _delivery_readiness(res)
 

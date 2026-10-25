@@ -133,7 +133,7 @@ def build_registry_with_local(models_dir_listing: List[str],
 
 
 def scan_dir_listing(root_dir: str, refresh: bool = False) -> Dict[str, Any]:
-    """扫描本机模型目录（如 D:\ComfyUI\...\checkpoints）。
+    """扫描本机模型目录（如 D:\\ComfyUI\...\checkpoints）。
 
     返回:
     {
