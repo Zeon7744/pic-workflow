@@ -8,9 +8,9 @@ MATRIX = str(pathlib.Path(__file__).resolve().parent.parent / "config" / "matrix
 
 def test_dim_counts():
     m = yaml.safe_load(open(MATRIX, encoding="utf-8"))
-    assert len(m["style_tracks"]) == 20
+    assert len(m["style_tracks"]) == 28
     assert len(m["music_tracks"]) == 30
-    assert len(m["voice_tracks"]) == 30
+    assert len(m["voice_tracks"]) == 48
     assert len(m["bgm_tracks"]) == 50
 
 def test_four_dim_generates_nodes():
@@ -37,4 +37,4 @@ def test_style_20_keys():
     for k in m["style_tracks"]:
         assert k.startswith("S"), k
     m2 = list(m["style_tracks"].keys())
-    assert m2[0] == "S1_anime_jp" and m2[-1].startswith("S20")
+    assert m2[0] == "S1_anime_jp" and m2[-1].startswith("S28")

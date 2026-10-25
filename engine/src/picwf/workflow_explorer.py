@@ -271,3 +271,131 @@ def explore_full_cycle(workdir: str,
                  f"识别出 {len(plan)} 个待探索组合并生成可执行 ComfyUI 工作流，"
                  "下一步可直接 POST /prompt 跑新组合，形成持续超越的闭环"),
     }
+
+def run_exploration_batch(workflows, base_url="http://127.0.0.1:8188",
+                          timeout=120):
+    """把 emit_exploration_batch 产出的工作流逐份 POST 给 ComfyUI /prompt。
+    返回 [{plan_item, ok, status, detail}]。ComfyUI 离线时全部 ok=False。
+    """
+    import json as _json
+    import urllib.request as _ur
+    results = []
+    for wf in workflows:
+        plan_item = wf.get("plan_item", {})
+        payload = wf.get("payload_for_prompt_endpoint", wf.get("workflow", {}))
+        ok = False
+        status = ""
+        detail = ""
+        try:
+            req = _ur.Request(
+                base_url + "/prompt",
+                data=_json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with _ur.urlopen(req, timeout=timeout) as resp:
+                body = _json.loads(resp.read().decode())
+            ok = True
+            status = body.get("status", "queued")
+            detail = "prompt_id=" + str(body.get("prompt_id", "?"))
+        except Exception as e:
+            detail = str(e)[:80]
+        results.append({"plan_item": plan_item, "ok": ok,
+                        "status": status, "detail": detail})
+    return results
+
+
+# ---------------------------------------------------------------------------
+# 5. 断点打通：探索回灌结果 → record_step → run_feedback → 矩阵校准
+# ---------------------------------------------------------------------------
+def apply_exploration_results(batch_results, workdir: str,
+                              matrix_path: str,
+                              adaptive_out_path: str,
+                              scenario: str = "dark_thriller") -> Dict[str, Any]:
+    """把 run_exploration_batch 的回灌结果采进 record_step 历史，
+    再触发 adaptive.run_feedback 让矩阵被探索数据校准。
+
+    batch_results: run_exploration_batch 的返回值
+    返回 {adopted, learn, applied}
+    """
+    from .record_metrics import record_step
+    from .adaptive import run_feedback
+
+    adopted = []
+    for i, r in enumerate(batch_results):
+        pi = r.get("plan_item", {})
+        tier = pi.get("tier", "T1")
+        node = pi.get("node", "video_shot")
+        impl = pi.get("model_impl", "auto")
+        ok = bool(r.get("ok", False))
+        # 成功的探索视为非 OOM 样本；失败的视为 OOM 风险样本
+        rec = record_step(
+            workdir,
+            task_id="exploration::" + str(i) + "::" + impl,
+            tier=tier,
+            node_id=node,
+            model_impl=impl,
+            quant_dtype="bf16",
+            oom_degraded=(not ok),   # 回灌失败 → OOM 风险标记
+            redo_queued=False,
+            peak_vram_gb=float(pi.get("expected_vram") or 0.0),
+            shot_elapsed_s=0.0,
+            scenario=scenario,
+            combo={"backend": "comfyui_exploration",
+                   "ok": ok,
+                   "status": r.get("status", ""),
+                   "detail": r.get("detail", "")},
+        )
+        adopted.append(rec)
+
+    if not adopted:
+        return {"adopted": 0, "learn": {}, "applied": False,
+                "note": "无探索结果可回流"}
+
+    learn = run_feedback(workdir, matrix_path, adaptive_out_path)
+    return {
+        "adopted": len(adopted),
+        "learn": learn,
+        "applied": bool(learn.get("applied")),
+        "real_ratio": round(sum(1 for a in adopted if a.get("combo", {}).get("ok", True)) / len(adopted), 2),
+        "note": "探索回灌结果已回流 matrix.adaptive.yaml，引擎矩阵被探索数据校准",
+    }
+
+
+def explore_and_learn(workdir: str,
+                      matrix_path: str,
+                      adaptive_out_path: str,
+                      base_url: str = "http://127.0.0.1:8188",
+                      tiers=None, node_ids=None,
+                      top_k: int = 5,
+                      checkpoint: str = DEFAULT_CHECKPOINT,
+                      scenario: str = "dark_thriller") -> Dict[str, Any]:
+    """完整"探索→回灌→学习"闭环（P0 断点打通）。
+
+    1. explore_full_cycle：学习 + 探索 + 生成工作流
+    2. run_exploration_batch：POST ComfyUI 跑探索工作流
+    3. apply_exploration_results：采 metrics + 回流矩阵
+
+    返回 {exploration, batch_results, learn, applied, ready_for_run}
+    """
+    cycle = explore_full_cycle(workdir, matrix_path, adaptive_out_path,
+                                tiers=tiers, node_ids=node_ids,
+                                top_k=top_k, checkpoint=checkpoint)
+    batch = cycle.get("workflows_payload", [])
+    if not batch:
+        return {**cycle, "batch_results": [], "applied": False,
+                "note": "无探索组合，跳过回灌"}
+
+    batch_results = run_exploration_batch(batch, base_url=base_url)
+    learned = apply_exploration_results(batch_results, workdir,
+                                          matrix_path, adaptive_out_path,
+                                          scenario=scenario)
+    return {
+        **cycle,
+        "batch_results": batch_results,
+        "explore_learned": learned,
+        "applied": learned.get("applied", False),
+        "note": (f"探索{len(batch)}组合，回灌成功"
+                 f"{sum(1 for r in batch_results if r.get('ok'))}个，"
+                 f"矩阵校准 applied={learned.get('applied')}"),
+    }

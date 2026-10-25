@@ -155,6 +155,12 @@ def main(argv=None) -> int:
     ap.add_argument("--mode", default="beginner", help="运行模式：beginner/pro/expert")
     ap.add_argument("--no-auto-repair", action="store_true",
                     help="关闭缺口自动修复（默认开启）")
+    ap.add_argument("--explore", action="store_true",
+                    help="run after: print active exploration suggestions (no ComfyUI回灌)")
+    ap.add_argument("--explore-run", action="store_true",
+                    help="run after: POST探索工作流给ComfyUI + 采metrics + 回流矩阵（完整闭环）")
+    ap.add_argument("--comfyui-url", default="http://127.0.0.1:8188",
+                    help="ComfyUI服务地址（--explore-run 用）")
     ap.add_argument("--local-models-dir", default="",
                     help="本地模型目录（如 D:\\ComfyUI\\...\\checkpoints），"
                          "有真实 checkpoint 时注入实跑 prompt，可把"
@@ -166,6 +172,51 @@ def main(argv=None) -> int:
               resume_ids=args.resume, mode=args.mode,
               auto_repair=not args.no_auto_repair,
               local_models_dir=args.local_models_dir)
+    # 主动探索建议（--explore）
+    if args.explore:
+        try:
+            from .workflow_explorer import explore_full_cycle
+            _pkg2 = os.path.dirname(os.path.abspath(__file__))
+            _mx2 = os.path.normpath(os.path.join(
+                _pkg2, '..', '..', 'config', 'matrix.yaml'))
+            _ad2 = os.path.join(args.workdir, 'matrix.adaptive.yaml')
+            _ex = explore_full_cycle(args.workdir, _mx2, _ad2, top_k=5)
+            res['explore_suggestions'] = _ex.get('exploration', {})
+            _wfs = _ex.get('workflows', [])
+            print(f'  [explore] next batch: {len(_wfs)} unverified combos:')
+            for _w in _wfs[:5]:
+                _pi = _w.get('plan_item', {})
+                print('    - ' + str(_pi.get('tier','?'))
+                      + ' / ' + str(_pi.get('node','?'))
+                      + ' / ' + str(_pi.get('impl','?')))
+        except Exception as _ex_e:
+            res['explore_suggestions'] = {'error': type(_ex_e).__name__}
+            print('  [explore] suggestion failed: ' + type(_ex_e).__name__)
+    # 完整探索闭环（--explore-run）：POST 工作流 + 采 metrics + 回流矩阵
+    if getattr(args, 'explore_run', False):
+        try:
+            from .workflow_explorer import explore_and_learn
+            _pkg3 = os.path.dirname(os.path.abspath(__file__))
+            _mx3 = os.path.normpath(os.path.join(
+                _pkg3, '..', '..', 'config', 'matrix.yaml'))
+            _ad3 = os.path.join(args.workdir, 'matrix.adaptive.yaml')
+            _full = explore_and_learn(
+                args.workdir, _mx3, _ad3,
+                base_url=getattr(args, 'comfyui_url', 'http://127.0.0.1:8188'),
+                top_k=5)
+            res['explore_full'] = {
+                'exploration': _full.get('exploration'),
+                'batch_results': _full.get('batch_results'),
+                'applied': _full.get('applied'),
+                'note': _full.get('note'),
+            }
+            _br = _full.get('batch_results', [])
+            print(f'  [explore-run] 探索{len(_br)}组合，'
+                  f'成功{sum(1 for x in _br if x.get("ok"))}，'
+                  f'矩阵 applied={_full.get("applied")}')
+        except Exception as _er_e:
+            res['explore_full'] = {'error': type(_er_e).__name__}
+            print('  [explore-run] 闭环失败: ' + type(_er_e).__name__)
     # 打印执行摘要
     print(f"✓ 出片完成: {res['final_video']}")
     print(f"  环节序: {res['order']}")

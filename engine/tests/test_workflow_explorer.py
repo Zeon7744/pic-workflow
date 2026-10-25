@@ -1,3 +1,4 @@
+import io
 # -*- coding: utf-8 -*-
 """workflow_explorer 主动探索 + 工作流产出单测。"""
 import sys
@@ -145,3 +146,67 @@ def test_explore_full_cycle_produces_runnable_batch(tmp_path, monkeypatch):
     # 工作流 payload 可执行（含 prompt 端点要的 7 节点）
     for w in rep["workflows_payload"]:
         assert w["workflow"]["5"]["class_type"] == "KSampler"
+
+
+def test_apply_exploration_results_adopts_and_applies(tmp_path):
+    """explore→回灌结果采 metrics→run_feedback 回流，applied=True"""
+    from picwf import workflow_explorer as we
+    import yaml, os, json
+
+    mx = os.path.join(str(tmp_path), "matrix.yaml")
+    ad = os.path.join(str(tmp_path), "matrix.adaptive.yaml")
+    base = tmp_path / "runs"
+    base.mkdir()
+
+    with io.open(r"C:\Users\Administrator\pic-push\engine\config\matrix.yaml", "r", encoding="utf-8") as f:
+        m = yaml.safe_load(f)
+    with io.open(mx, "w", encoding="utf-8") as f:
+        yaml.safe_dump(m, f, allow_unicode=True)
+
+    from picwf.record_metrics import load_history
+
+    # 探索回灌结果（2个成功，1个失败）
+    batch_results = [
+        {"ok": True, "status": "completed", "plan_item": {"tier": "T2", "node": "video_shot", "model_impl": "ltx095_fp16_720", "impl": "ltx095_fp16_720", "expected_vram": 11.0}},
+        {"ok": True, "status": "completed", "plan_item": {"tier": "T1", "node": "video_shot", "model_impl": "wan13b_fa_fp16_480", "impl": "wan13b_fa_fp16_480", "expected_vram": 13.0}},
+        {"ok": False, "status": "failed", "plan_item": {"tier": "T0", "node": "storyboard_prompt", "model_impl": "hf_zero", "impl": "hf_zero", "expected_vram": 1.0}},
+    ]
+
+    out = we.apply_exploration_results(batch_results, str(tmp_path), mx, ad, scenario="dark_thriller")
+    assert out["adopted"] == 3
+    assert out["applied"] is True, f"learn applied should be True, got {out['learn']}"
+    assert os.path.exists(ad)
+    # 回流后历史里应有 3 条探索记录
+    h2 = load_history(str(tmp_path))
+    exp = [x for x in h2 if str(x.get("task_id", "")).startswith("exploration::")]
+    assert len(exp) == 3
+    print("    P0 apply_exploration_results adopted + applied OK")
+
+
+def test_explore_and_learn_returns_full_loop(tmp_path):
+    """explore_and_learn 完整闭环：探索→回灌→学习，返回 applied 状态"""
+    from picwf import workflow_explorer as we
+    import yaml, os
+
+    mx = os.path.join(str(tmp_path), "matrix.yaml")
+    ad = os.path.join(str(tmp_path), "matrix.adaptive.yaml")
+    with io.open(r"C:\Users\Administrator\pic-push\engine\config\matrix.yaml", "r", encoding="utf-8") as f:
+        m = yaml.safe_load(f)
+    with io.open(mx, "w", encoding="utf-8") as f:
+        yaml.safe_dump(m, f, allow_unicode=True)
+
+    # 无 ComfyUI 在线时，batch_results 全部 offline，但流程应完整返回
+    out = we.explore_and_learn(
+        str(tmp_path), mx, ad,
+        base_url="http://127.0.0.1:1",  # 不存在的服务 → offline
+        top_k=2,
+    )
+    assert "exploration" in out
+    assert "batch_results" in out
+    assert "applied" in out
+    assert "explore_learned" in out
+    # offline 时 0 成功
+    oks = [r for r in out["batch_results"] if r.get("ok")]
+    assert len(oks) == 0
+    assert out["note"]  # 有说明
+    print("    explore_and_learn full loop OK, note:", out["note"])

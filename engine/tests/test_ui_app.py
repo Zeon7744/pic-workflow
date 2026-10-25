@@ -18,9 +18,20 @@ def _client():
 def test_index_200():
     r = _client().get("/")
     assert r.status_code == 200
-    b = r.data.decode()
+    b = r.data.decode("utf-8")
+    assert ("爽点厂" in b) or ("HookForge" in b)
+
+
+def test_index_locale_zh():
+    r = _client().get("/?lang=zh")
+    b = r.data.decode("utf-8")
     assert "爽点厂" in b
-    assert "一键出片" in b
+
+
+def test_index_locale_en():
+    r = _client().get("/?lang=en")
+    b = r.data.decode("utf-8")
+    assert "HookForge" in b
 
 
 def test_options_api():

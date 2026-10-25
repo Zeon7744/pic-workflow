@@ -23,48 +23,39 @@ except Exception:
     sys.exit("缺少 Flask，请先 pip install flask（Web UI 需要）；引擎核心不依赖 Flask")
 
 from picwf import workflow_gen, pipeline_cli
+from picwf import i18n
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
 # 下拉框选项（来自 matrix.yaml）
-STYLE_OPTIONS = [
-    ("S1_anime_jp", "日系动漫"), ("S2_korean_cool", "韩系冷感"),
-    ("S3_cn_shuimo", "中国水墨"), ("S4_realistic", "写实"),
-    ("S5_mmd_2d", "MMD二次元"), ("S6_shounen_manga", "少年漫画"),
-    ("S7_shoujo_manga", "少女漫画"), ("S8_dark_gothic", "暗黑哥特"),
-    ("S9_cyberpunk", "赛博朋克"), ("S10_steampunk", "蒸汽朋克"),
-    ("S11_lowpoly", "低多边形"), ("S12_thick_paint", "厚涂"),
-    ("S13_watercolor", "水彩"), ("S14_flat_illustration", "扁平插画"),
-    ("S15_pixel_90s", "90s像素"), ("S16_film_photo", "胶片摄影"),
-    ("S17_doc_real", "纪实写实"), ("S18_cel_3d", "卡通3D"),
-    ("S19_ink_brush_cn", "国风水墨"), ("S20_photoreal_8k", "超写实8K"),
-]
-SCENARIO_OPTIONS = [
-    ("light_comedy", "轻喜剧"), ("daily_romance", "日常恋爱"),
-    ("male_revenge", "男频复仇"), ("dark_thriller", "暗黑惊悚"),
-    ("fantasy_wuxia", "玄幻武侠"), ("romance_sad", "虐恋"),
-    ("sci_fi_cyber", "科幻赛博"), ("action_battle", "动作打斗"),
-    ("family_warm", "家庭温情"), ("school_youth", "校园青春"),
-]
-TIER_OPTIONS = [
-    ("T0", "T0 · 无独显（纯云端出片，适合笔记本/轻薄本）"),
-    ("T1", "T1 · 入门独显（1060/1650 级，6GB 显存，性价比之王）"),
-    ("T2", "T2 · 中端独显（3060/4060 级，8-12GB）"),
-]
-_TIER_HUMAN = {k: v for k, v in TIER_OPTIONS}
+# 下拉框选项来自 i18n（中英双语，跟随 locale）
+def _style_opts():
+    return i18n.style_options()
+def _scenario_opts():
+    return i18n.scenario_options()
+def _tier_opts():
+    return i18n.tier_options()
 
 
 @app.route("/")
 def index():
+    loc = request.args.get("lang", i18n.get_locale())
+    i18n.set_locale(loc)
     return render_template("index.html",
-                           styles=STYLE_OPTIONS, scenarios=SCENARIO_OPTIONS,
-                           tiers=TIER_OPTIONS, tier_human=_TIER_HUMAN)
+                           styles=i18n.style_options(),
+                           scenarios=i18n.scenario_options(),
+                           tiers=i18n.tier_options(),
+                           tier_human=dict(i18n.tier_options()),
+                           locale=i18n.get_locale(),
+                           all_text=i18n.all_ui_text(),
+                           l10n_js=i18n.l10n_js())
 
 
 @app.route("/api/options")
 def options():
-    return jsonify({"styles": STYLE_OPTIONS, "scenarios": SCENARIO_OPTIONS,
-                    "tiers": TIER_OPTIONS})
+    loc = request.args.get("lang", i18n.get_locale())
+    i18n.set_locale(loc)
+    return jsonify(i18n.all_options())
 
 
 @app.route("/api/run", methods=["POST"])

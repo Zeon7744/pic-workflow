@@ -1,4 +1,4 @@
-version: 0.1.0
+version: 0.2.0
 default_policy:
   philosophy: 低配优先跑通率，不追峰值画质
   low_tiers_prefer:
@@ -30,6 +30,18 @@ style_tracks:
     - cloud_kling
     prompt_prefix: 日本2D手绘动漫风, 新海诚式体积光, 青蓝主色+暖橙霓虹点缀, 动漫线稿清晰, 高细节
     lora: anime_style_animerus
+    tts_voice: vivi
+    bgm_style: cinematic_pianissimo
+    sfx: light
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
   S2_korean_cool:
     label: 韩系清冷插画
     image_model:
@@ -41,6 +53,18 @@ style_tracks:
     - cloud_kling
     prompt_prefix: 韩系清冷插画, 低饱和电影色调, 高级留白构图, 柔光人像, 都市时尚质感, 8K级细节
     lora: cool_portrait_realistic
+    tts_voice: vivi
+    bgm_style: cinematic_pianissimo
+    sfx: light
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
   S3_cn_shuimo:
     label: 国风水墨
     image_model:
@@ -52,6 +76,18 @@ style_tracks:
     - cloud_kling
     prompt_prefix: 国风水墨写意, 宣纸留白质感, 泼墨晕染, 青绿山水配色, 古典留白构图, 东方意境
     lora: shuimo_chinese_ink
+    tts_voice: vivi
+    bgm_style: cinematic_pianissimo
+    sfx: light
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
   S4_realistic:
     label: 写实拟真
     image_model:
@@ -63,6 +99,18 @@ style_tracks:
     - cloud_kling
     prompt_prefix: 写实摄影风格, 真实光影, 皮肤质感, 85mm人像镜头, 浅景深, 电影级色彩还原, 真实细节
     lora: realistic_human_photo
+    tts_voice: vivi
+    bgm_style: cinematic_pianissimo
+    sfx: light
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
   S5_mmd_2d:
     label: 二次元MMD
     image_model:
@@ -74,6 +122,18 @@ style_tracks:
     - cloud_kling
     prompt_prefix: 3D二次元MMD渲染, 夸张表情, 发光材质, 虚拟偶像风格, 高饱和, 3D模型感
     lora: mmd_render
+    tts_voice: vivi
+    bgm_style: cinematic_pianissimo
+    sfx: light
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
   S6_shounen_manga:
     label: 少年漫热血
     image_model:
@@ -85,6 +145,18 @@ style_tracks:
     - cloud_kling
     prompt_prefix: 少年热血动漫, 动态线条, 速度线, 高饱和, 战斗爆发感, 男频爽感
     lora: shounen_action
+    tts_voice: vivi
+    bgm_style: cinematic_pianissimo
+    sfx: light
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
   S7_shoujo_manga:
     label: 少女漫恋爱
     image_model:
@@ -96,6 +168,18 @@ style_tracks:
     - cloud_kling
     prompt_prefix: 少女恋爱动漫, 柔光, 花瓣特效, 高纯度粉紫, 细腻线条, 甜宠感
     lora: shoujo_romance
+    tts_voice: vivi
+    bgm_style: cinematic_pianissimo
+    sfx: light
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
   S8_dark_gothic:
     label: 暗黑哥特
     image_model:
@@ -107,6 +191,18 @@ style_tracks:
     - cloud_kling
     prompt_prefix: 暗黑哥特风, 高对比明暗, 暗紫黑色调, 阴影质感, 压抑神秘, 电影级
     lora: dark_gothic
+    tts_voice: vivi
+    bgm_style: cinematic_pianissimo
+    sfx: light
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
   S9_cyberpunk:
     label: 赛博朋克
     image_model:
@@ -118,6 +214,18 @@ style_tracks:
     - cloud_kling
     prompt_prefix: 赛博朋克, 霓虹高饱和, 雨夜反光, 科技都市, 冷蓝+品红, 高对比
     lora: cyberpunk_neon
+    tts_voice: vivi
+    bgm_style: cinematic_pianissimo
+    sfx: light
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
   S10_steampunk:
     label: 蒸汽朋克
     image_model:
@@ -129,6 +237,18 @@ style_tracks:
     - cloud_kling
     prompt_prefix: 蒸汽朋克, 铜锈齿轮, 暖棕复古色调, 维多利亚质感, 蒸汽烟雾
     lora: steampunk_vintage
+    tts_voice: vivi
+    bgm_style: cinematic_pianissimo
+    sfx: light
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
   S11_lowpoly:
     label: 低多边形
     image_model:
@@ -139,6 +259,18 @@ style_tracks:
     - cloud_kling
     prompt_prefix: 低多边形3D渲染, 棱角分明, 平面色块, 游戏感, 几何体
     lora: lowpoly_3d
+    tts_voice: vivi
+    bgm_style: cinematic_pianissimo
+    sfx: light
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
   S12_thick_paint:
     label: 厚涂写实
     image_model:
@@ -150,6 +282,18 @@ style_tracks:
     - cloud_kling
     prompt_prefix: 厚涂数字绘画, 笔触质感, 光影体积, 高细节, 史诗感
     lora: thick_paint
+    tts_voice: vivi
+    bgm_style: cinematic_pianissimo
+    sfx: light
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
   S13_watercolor:
     label: 水彩治愈
     image_model:
@@ -161,6 +305,18 @@ style_tracks:
     - cloud_kling
     prompt_prefix: 水彩淡彩, 晕染边缘, 低饱和柔和, 留白, 治愈系, 通透感
     lora: watercolor_soft
+    tts_voice: vivi
+    bgm_style: cinematic_pianissimo
+    sfx: light
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
   S14_flat_illustration:
     label: 扁平插画
     image_model:
@@ -171,6 +327,18 @@ style_tracks:
     - cloud_kling
     prompt_prefix: 扁平矢量插画, 简洁色块, 无渐变, 几何化, 现代感
     lora: flat_design
+    tts_voice: vivi
+    bgm_style: cinematic_pianissimo
+    sfx: light
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
   S15_pixel_90s:
     label: 复古像素
     image_model:
@@ -181,6 +349,18 @@ style_tracks:
     - cloud_kling
     prompt_prefix: 90年代像素风, 8-bit质感, 怀旧配色, 游戏机画面感
     lora: retro_pixel
+    tts_voice: vivi
+    bgm_style: cinematic_pianissimo
+    sfx: light
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
   S16_film_photo:
     label: 胶片摄影
     image_model:
@@ -192,6 +372,18 @@ style_tracks:
     - cloud_kling
     prompt_prefix: 胶片摄影, 颗粒感, 35mm画幅, 暖调偏青, 复古光影
     lora: film_grain
+    tts_voice: vivi
+    bgm_style: cinematic_pianissimo
+    sfx: light
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
   S17_doc_real:
     label: 纪实影像
     image_model:
@@ -202,6 +394,18 @@ style_tracks:
     - cloud_kling
     prompt_prefix: 纪实影像, 手持镜头, 自然光, 去修饰, 真实质感
     lora: documentary
+    tts_voice: vivi
+    bgm_style: cinematic_pianissimo
+    sfx: light
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
   S18_cel_3d:
     label: 3D卡通
     image_model:
@@ -213,6 +417,18 @@ style_tracks:
     - cloud_kling
     prompt_prefix: 3D卡通渲染, 圆润造型, 皮克斯质感, 柔和光影, 合家欢
     lora: cel3d_cartoon
+    tts_voice: vivi
+    bgm_style: cinematic_pianissimo
+    sfx: light
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
   S19_ink_brush_cn:
     label: 工笔重彩
     image_model:
@@ -224,6 +440,18 @@ style_tracks:
     - cloud_kling
     prompt_prefix: 工笔重彩, 细线勾勒, 矿物色, 宫廷质感, 东方华丽
     lora: gongbi_chinese
+    tts_voice: vivi
+    bgm_style: cinematic_pianissimo
+    sfx: light
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
   S20_photoreal_8k:
     label: 极致写实
     image_model:
@@ -234,6 +462,218 @@ style_tracks:
     - cloud_kling
     prompt_prefix: 8K极致写实, 超写实皮肤, 电影级布光, 真实材质, 大片感
     lora: photoreal_ultra
+    tts_voice: vivi
+    bgm_style: cinematic_pianissimo
+    sfx: light
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
+  S21_wuxia_samurai:
+    label: 国漫武侠/武士
+    image_model:
+    - flux_dev_cool_lora
+    - sdxl_turbo_768
+    - sd15_gguf_q4_512_offload
+    - cloud_api_seedream
+    video_model:
+    - cinematic_epic_720
+    - wan13b_fa_480
+    - cloud_kling
+    prompt_prefix: 国漫武侠/武士 风格，高细节电影级光影，统一色调
+    lora: wuxia_samurai_ink
+    tts_voice: vivi
+    bgm_style: epic_orchestra_sfx
+    sfx: medium
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
+  S22_cel_fantasy:
+    label: 日系治愈奇幻
+    image_model:
+    - flux_dev_cool_lora
+    - sdxl_turbo_768
+    - sd15_gguf_q4_512_offload
+    - cloud_api_seedream
+    video_model:
+    - wan13b_fa_480
+    - wan13b_fa_480
+    - cloud_kling
+    prompt_prefix: 日系治愈奇幻 风格，高细节电影级光影，统一色调
+    lora: cel_fantasy_luminescent
+    tts_voice: vivi
+    bgm_style: lofi_guitar_warm
+    sfx: medium
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
+  S23_noir_detective:
+    label: 黑色电影/悬疑
+    image_model:
+    - flux_dev_cool_lora
+    - sdxl_turbo_768
+    - sd15_gguf_q4_512_offload
+    - cloud_api_seedream
+    video_model:
+    - wan13b_gguf_q4_offload_480
+    - wan13b_fa_480
+    - cloud_kling
+    prompt_prefix: 黑色电影/悬疑 风格，高细节电影级光影，统一色调
+    lora: noir_detective_grain
+    tts_voice: 大壹
+    bgm_style: noir_jazz_piano
+    sfx: medium
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
+  S24_y2k_glam:
+    label: Y2K 千禧美艳
+    image_model:
+    - flux_dev_cool_lora
+    - sdxl_turbo_768
+    - sd15_gguf_q4_512_offload
+    - cloud_api_seedream
+    video_model:
+    - wan13b_fa_480
+    - wan13b_fa_480
+    - cloud_kling
+    prompt_prefix: Y2K 千禧美艳 风格，高细节电影级光影，统一色调
+    lora: y2k_glam_gloss
+    tts_voice: 大壹
+    bgm_style: hyperpop_gloss
+    sfx: medium
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
+  S25_clay_stopmotion:
+    label: 黏土定格
+    image_model:
+    - flux_dev_cool_lora
+    - sdxl_turbo_768
+    - sd15_gguf_q4_512_offload
+    - cloud_api_seedream
+    video_model:
+    - sdxl_turbo_768
+    - wan13b_fa_480
+    - cloud_kling
+    prompt_prefix: 黏土定格 风格，高细节电影级光影，统一色调
+    lora: claymation_stopmotion
+    tts_voice: 大壹
+    bgm_style: playful_xylophone
+    sfx: medium
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
+  S26_neon_hongkong:
+    label: 港风霓虹80s
+    image_model:
+    - flux_dev_cool_lora
+    - sdxl_turbo_768
+    - sd15_gguf_q4_512_offload
+    - cloud_api_seedream
+    video_model:
+    - wan13b_gguf_q4_offload_480
+    - wan13b_fa_480
+    - cloud_kling
+    prompt_prefix: 港风霓虹80s 风格，高细节电影级光影，统一色调
+    lora: neon_hk_retro_80s
+    tts_voice: 大壹
+    bgm_style: citypop_synth
+    sfx: medium
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
+  S27_chibi_q3d:
+    label: Q版3D萌系
+    image_model:
+    - flux_dev_cool_lora
+    - sdxl_turbo_768
+    - sd15_gguf_q4_512_offload
+    - cloud_api_seedream
+    video_model:
+    - wan13b_gguf_q4_offload_480
+    - wan13b_fa_480
+    - cloud_kling
+    prompt_prefix: Q版3D萌系 风格，高细节电影级光影，统一色调
+    lora: chibi_q_3d_soft
+    tts_voice: 大壹
+    bgm_style: cute_carnival
+    sfx: medium
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
+  S28_guofeng_3d:
+    label: 国风3D写实
+    image_model:
+    - flux_dev_cool_lora
+    - sdxl_turbo_768
+    - sd15_gguf_q4_512_offload
+    - cloud_api_seedream
+    video_model:
+    - wan13b_fa_480
+    - wan13b_fa_480
+    - cloud_kling
+    prompt_prefix: 国风3D写实 风格，高细节电影级光影，统一色调
+    lora: guofeng_3d_realistic
+    tts_voice: vivi
+    bgm_style: guofeng_silk_orchestra
+    sfx: medium
+    params:
+      image_res: '768'
+      video_res: '480'
+      neg_prompt_strength: 0.7
+      seed_range:
+      - 0
+      - 9999
+      aspect_ratio: '16:9'
+      fps: 24
 music_tracks:
   M1_guoqin_classic:
     label: 国风器乐
@@ -626,6 +1066,42 @@ voice_tracks:
     label:"高音·亮": null
     desc:"超高音，清亮尖锐": null
     role:"激昂/情绪": null
+  v_shousheng_men:
+    label: 青涩少年男声
+  v_zhoushang_wen:
+    label: 温柔周叔男声
+  v_lengjue_boss:
+    label: 冷酷总裁男声
+  v_weiquan_ao:
+    label: 委屈少年男声
+  v_linglang_ao:
+    label: 灵动少女女声
+  v_weizhen_zheni:
+    label: 妩媚成熟女声
+  v_sansheng_nu:
+    label: 爽利御姐女声
+  v_lansu_nu:
+    label: 慵懒甜美女声
+  v_badao_lao:
+    label: 暴躁老丈男声
+  v_fanyan_ao:
+    label: 腹黑少年男声
+  v_meiqi_nu:
+    label: 傲娇少女女声
+  v_shengqi_nu:
+    label: 清冷声线女声
+  v_chunzhen_ao:
+    label: 纯真男童声
+  v_fangsong_nu:
+    label: 温柔人妻女声
+  v_yingjia_lao:
+    label: 阴鸷反派男声
+  v_suhuang_nu:
+    label: 飒爽女侠女声
+  v_beiqi_shao:
+    label: 疲惫中年男声
+  v_xianmeng_ao:
+    label: 梦幻少女女声
 bgm_tracks:
   B01_battle_ramp:
     label:"战斗升级": null
@@ -1033,6 +1509,46 @@ scenario_resource_map:
     - voice
     default_bgm: B44_growth_up
     default_mood: 向上
+  urban_rooftop_night:
+    label: 都市天台夜景
+    resource: stock_urban_rooftop_night
+    lighting: cinematic
+    palette: neutral
+  ancient_palace_hall:
+    label: 古装宫殿大殿
+    resource: stock_ancient_palace_hall
+    lighting: cinematic
+    palette: neutral
+  school_corridor:
+    label: 校园走廊
+    resource: stock_school_corridor
+    lighting: cinematic
+    palette: neutral
+  modern_office_loft:
+    label: 现代办公LOFT
+    resource: stock_modern_office_loft
+    lighting: cinematic
+    palette: neutral
+  horrified_ward:
+    label: 惊悚病房
+    resource: stock_horrified_ward
+    lighting: cinematic
+    palette: neutral
+  wedding_banquet_hall:
+    label: 婚礼宴会厅
+    resource: stock_wedding_banquet_hall
+    lighting: cinematic
+    palette: neutral
+  desert_dune:
+    label: 荒漠沙丘
+    resource: stock_desert_dune
+    lighting: cinematic
+    palette: neutral
+  underwater_deep:
+    label: 深海海底
+    resource: stock_underwater_deep
+    lighting: cinematic
+    palette: neutral
 emotion_arc_map:
   act1_opening:
     arc_label: 开篇定调
@@ -1109,6 +1625,27 @@ emotion_arc_map:
       music: M29_sad_piano_ballad
       voice: V16_narrator_female
       bgm: B46_redemption_soft
+  revenge_catharsis:
+    label: 复仇爽感
+    bpm_curve:
+    - 70
+    - 100
+    - 140
+    vocal: tense->euphoric
+  romance_tense:
+    label: 虐恋拉扯
+    bpm_curve:
+    - 60
+    - 80
+    - 90
+    vocal: warm->aching
+  mystery_reveal:
+    label: 悬疑揭晓
+    bpm_curve:
+    - 50
+    - 80
+    - 160
+    vocal: hushed->shock
 tiers:
   T0:
     label: 纯云端
@@ -1335,6 +1872,9 @@ nodes:
     - impl: ltx095_720
       estimated_vram_need_gb: 5
       style: S5_mmd_2d
+    - impl: cinematic_epic_720
+      estimated_vram_need_gb: 6.0
+      note: epic 动作 720p 档（S21 武侠/武士画风），本地/云可切换
     T2:
     - impl: wan13b_fa_480
       estimated_vram_need_gb: 9

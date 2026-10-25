@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="{{ locale }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>爽点厂 HookForge · 一键出片</title>
+<title>{{ all_text.brand }} {{ all_text.brand_sub }} · {{ all_text.hero_title }}</title>
 <style>
 :root{--bg:#0f1220;--card:#1a1f35;--accent:#ff4d6d;--accent2:#4d7cfe;
 --text:#e8eaf2;--muted:#9aa0b5;--ok:#3ddc84;--err:#ff6b6b;--r:14px}
@@ -55,73 +55,74 @@ background:var(--ok);color:#08301a;font-size:14px;font-weight:600;text-decoratio
 <body>
 <div class="wrap">
   <div class="hero">
-    <h1>爽点厂 <span>HookForge</span></h1>
-    <p>粘贴剧本 → 选档位/画风/剧种 → 一键出片 · 给创作者的短剧视频工作流引擎</p>
+    <h1>{{ all_text.brand }} <span>{{ all_text.brand_sub }}</span></h1>
+    <p>{{ all_text.hero_desc }}</p>
   </div>
 
   <div class="card">
-    <h2>① 粘贴你的剧本</h2>
-    <textarea id="script" placeholder="第1场：男主进屋看到刀，神色凝重
-第2场：男主拿起刀冲向门口
-第3场：男主和反派在门口对峙
-第4场：反转——刀上刻着男主的名字，真相揭晓…
-（支持 markdown 标题，会自动跳过；建议 3-10 场/集）"></textarea>
-    <p class="tip">💡 写清每场动作+情绪，效果最好。剧种决定 BGM/配音风格，画风决定画面质感。</p>
+    <h2>{{ all_text.card_script }}</h2>
+    <textarea id="script" placeholder="{{ all_text.placeholder_script | e }}"></textarea>
+    <p class="tip">{{ all_text.tip_script }}</p>
   </div>
 
   <div class="card">
-    <h2>② 选择出片配置</h2>
+    <h2>{{ all_text.card_config }}</h2>
     <div class="grid">
       <div>
-        <label>档位（你的电脑配置）</label>
+        <label>{{ all_text.label_tier }}</label>
         <select id="tier">{% for v,l in tiers %}<option value="{{v}}">{{l}}</option>{% endfor %}</select>
       </div>
       <div>
-        <label>画风</label>
+        <label>{{ all_text.label_style }}</label>
         <select id="style">{% for v,l in styles %}<option value="{{v}}">{{l}}</option>{% endfor %}</select>
       </div>
       <div>
-        <label>剧种（决定 BGM/配音）</label>
+        <label>{{ all_text.label_scenario }}</label>
         <select id="scenario">{% for v,l in scenarios %}<option value="{{v}}">{{l}}</option>{% endfor %}</select>
       </div>
       <div>
-        <label>本集分镜数</label>
+        <label>{{ all_text.label_ep }}</label>
         <input type="number" id="ep" value="10" min="1" max="20">
       </div>
     </div>
-    <p class="tip">🖥 不确定选哪档？1060/1650 这类入门卡选 <b>T1</b>；轻薄本无独显选 <b>T0</b>（纯云端出片）；3060/4060 选 <b>T2</b>。</p>
+    <p class="tip">{{ all_text.tip_tier }}</p>
   </div>
 
-  <button class="btn" id="go">🎬 一键出片</button>
+  <button class="btn" id="go">{{ all_text.btn_run }}</button>
+<button class="btn" style="margin-top:8px;background:var(--card);border:1px solid var(--accent2);color:var(--text)" onclick="switchLang()">🌐 中文 / EN</button>
 
   <div class="card" id="resultCard" style="display:none">
-    <h2>③ 出片结果</h2>
+    <h2>{{ all_text.card_result }}</h2>
     <div class="status" id="status"></div>
     <div class="progress" id="progressWrap" style="display:none">
       <div class="bar"><div id="bar"></div></div>
       <ul class="steps" id="steps"></ul>
     </div>
-    <a class="dl" id="dl" style="display:none">⬇ 下载成片</a>
+    <a class="dl" id="dl" style="display:none">{{ all_text.btn_download }}</a>
     <p class="tip" id="meta"></p>
   </div>
 </div>
 
 <script>
+window.L10N = {{ l10n_js | safe }};
 const stages = ['script_struct','bgm','character_image','storyboard_prompt',
 'video_shot','fx_enhance','post_assemble','bgm_audio','package_publish'];
-const stageZh = {script_struct:'拆解剧本',bgm:'选BGM',character_image:'画角色',
-storyboard_prompt:'生成分镜',video_shot:'渲染视频',fx_enhance:'加特效',
-post_assemble:'合成成片',bgm_audio:'配BGM',package_publish:'打包发布'};
+const stageZh = window.L10N.stages;
 document.getElementById('go').onclick = async function(){
   const btn=this; const script=document.getElementById('script').value.trim();
-  if(!script){alert('请先粘贴剧本内容');return}
-  btn.disabled=true; btn.textContent='出片中…';
+  if(!script){alert(window.L10N.err_empty);return}
+  btn.disabled=true; btn.textContent=window.L10N.running_btn;
   document.getElementById('resultCard').style.display='block';
   document.getElementById('status').className='status st-run';
-  document.getElementById('status').textContent='⏳ 正在出片，请稍候（30秒~2分钟）…';
+  document.getElementById('status').textContent=window.L10N.running;
   document.getElementById('progressWrap').style.display='block';
   document.getElementById('steps').innerHTML='';
   document.getElementById('dl').style.display='none';
+function switchLang(){
+  const cur=document.documentElement.lang;
+  const loc=(cur==='zh-CN'||cur==='zh')?'en':'zh';
+  location.href='/?lang='+loc;
+}
   document.getElementById('bar').style.width='10%';
   try{
     const r=await fetch('/api/run',{method:'POST',headers:{'Content-Type':'application/json'},
@@ -130,7 +131,7 @@ document.getElementById('go').onclick = async function(){
     const d=await r.json();
     if(d.ok){
       document.getElementById('status').className='status st-ok';
-      document.getElementById('status').textContent='✓ 出片成功！';
+      document.getElementById('status').textContent=window.L10N.ok;
       const ul=document.getElementById('steps');
       (d.order||[]).forEach(s=>{
         const li=document.createElement('li');
