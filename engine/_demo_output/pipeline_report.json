@@ -1,0 +1,1212 @@
+{
+  "ok": true,
+  "order": [
+    "script_struct",
+    "bgm",
+    "character_image",
+    "storyboard_prompt",
+    "video_shot",
+    "fx_enhance",
+    "post_assemble",
+    "bgm_audio",
+    "package_publish"
+  ],
+  "completed": [
+    "script_struct",
+    "bgm",
+    "character_image",
+    "storyboard_prompt",
+    "video_shot",
+    "fx_enhance",
+    "post_assemble",
+    "bgm_audio",
+    "package_publish"
+  ],
+  "failed": {},
+  "artifacts": {
+    "script_struct": {
+      "shots": [
+        {
+          "index": 1,
+          "raw": "**类型：** 古装权谋 / 宫斗复仇",
+          "prompt": "特写（缓推）角色面部特写，情绪克制，背景虚化：**类型：** 古装权谋 / 宫斗复仇。情绪基调：推进",
+          "shot_type": "特写",
+          "motion": "缓推",
+          "emotion": "推进",
+          "est_s": 5.4
+        },
+        {
+          "index": 2,
+          "raw": "**集数：** 12集 × 1分钟",
+          "prompt": "近景（手持）近景人物动作，手持微晃增强临场：**集数：** 12集 × 1分钟。情绪基调：推进",
+          "shot_type": "近景",
+          "motion": "手持",
+          "emotion": "推进",
+          "est_s": 5.4
+        },
+        {
+          "index": 3,
+          "raw": "**基调：** 权谋布局 · 暗流涌动 · 步步为营",
+          "prompt": "中景（跟随）中景跟拍动作，节奏加快：**基调：** 权谋布局 · 暗流涌动 · 步步为营。情绪基调：推进",
+          "shot_type": "中景",
+          "motion": "跟随",
+          "emotion": "推进",
+          "est_s": 5.4
+        },
+        {
+          "index": 4,
+          "raw": "**平台：** 红果短剧",
+          "prompt": "全景（摇臂）全景摇臂展现冲突全貌：**平台：** 红果短剧。情绪基调：推进",
+          "shot_type": "全景",
+          "motion": "摇臂",
+          "emotion": "推进",
+          "est_s": 5.4
+        },
+        {
+          "index": 5,
+          "raw": "---",
+          "prompt": "特写（急推）特写急推抓反转瞬间，浅景深：---。情绪基调：推进",
+          "shot_type": "特写",
+          "motion": "急推",
+          "emotion": "推进",
+          "est_s": 5.4
+        },
+        {
+          "index": 6,
+          "raw": "| 角色 | 定位 | 外景描述 |",
+          "prompt": "近景（横移）近景横移交代环境关系：| 角色 | 定位 | 外景描述 |。情绪基调：推进",
+          "shot_type": "近景",
+          "motion": "横移",
+          "emotion": "推进",
+          "est_s": 5.4
+        },
+        {
+          "index": 7,
+          "raw": "|------|------|----------|",
+          "prompt": "中景（推拉）中景推拉强化双方对峙张力：|------|------|----------|。情绪基调：推进",
+          "shot_type": "中景",
+          "motion": "推拉",
+          "emotion": "推进",
+          "est_s": 5.4
+        },
+        {
+          "index": 8,
+          "raw": "| 沈长歌 | 主角，22岁，罪臣之女（入宫为婢） | 素色宫装，发髻简单，眼神清冷隐忍 |",
+          "prompt": "全景（升降）全景升降给情绪落点：| 沈长歌 | 主角，22岁，罪臣之女（入宫为婢） | 素色宫装，发髻简单，眼神清冷隐忍 |。情绪基调：推进",
+          "shot_type": "全景",
+          "motion": "升降",
+          "emotion": "推进",
+          "est_s": 5.4
+        },
+        {
+          "index": 9,
+          "raw": "| 皇后 | 反派，35岁，中宫之主 | 凤袍华服，雍容威严，笑意不达眼底 |",
+          "prompt": "特写（甩镜）甩镜特写制造视觉冲击：| 皇后 | 反派，35岁，中宫之主 | 凤袍华服，雍容威严，笑意不达眼底 |。情绪基调：推进",
+          "shot_type": "特写",
+          "motion": "甩镜",
+          "emotion": "推进",
+          "est_s": 5.4
+        },
+        {
+          "index": 10,
+          "raw": "| 林姑姑 | 配角，50岁，内务府掌事 | 灰布衣裳，面容严厉但眼角有慈悲 |",
+          "prompt": "中景（固定）固定中景留白沉淀情绪：| 林姑姑 | 配角，50岁，内务府掌事 | 灰布衣裳，面容严厉但眼角有慈悲 |。情绪基调：推进",
+          "shot_type": "中景",
+          "motion": "固定",
+          "emotion": "推进",
+          "est_s": 5.4
+        }
+      ],
+      "shot_count": 10,
+      "script_lines": 45,
+      "mode": "rules"
+    },
+    "bgm": {
+      "bgm_track": "B08_suspense_cold"
+    },
+    "character_image": {
+      "character_refs": [
+        "./_demo_output/char_ref_主角_3view.png"
+      ],
+      "char_blocks": [
+        "主角（主角）：女性，25-32岁，黑色中分微卷，简约都市通勤装，气质冷峻克制。面部轮廓、五官比例、发型、服装配色全程保持一致。 主角 (主角): 女性 character, 25-32岁, 黑色中分微卷, 简约都市通勤装, 冷峻克制 demeanor. Keep facial structure, proportions, hairstyle and outfit color consistent across all shots."
+      ],
+      "char_count": 1,
+      "three_view_prompts": [
+        "Character reference sheet of 主角, three views (front, side, back) on neutral light-grey background, full body, consistent proportions, clean studio lighting, 3:4 portrait layout. 主角 (主角): 女性 character, 25-32岁, 黑色中分微卷, 简约都市通勤装, 冷峻克制 demeanor. Keep facial structure, proportions, hairstyle and outfit color consistent across all shots."
+      ]
+    },
+    "storyboard_prompt": {
+      "shots": [
+        {
+          "index": 1,
+          "raw": "**类型：** 古装权谋 / 宫斗复仇",
+          "prompt": "特写（缓推）角色面部特写，情绪克制，背景虚化：**类型：** 古装权谋 / 宫斗复仇。情绪基调：推进",
+          "shot_type": "特写",
+          "motion": "缓推",
+          "emotion": "推进",
+          "est_s": 5.4,
+          "craft_prompt": "特写（机位平拍，镜头缓推）；浅景深中心构图，烛火/柔侧光光位，水墨暖调色调；**类型：** 古装权谋 / 宫斗复仇；基调：古典礼仪感：身段收敛、执礼停顿、器物入画；表演自然不造作，保留生活细节与情绪延续，面部与肢体比例真实不走形。",
+          "time_axis": "0-5s: **类型：** 古装权谋 / 宫斗复仇",
+          "segments": [
+            {
+              "start_s": 0,
+              "end_s": 5,
+              "who": "",
+              "where": "",
+              "action": "**类型：** 古装权谋 / 宫斗复仇",
+              "motion": "缓推"
+            }
+          ],
+          "motion_locked": "缓慢缓推",
+          "split_advice": null
+        },
+        {
+          "index": 2,
+          "raw": "**集数：** 12集 × 1分钟",
+          "prompt": "近景（手持）近景人物动作，手持微晃增强临场：**集数：** 12集 × 1分钟。情绪基调：推进",
+          "shot_type": "近景",
+          "motion": "手持",
+          "emotion": "推进",
+          "est_s": 5.4,
+          "craft_prompt": "近景（机位平拍，镜头手持）；浅景深构图，烛火/柔侧光光位，水墨暖调色调；**集数：** 12集 × 1分钟；基调：古典礼仪感：身段收敛、执礼停顿、器物入画；表演自然不造作，保留生活细节与情绪延续，面部与肢体比例真实不走形。",
+          "time_axis": "0-5s: **集数：** 12集 × 1分钟",
+          "segments": [
+            {
+              "start_s": 0,
+              "end_s": 5,
+              "who": "",
+              "where": "",
+              "action": "**集数：** 12集 × 1分钟",
+              "motion": "手持"
+            }
+          ],
+          "motion_locked": "缓慢手持",
+          "split_advice": null
+        },
+        {
+          "index": 3,
+          "raw": "**基调：** 权谋布局 · 暗流涌动 · 步步为营",
+          "prompt": "中景（跟随）中景跟拍动作，节奏加快：**基调：** 权谋布局 · 暗流涌动 · 步步为营。情绪基调：推进",
+          "shot_type": "中景",
+          "motion": "跟随",
+          "emotion": "推进",
+          "est_s": 5.4,
+          "craft_prompt": "中景（机位平拍，镜头跟随）；三分构图，烛火/柔侧光光位，水墨暖调色调；**基调：** 权谋布局 · 暗流涌动 · 步步为营；基调：古典礼仪感：身段收敛、执礼停顿、器物入画；表演自然不造作，保留生活细节与情绪延续，面部与肢体比例真实不走形。",
+          "time_axis": "0-5s: **基调：** 权谋布局 · 暗流涌动 · 步步为营",
+          "segments": [
+            {
+              "start_s": 0,
+              "end_s": 5,
+              "who": "",
+              "where": "",
+              "action": "**基调：** 权谋布局 · 暗流涌动 · 步步为营",
+              "motion": "跟随"
+            }
+          ],
+          "motion_locked": "缓慢跟随",
+          "split_advice": null
+        },
+        {
+          "index": 4,
+          "raw": "**平台：** 红果短剧",
+          "prompt": "全景（摇臂）全景摇臂展现冲突全貌：**平台：** 红果短剧。情绪基调：推进",
+          "shot_type": "全景",
+          "motion": "摇臂",
+          "emotion": "推进",
+          "est_s": 5.4,
+          "craft_prompt": "全景（机位平拍，镜头摇臂）；三分构图，烛火/柔侧光光位，水墨暖调色调；**平台：** 红果短剧；基调：古典礼仪感：身段收敛、执礼停顿、器物入画；表演自然不造作，保留生活细节与情绪延续，面部与肢体比例真实不走形。",
+          "time_axis": "0-5s: **平台：** 红果短剧",
+          "segments": [
+            {
+              "start_s": 0,
+              "end_s": 5,
+              "who": "",
+              "where": "",
+              "action": "**平台：** 红果短剧",
+              "motion": "摇臂"
+            }
+          ],
+          "motion_locked": "缓慢摇臂",
+          "split_advice": null
+        },
+        {
+          "index": 5,
+          "raw": "---",
+          "prompt": "特写（急推）特写急推抓反转瞬间，浅景深：---。情绪基调：推进",
+          "shot_type": "特写",
+          "motion": "急推",
+          "emotion": "推进",
+          "est_s": 5.4,
+          "craft_prompt": "特写（机位平拍，镜头急推）；浅景深中心构图，烛火/柔侧光光位，水墨暖调色调；---；基调：古典礼仪感：身段收敛、执礼停顿、器物入画；表演自然不造作，保留生活细节与情绪延续，面部与肢体比例真实不走形。",
+          "time_axis": "0-5s: ---",
+          "segments": [
+            {
+              "start_s": 0,
+              "end_s": 5,
+              "who": "",
+              "where": "",
+              "action": "---",
+              "motion": "急推"
+            }
+          ],
+          "motion_locked": "缓慢急推",
+          "split_advice": null
+        },
+        {
+          "index": 6,
+          "raw": "| 角色 | 定位 | 外景描述 |",
+          "prompt": "近景（横移）近景横移交代环境关系：| 角色 | 定位 | 外景描述 |。情绪基调：推进",
+          "shot_type": "近景",
+          "motion": "横移",
+          "emotion": "推进",
+          "est_s": 5.4,
+          "craft_prompt": "近景（机位平拍，镜头横移）；浅景深构图，烛火/柔侧光光位，水墨暖调色调；| 角色 | 定位 | 外景描述 |；基调：古典礼仪感：身段收敛、执礼停顿、器物入画；表演自然不造作，保留生活细节与情绪延续，面部与肢体比例真实不走形。",
+          "time_axis": "0-5s: | 角色 | 定位 | 外景描述 |",
+          "segments": [
+            {
+              "start_s": 0,
+              "end_s": 5,
+              "who": "",
+              "where": "",
+              "action": "| 角色 | 定位 | 外景描述 |",
+              "motion": "横移"
+            }
+          ],
+          "motion_locked": "缓慢横移",
+          "split_advice": null
+        },
+        {
+          "index": 7,
+          "raw": "|------|------|----------|",
+          "prompt": "中景（推拉）中景推拉强化双方对峙张力：|------|------|----------|。情绪基调：推进",
+          "shot_type": "中景",
+          "motion": "推拉",
+          "emotion": "推进",
+          "est_s": 5.4,
+          "craft_prompt": "中景（机位平拍，镜头推拉）；三分构图，烛火/柔侧光光位，水墨暖调色调；|------|------|----------|；基调：古典礼仪感：身段收敛、执礼停顿、器物入画；表演自然不造作，保留生活细节与情绪延续，面部与肢体比例真实不走形。",
+          "time_axis": "0-5s: |------|------|----------|",
+          "segments": [
+            {
+              "start_s": 0,
+              "end_s": 5,
+              "who": "",
+              "where": "",
+              "action": "|------|------|----------|",
+              "motion": "推拉"
+            }
+          ],
+          "motion_locked": "缓慢推拉",
+          "split_advice": null
+        },
+        {
+          "index": 8,
+          "raw": "| 沈长歌 | 主角，22岁，罪臣之女（入宫为婢） | 素色宫装，发髻简单，眼神清冷隐忍 |",
+          "prompt": "全景（升降）全景升降给情绪落点：| 沈长歌 | 主角，22岁，罪臣之女（入宫为婢） | 素色宫装，发髻简单，眼神清冷隐忍 |。情绪基调：推进",
+          "shot_type": "全景",
+          "motion": "升降",
+          "emotion": "推进",
+          "est_s": 5.4,
+          "craft_prompt": "全景（机位平拍，镜头升降）；三分构图，烛火/柔侧光光位，水墨暖调色调；| 沈长歌 | 主角，22岁，罪臣之女（入宫为婢） | 素色宫装，发髻简单，眼神清冷隐忍 |；基调：古典礼仪感：身段收敛、执礼停顿、器物入画；表演自然不造作，保留生活细节与情绪延续，面部与肢体比例真实不走形。",
+          "time_axis": "0-5s: | 沈长歌 | 主角，22岁，罪臣之女（入宫为婢） | 素色宫装，发髻简单，眼神清冷隐忍 |",
+          "segments": [
+            {
+              "start_s": 0,
+              "end_s": 5,
+              "who": "",
+              "where": "",
+              "action": "| 沈长歌 | 主角，22岁，罪臣之女（入宫为婢） | 素色宫装，发髻简单，眼神清冷隐忍 |",
+              "motion": "升降"
+            }
+          ],
+          "motion_locked": "缓慢升降",
+          "split_advice": null
+        },
+        {
+          "index": 9,
+          "raw": "| 皇后 | 反派，35岁，中宫之主 | 凤袍华服，雍容威严，笑意不达眼底 |",
+          "prompt": "特写（甩镜）甩镜特写制造视觉冲击：| 皇后 | 反派，35岁，中宫之主 | 凤袍华服，雍容威严，笑意不达眼底 |。情绪基调：推进",
+          "shot_type": "特写",
+          "motion": "甩镜",
+          "emotion": "推进",
+          "est_s": 5.4,
+          "craft_prompt": "特写（机位平拍，镜头甩镜）；浅景深中心构图，烛火/柔侧光光位，水墨暖调色调；| 皇后 | 反派，35岁，中宫之主 | 凤袍华服，雍容威严，笑意不达眼底 |；基调：古典礼仪感：身段收敛、执礼停顿、器物入画；表演自然不造作，保留生活细节与情绪延续，面部与肢体比例真实不走形。",
+          "time_axis": "0-5s: | 皇后 | 反派，35岁，中宫之主 | 凤袍华服，雍容威严，笑意不达眼底 |",
+          "segments": [
+            {
+              "start_s": 0,
+              "end_s": 5,
+              "who": "",
+              "where": "",
+              "action": "| 皇后 | 反派，35岁，中宫之主 | 凤袍华服，雍容威严，笑意不达眼底 |",
+              "motion": "甩镜"
+            }
+          ],
+          "motion_locked": "缓慢甩镜",
+          "split_advice": null
+        },
+        {
+          "index": 10,
+          "raw": "| 林姑姑 | 配角，50岁，内务府掌事 | 灰布衣裳，面容严厉但眼角有慈悲 |",
+          "prompt": "中景（固定）固定中景留白沉淀情绪：| 林姑姑 | 配角，50岁，内务府掌事 | 灰布衣裳，面容严厉但眼角有慈悲 |。情绪基调：推进",
+          "shot_type": "中景",
+          "motion": "固定",
+          "emotion": "推进",
+          "est_s": 5.4,
+          "craft_prompt": "中景（机位平拍，镜头固定）；三分构图，烛火/柔侧光光位，水墨暖调色调；| 林姑姑 | 配角，50岁，内务府掌事 | 灰布衣裳，面容严厉但眼角有慈悲 |；基调：古典礼仪感：身段收敛、执礼停顿、器物入画；表演自然不造作，保留生活细节与情绪延续，面部与肢体比例真实不走形。",
+          "time_axis": "0-5s: | 林姑姑 | 配角，50岁，内务府掌事 | 灰布衣裳，面容严厉但眼角有慈悲 | （机位固定）",
+          "segments": [
+            {
+              "start_s": 0,
+              "end_s": 5,
+              "who": "",
+              "where": "",
+              "action": "| 林姑姑 | 配角，50岁，内务府掌事 | 灰布衣裳，面容严厉但眼角有慈悲 |",
+              "motion": "固定"
+            }
+          ],
+          "motion_locked": "缓慢固定",
+          "split_advice": null
+        }
+      ],
+      "topic": "古装",
+      "style": {
+        "topic": "古装",
+        "palette": "水墨暖调",
+        "light": "烛火/柔侧光",
+        "human_base": "古典礼仪感：身段收敛、执礼停顿、器物入画"
+      },
+      "shot_prompts": [
+        "特写（机位平拍，镜头缓推）；浅景深中心构图，烛火/柔侧光光位，水墨暖调色调；**类型：** 古装权谋 / 宫斗复仇；基调：古典礼仪感：身段收敛、执礼停顿、器物入画；表演自然不造作，保留生活细节与情绪延续，面部与肢体比例真实不走形。",
+        "近景（机位平拍，镜头手持）；浅景深构图，烛火/柔侧光光位，水墨暖调色调；**集数：** 12集 × 1分钟；基调：古典礼仪感：身段收敛、执礼停顿、器物入画；表演自然不造作，保留生活细节与情绪延续，面部与肢体比例真实不走形。",
+        "中景（机位平拍，镜头跟随）；三分构图，烛火/柔侧光光位，水墨暖调色调；**基调：** 权谋布局 · 暗流涌动 · 步步为营；基调：古典礼仪感：身段收敛、执礼停顿、器物入画；表演自然不造作，保留生活细节与情绪延续，面部与肢体比例真实不走形。",
+        "全景（机位平拍，镜头摇臂）；三分构图，烛火/柔侧光光位，水墨暖调色调；**平台：** 红果短剧；基调：古典礼仪感：身段收敛、执礼停顿、器物入画；表演自然不造作，保留生活细节与情绪延续，面部与肢体比例真实不走形。",
+        "特写（机位平拍，镜头急推）；浅景深中心构图，烛火/柔侧光光位，水墨暖调色调；---；基调：古典礼仪感：身段收敛、执礼停顿、器物入画；表演自然不造作，保留生活细节与情绪延续，面部与肢体比例真实不走形。",
+        "近景（机位平拍，镜头横移）；浅景深构图，烛火/柔侧光光位，水墨暖调色调；| 角色 | 定位 | 外景描述 |；基调：古典礼仪感：身段收敛、执礼停顿、器物入画；表演自然不造作，保留生活细节与情绪延续，面部与肢体比例真实不走形。",
+        "中景（机位平拍，镜头推拉）；三分构图，烛火/柔侧光光位，水墨暖调色调；|------|------|----------|；基调：古典礼仪感：身段收敛、执礼停顿、器物入画；表演自然不造作，保留生活细节与情绪延续，面部与肢体比例真实不走形。",
+        "全景（机位平拍，镜头升降）；三分构图，烛火/柔侧光光位，水墨暖调色调；| 沈长歌 | 主角，22岁，罪臣之女（入宫为婢） | 素色宫装，发髻简单，眼神清冷隐忍 |；基调：古典礼仪感：身段收敛、执礼停顿、器物入画；表演自然不造作，保留生活细节与情绪延续，面部与肢体比例真实不走形。",
+        "特写（机位平拍，镜头甩镜）；浅景深中心构图，烛火/柔侧光光位，水墨暖调色调；| 皇后 | 反派，35岁，中宫之主 | 凤袍华服，雍容威严，笑意不达眼底 |；基调：古典礼仪感：身段收敛、执礼停顿、器物入画；表演自然不造作，保留生活细节与情绪延续，面部与肢体比例真实不走形。",
+        "中景（机位平拍，镜头固定）；三分构图，烛火/柔侧光光位，水墨暖调色调；| 林姑姑 | 配角，50岁，内务府掌事 | 灰布衣裳，面容严厉但眼角有慈悲 |；基调：古典礼仪感：身段收敛、执礼停顿、器物入画；表演自然不造作，保留生活细节与情绪延续，面部与肢体比例真实不走形。"
+      ],
+      "time_axis_applied": true,
+      "skeleton_chained": true,
+      "motion_violations": [
+        {
+          "index": 3,
+          "found_motions": [
+            "推",
+            "跟"
+          ],
+          "hint": "第3镜混入 2 种运镜，模型只能执行一种且容易打架，建议收敛到单一运镜"
+        },
+        {
+          "index": 4,
+          "found_motions": [
+            "推",
+            "摇"
+          ],
+          "hint": "第4镜混入 2 种运镜，模型只能执行一种且容易打架，建议收敛到单一运镜"
+        },
+        {
+          "index": 6,
+          "found_motions": [
+            "推",
+            "移"
+          ],
+          "hint": "第6镜混入 2 种运镜，模型只能执行一种且容易打架，建议收敛到单一运镜"
+        },
+        {
+          "index": 7,
+          "found_motions": [
+            "拉",
+            "推"
+          ],
+          "hint": "第7镜混入 2 种运镜，模型只能执行一种且容易打架，建议收敛到单一运镜"
+        },
+        {
+          "index": 9,
+          "found_motions": [
+            "推",
+            "甩"
+          ],
+          "hint": "第9镜混入 2 种运镜，模型只能执行一种且容易打架，建议收敛到单一运镜"
+        },
+        {
+          "index": 10,
+          "found_motions": [
+            "固定",
+            "推"
+          ],
+          "hint": "第10镜混入 2 种运镜，模型只能执行一种且容易打架，建议收敛到单一运镜"
+        }
+      ],
+      "chars_locked": false
+    },
+    "video_shot": {
+      "video_clips": [
+        {
+          "index": 1,
+          "clip": true,
+          "peak_vram": 4.0,
+          "backend": "ltx095_720",
+          "efficiency_score": 0.94,
+          "efficiency_gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          },
+          "fallback_paths": [
+            "ltx095_720",
+            "wan13b_fa_480",
+            "cloud_seedance_2"
+          ],
+          "qa_loop_decision": null,
+          "hot_update_enabled": false,
+          "local_models_dir": "local"
+        },
+        {
+          "index": 2,
+          "clip": true,
+          "peak_vram": 4.0,
+          "backend": "ltx095_720",
+          "efficiency_score": 0.94,
+          "efficiency_gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          },
+          "fallback_paths": [
+            "ltx095_720",
+            "wan13b_fa_480",
+            "cloud_seedance_2"
+          ],
+          "qa_loop_decision": null,
+          "hot_update_enabled": false,
+          "local_models_dir": "local"
+        },
+        {
+          "index": 3,
+          "clip": true,
+          "peak_vram": 4.0,
+          "backend": "ltx095_720",
+          "efficiency_score": 0.94,
+          "efficiency_gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          },
+          "fallback_paths": [
+            "ltx095_720",
+            "wan13b_fa_480",
+            "cloud_seedance_2"
+          ],
+          "qa_loop_decision": null,
+          "hot_update_enabled": false,
+          "local_models_dir": "local"
+        },
+        {
+          "index": 4,
+          "clip": true,
+          "peak_vram": 4.0,
+          "backend": "ltx095_720",
+          "efficiency_score": 0.94,
+          "efficiency_gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          },
+          "fallback_paths": [
+            "ltx095_720",
+            "wan13b_fa_480",
+            "cloud_seedance_2"
+          ],
+          "qa_loop_decision": null,
+          "hot_update_enabled": false,
+          "local_models_dir": "local"
+        },
+        {
+          "index": 5,
+          "clip": true,
+          "peak_vram": 4.0,
+          "backend": "ltx095_720",
+          "efficiency_score": 0.94,
+          "efficiency_gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          },
+          "fallback_paths": [
+            "ltx095_720",
+            "wan13b_fa_480",
+            "cloud_seedance_2"
+          ],
+          "qa_loop_decision": null,
+          "hot_update_enabled": false,
+          "local_models_dir": "local"
+        },
+        {
+          "index": 6,
+          "clip": true,
+          "peak_vram": 4.0,
+          "backend": "ltx095_720",
+          "efficiency_score": 0.94,
+          "efficiency_gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          },
+          "fallback_paths": [
+            "ltx095_720",
+            "wan13b_fa_480",
+            "cloud_seedance_2"
+          ],
+          "qa_loop_decision": null,
+          "hot_update_enabled": false,
+          "local_models_dir": "local"
+        },
+        {
+          "index": 7,
+          "clip": true,
+          "peak_vram": 4.0,
+          "backend": "ltx095_720",
+          "efficiency_score": 0.94,
+          "efficiency_gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          },
+          "fallback_paths": [
+            "ltx095_720",
+            "wan13b_fa_480",
+            "cloud_seedance_2"
+          ],
+          "qa_loop_decision": null,
+          "hot_update_enabled": false,
+          "local_models_dir": "local"
+        },
+        {
+          "index": 8,
+          "clip": true,
+          "peak_vram": 4.0,
+          "backend": "ltx095_720",
+          "efficiency_score": 0.94,
+          "efficiency_gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          },
+          "fallback_paths": [
+            "ltx095_720",
+            "wan13b_fa_480",
+            "cloud_seedance_2"
+          ],
+          "qa_loop_decision": null,
+          "hot_update_enabled": false,
+          "local_models_dir": "local"
+        },
+        {
+          "index": 9,
+          "clip": true,
+          "peak_vram": 4.0,
+          "backend": "ltx095_720",
+          "efficiency_score": 0.94,
+          "efficiency_gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          },
+          "fallback_paths": [
+            "ltx095_720",
+            "wan13b_fa_480",
+            "cloud_seedance_2"
+          ],
+          "qa_loop_decision": null,
+          "hot_update_enabled": false,
+          "local_models_dir": "local"
+        },
+        {
+          "index": 10,
+          "clip": true,
+          "peak_vram": 4.0,
+          "backend": "ltx095_720",
+          "efficiency_score": 0.94,
+          "efficiency_gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          },
+          "fallback_paths": [
+            "ltx095_720",
+            "wan13b_fa_480",
+            "cloud_seedance_2"
+          ],
+          "qa_loop_decision": null,
+          "hot_update_enabled": false,
+          "local_models_dir": "local"
+        }
+      ],
+      "clip_count": 10,
+      "efficiency_best_model": "ltx095_720",
+      "efficiency_plan": {
+        "kind": "video",
+        "profile": {
+          "gpu": {
+            "vram_gb": 6.0
+          }
+        },
+        "paths": [
+          {
+            "path_id": "p1",
+            "model_id": "ltx095_720",
+            "kind": "video",
+            "cloud": false,
+            "cost": 1.0,
+            "speed": 1.0,
+            "quality": 0.8,
+            "resource_ok": true,
+            "score": 0.94,
+            "estimated_vram_gb": null
+          },
+          {
+            "path_id": "p2",
+            "model_id": "wan13b_fa_480",
+            "kind": "video",
+            "cloud": false,
+            "cost": 1.0,
+            "speed": 1.0,
+            "quality": 0.8,
+            "resource_ok": true,
+            "score": 0.94,
+            "estimated_vram_gb": null
+          },
+          {
+            "path_id": "p3",
+            "model_id": "cloud_seedance_2",
+            "kind": "video",
+            "cloud": true,
+            "cost": 1.8,
+            "speed": 1.3,
+            "quality": 0.92,
+            "resource_ok": true,
+            "score": 0.8882,
+            "estimated_vram_gb": null
+          }
+        ],
+        "best": {
+          "path_id": "p1",
+          "model_id": "ltx095_720",
+          "kind": "video",
+          "cloud": false,
+          "cost": 1.0,
+          "speed": 1.0,
+          "quality": 0.8,
+          "resource_ok": true,
+          "score": 0.94,
+          "estimated_vram_gb": null
+        },
+        "gate": {
+          "has_path": true,
+          "best_path": "p1",
+          "fallback_cloud": false,
+          "reason": "resource_cost_speed_quality_balanced",
+          "prefer_local": false
+        },
+        "prefer_local": false,
+        "dashboard": {
+          "kind": "video",
+          "best_model": "ltx095_720",
+          "best_cloud": false,
+          "best_score": 0.94,
+          "best_cost": 1.0,
+          "best_quality": 0.8,
+          "best_speed": 1.0,
+          "path_count": 3,
+          "gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          }
+        },
+        "local_models_source": [],
+        "local_models_dir": "local",
+        "hot_update_enabled": false
+      },
+      "qa_loop_summary": {
+        "total": 0,
+        "accepted": 0,
+        "retried": 0,
+        "escalated": 0,
+        "failed": 0,
+        "pass_rate": 0.0,
+        "needs_cloud": false,
+        "has_failure": false
+      },
+      "accessibility": {
+        "mode": "pro",
+        "mode_label": "进阶",
+        "params": {
+          "style_strength": 0.82,
+          "resolution": 720,
+          "steps": 28,
+          "quality_target": 0.85,
+          "negative_prompt": "blurry, low quality, watermark"
+        },
+        "cost_panel": {
+          "primary": {
+            "model_id": "ltx095_720",
+            "cloud": false,
+            "cost_label": "中等成本",
+            "vram_label": "低显存可跑",
+            "quality_score": 0.8,
+            "speed_label": "快"
+          },
+          "options": [
+            {
+              "model_id": "ltx095_720",
+              "cloud": false,
+              "cost_label": "中等成本",
+              "vram_label": "低显存可跑",
+              "quality_score": 0.8,
+              "speed_label": "快"
+            },
+            {
+              "model_id": "wan13b_fa_480",
+              "cloud": false,
+              "cost_label": "中等成本",
+              "vram_label": "低显存可跑",
+              "quality_score": 0.8,
+              "speed_label": "快"
+            },
+            {
+              "model_id": "cloud_seedance_2",
+              "cloud": true,
+              "cost_label": "云端较高成本",
+              "vram_label": "低显存可跑",
+              "quality_score": 0.92,
+              "speed_label": "快"
+            }
+          ],
+          "note": "本地优先，云端兜底；失败会先重试本地路径"
+        },
+        "failure_panel": {
+          "reason": "未知问题",
+          "fallbacks": [
+            {
+              "model_id": "ltx095_720",
+              "why": "成本更低",
+              "resource_ok": true
+            },
+            {
+              "model_id": "wan13b_fa_480",
+              "why": "成本更低",
+              "resource_ok": true
+            },
+            {
+              "model_id": "cloud_seedance_2",
+              "why": "质量更高",
+              "resource_ok": true
+            }
+          ]
+        },
+        "mode_overlay": {
+          "mode": "pro",
+          "mode_label": "进阶",
+          "params": {
+            "style_strength": 0.82,
+            "resolution": 720,
+            "steps": 28,
+            "quality_target": 0.85,
+            "negative_prompt": "blurry, low quality, watermark"
+          },
+          "iteration_feedback": [
+            {
+              "schema": "mode_feedback_v1",
+              "model_id": "ltx095_720",
+              "qa_pass_rate": 0.0,
+              "qa_failed": 0,
+              "local_models_dir": "local",
+              "hot_update_enabled": false,
+              "resource_ok": true,
+              "applied_from": "runtime_mode_feedback"
+            }
+          ],
+          "legacy_workflow_preserved": true
+        },
+        "mode_feedback": {
+          "schema": "mode_feedback_v1",
+          "mode": "pro",
+          "mode_overlay_applied": true,
+          "params_used": {
+            "style_strength": 0.82,
+            "resolution": 720,
+            "steps": 28,
+            "quality_target": 0.85,
+            "negative_prompt": "blurry, low quality, watermark"
+          },
+          "model_id": "ltx095_720",
+          "qa_pass_rate": 0.0,
+          "qa_failed": 0,
+          "resource_ok": true,
+          "local_models_dir": "local",
+          "hot_update_enabled": false,
+          "feedback_target": "workflow_gen.mode_overlay",
+          "can_feedback_to_original_workflow": true
+        }
+      },
+      "mode_feedback": {
+        "schema": "mode_feedback_v1",
+        "mode": "pro",
+        "mode_overlay_applied": true,
+        "params_used": {
+          "style_strength": 0.82,
+          "resolution": 720,
+          "steps": 28,
+          "quality_target": 0.85,
+          "negative_prompt": "blurry, low quality, watermark"
+        },
+        "model_id": "ltx095_720",
+        "qa_pass_rate": 0.0,
+        "qa_failed": 0,
+        "resource_ok": true,
+        "local_models_dir": "local",
+        "hot_update_enabled": false,
+        "feedback_target": "workflow_gen.mode_overlay",
+        "can_feedback_to_original_workflow": true
+      }
+    },
+    "fx_enhance": {
+      "fx_clips": [
+        {
+          "index": 1,
+          "clip": true,
+          "peak_vram": 4.0,
+          "backend": "ltx095_720",
+          "efficiency_score": 0.94,
+          "efficiency_gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          },
+          "fallback_paths": [
+            "ltx095_720",
+            "wan13b_fa_480",
+            "cloud_seedance_2"
+          ],
+          "qa_loop_decision": null,
+          "hot_update_enabled": false,
+          "local_models_dir": "local"
+        },
+        {
+          "index": 2,
+          "clip": true,
+          "peak_vram": 4.0,
+          "backend": "ltx095_720",
+          "efficiency_score": 0.94,
+          "efficiency_gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          },
+          "fallback_paths": [
+            "ltx095_720",
+            "wan13b_fa_480",
+            "cloud_seedance_2"
+          ],
+          "qa_loop_decision": null,
+          "hot_update_enabled": false,
+          "local_models_dir": "local"
+        },
+        {
+          "index": 3,
+          "clip": true,
+          "peak_vram": 4.0,
+          "backend": "ltx095_720",
+          "efficiency_score": 0.94,
+          "efficiency_gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          },
+          "fallback_paths": [
+            "ltx095_720",
+            "wan13b_fa_480",
+            "cloud_seedance_2"
+          ],
+          "qa_loop_decision": null,
+          "hot_update_enabled": false,
+          "local_models_dir": "local"
+        },
+        {
+          "index": 4,
+          "clip": true,
+          "peak_vram": 4.0,
+          "backend": "ltx095_720",
+          "efficiency_score": 0.94,
+          "efficiency_gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          },
+          "fallback_paths": [
+            "ltx095_720",
+            "wan13b_fa_480",
+            "cloud_seedance_2"
+          ],
+          "qa_loop_decision": null,
+          "hot_update_enabled": false,
+          "local_models_dir": "local"
+        },
+        {
+          "index": 5,
+          "clip": true,
+          "peak_vram": 4.0,
+          "backend": "ltx095_720",
+          "efficiency_score": 0.94,
+          "efficiency_gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          },
+          "fallback_paths": [
+            "ltx095_720",
+            "wan13b_fa_480",
+            "cloud_seedance_2"
+          ],
+          "qa_loop_decision": null,
+          "hot_update_enabled": false,
+          "local_models_dir": "local"
+        },
+        {
+          "index": 6,
+          "clip": true,
+          "peak_vram": 4.0,
+          "backend": "ltx095_720",
+          "efficiency_score": 0.94,
+          "efficiency_gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          },
+          "fallback_paths": [
+            "ltx095_720",
+            "wan13b_fa_480",
+            "cloud_seedance_2"
+          ],
+          "qa_loop_decision": null,
+          "hot_update_enabled": false,
+          "local_models_dir": "local"
+        },
+        {
+          "index": 7,
+          "clip": true,
+          "peak_vram": 4.0,
+          "backend": "ltx095_720",
+          "efficiency_score": 0.94,
+          "efficiency_gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          },
+          "fallback_paths": [
+            "ltx095_720",
+            "wan13b_fa_480",
+            "cloud_seedance_2"
+          ],
+          "qa_loop_decision": null,
+          "hot_update_enabled": false,
+          "local_models_dir": "local"
+        },
+        {
+          "index": 8,
+          "clip": true,
+          "peak_vram": 4.0,
+          "backend": "ltx095_720",
+          "efficiency_score": 0.94,
+          "efficiency_gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          },
+          "fallback_paths": [
+            "ltx095_720",
+            "wan13b_fa_480",
+            "cloud_seedance_2"
+          ],
+          "qa_loop_decision": null,
+          "hot_update_enabled": false,
+          "local_models_dir": "local"
+        },
+        {
+          "index": 9,
+          "clip": true,
+          "peak_vram": 4.0,
+          "backend": "ltx095_720",
+          "efficiency_score": 0.94,
+          "efficiency_gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          },
+          "fallback_paths": [
+            "ltx095_720",
+            "wan13b_fa_480",
+            "cloud_seedance_2"
+          ],
+          "qa_loop_decision": null,
+          "hot_update_enabled": false,
+          "local_models_dir": "local"
+        },
+        {
+          "index": 10,
+          "clip": true,
+          "peak_vram": 4.0,
+          "backend": "ltx095_720",
+          "efficiency_score": 0.94,
+          "efficiency_gate": {
+            "has_path": true,
+            "best_path": "p1",
+            "fallback_cloud": false,
+            "reason": "resource_cost_speed_quality_balanced",
+            "prefer_local": false
+          },
+          "fallback_paths": [
+            "ltx095_720",
+            "wan13b_fa_480",
+            "cloud_seedance_2"
+          ],
+          "qa_loop_decision": null,
+          "hot_update_enabled": false,
+          "local_models_dir": "local"
+        }
+      ],
+      "fx_applied": true
+    },
+    "post_assemble": {
+      "assembled_video": "./_demo_output/assembled_ep12.mp4",
+      "clip_count": 10,
+      "music": "",
+      "voice": "",
+      "bgm": "B08_suspense_cold",
+      "duration_s": 0,
+      "assembled": false,
+      "assembled_ffmpeg": true
+    },
+    "bgm_audio": {
+      "bgm_track": "B08_suspense_cold",
+      "bgm_path": "./_demo_output/bgm_ep12.wav"
+    },
+    "package_publish": {
+      "final_video": "./_demo_output/final_ep12.mp4",
+      "bgm_track": "B08_suspense_cold",
+      "publish_ready": false,
+      "duration_s": 0
+    }
+  },
+  "mode": "pro",
+  "mode_overlay": {
+    "mode": "pro",
+    "mode_label": "进阶",
+    "params": {
+      "style_strength": 0.82,
+      "resolution": 720,
+      "steps": 28,
+      "quality_target": 0.85,
+      "negative_prompt": "blurry, low quality, watermark"
+    },
+    "iteration_feedback": [
+      {
+        "schema": "mode_feedback_v1",
+        "model_id": "ltx095_720",
+        "qa_pass_rate": 0.0,
+        "qa_failed": 0,
+        "local_models_dir": "local",
+        "hot_update_enabled": false,
+        "resource_ok": true,
+        "applied_from": "runtime_mode_feedback"
+      }
+    ],
+    "legacy_workflow_preserved": true
+  },
+  "mode_feedback": {
+    "schema": "mode_feedback_v1",
+    "mode": "pro",
+    "mode_overlay_applied": true,
+    "params_used": {
+      "style_strength": 0.82,
+      "resolution": 720,
+      "steps": 28,
+      "quality_target": 0.85,
+      "negative_prompt": "blurry, low quality, watermark"
+    },
+    "model_id": "ltx095_720",
+    "qa_pass_rate": 0.0,
+    "qa_failed": 0,
+    "resource_ok": true,
+    "local_models_dir": "local",
+    "hot_update_enabled": false,
+    "feedback_target": "workflow_gen.mode_overlay",
+    "can_feedback_to_original_workflow": true
+  },
+  "delivery_readiness": {
+    "ready": false,
+    "checks": {
+      "pipeline_ok": true,
+      "publish_ready": false,
+      "final_video_present": false,
+      "assembled_video_present": false,
+      "video_clips_generated": true,
+      "qa_loop_visible": true,
+      "mode_overlay_visible": false,
+      "mode_feedback_visible": true
+    },
+    "gaps": [
+      "成片文件尚未落盘，暂不能直接交付"
+    ]
+  },
+  "auto_repair": {
+    "ready": false,
+    "rounds": 2,
+    "actions": [],
+    "unresolvable": []
+  }
+}
