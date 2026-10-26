@@ -1,0 +1,10 @@
+{"tid": "shot_1", "ok": true, "model_impl": "ltx095_720", "peak_vram_gb": 4.0, "shot_elapsed_s": 54.0, "mock": true, "local_checkpoint": "ltx095_720", "local_models_dir": ""}
+{"tid": "shot_2", "ok": true, "model_impl": "ltx095_720", "peak_vram_gb": 4.0, "shot_elapsed_s": 54.0, "mock": true, "local_checkpoint": "ltx095_720", "local_models_dir": ""}
+{"tid": "shot_3", "ok": true, "model_impl": "ltx095_720", "peak_vram_gb": 4.0, "shot_elapsed_s": 54.0, "mock": true, "local_checkpoint": "ltx095_720", "local_models_dir": ""}
+{"tid": "shot_4", "ok": true, "model_impl": "ltx095_720", "peak_vram_gb": 4.0, "shot_elapsed_s": 54.0, "mock": true, "local_checkpoint": "ltx095_720", "local_models_dir": ""}
+{"tid": "shot_5", "ok": true, "model_impl": "ltx095_720", "peak_vram_gb": 4.0, "shot_elapsed_s": 54.0, "mock": true, "local_checkpoint": "ltx095_720", "local_models_dir": ""}
+{"tid": "shot_6", "ok": true, "model_impl": "ltx095_720", "peak_vram_gb": 4.0, "shot_elapsed_s": 54.0, "mock": true, "local_checkpoint": "ltx095_720", "local_models_dir": ""}
+{"tid": "shot_7", "ok": true, "model_impl": "ltx095_720", "peak_vram_gb": 4.0, "shot_elapsed_s": 54.0, "mock": true, "local_checkpoint": "ltx095_720", "local_models_dir": ""}
+{"tid": "shot_8", "ok": true, "model_impl": "ltx095_720", "peak_vram_gb": 4.0, "shot_elapsed_s": 54.0, "mock": true, "local_checkpoint": "ltx095_720", "local_models_dir": ""}
+{"tid": "shot_9", "ok": true, "model_impl": "ltx095_720", "peak_vram_gb": 4.0, "shot_elapsed_s": 54.0, "mock": true, "local_checkpoint": "ltx095_720", "local_models_dir": ""}
+{"tid": "shot_10", "ok": true, "model_impl": "ltx095_720", "peak_vram_gb": 4.0, "shot_elapsed_s": 54.0, "mock": true, "local_checkpoint": "ltx095_720", "local_models_dir": ""}

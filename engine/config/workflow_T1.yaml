@@ -1,6 +1,11 @@
 tier: T1
 tier_label: 6-8GB
 free_vram_gb: 99.0
+style: S1_anime_jp
+style_label: 日系2D动漫
+music: ''
+voice: ''
+bgm: ''
 nodes:
 - id: script_struct
   name: ① 剧本结构化
@@ -13,19 +18,28 @@ nodes:
 - id: character_image
   name: ② 角色图
   primary: &id002
-    impl: sd15_gguf_q4_512_offload
-    estimated_vram_need_gb: 4
+    impl: sdxl_anime_lora
+    estimated_vram_need_gb: 8
     params: &id003
-      model: sd15.safetensors(gguf Q4_K_M)
-      res: 512
-      sampler: Euler a
-      steps: 20
-      offload: true
+      style: S1_anime_jp
+      lora: anime_style_animerus
+      prompt_prefix: 日本2D手绘动漫风, 新海诚式体积光, 青蓝主色+暖橙霓虹点缀, 动漫线稿清晰, 高细节
   fallback_chain:
   - *id002
+  - impl: sd15_gguf_q4_512_offload
+    estimated_vram_need_gb: 4
+    params:
+      style: S1_anime_jp
+      lora: anime_style_animerus
+      prompt_prefix: 日本2D手绘动漫风, 新海诚式体积光, 青蓝主色+暖橙霓虹点缀, 动漫线稿清晰, 高细节
   - impl: cloud_api_seedream
     estimated_vram_need_gb: 0
+    params:
+      style: S1_anime_jp
+      lora: anime_style_animerus
+      prompt_prefix: 日本2D手绘动漫风, 新海诚式体积光, 青蓝主色+暖橙霓虹点缀, 动漫线稿清晰, 高细节
   params: *id003
+  style: S1_anime_jp
 - id: storyboard_prompt
   name: ③ 分镜提示词
   primary: &id004
@@ -40,15 +54,19 @@ nodes:
     impl: wan13b_gguf_q4_offload_480
     estimated_vram_need_gb: 5
     params: &id006
-      model: Wan2.1-T2V-1.3B(gguf Q4)
-      res: 480
-      offload: true
-      duration_s: 5
+      style: S1_anime_jp
+      lora: anime_style_animerus
+      prompt_prefix: 日本2D手绘动漫风, 新海诚式体积光, 青蓝主色+暖橙霓虹点缀, 动漫线稿清晰, 高细节
   fallback_chain:
   - *id005
   - impl: cloud_kling
     estimated_vram_need_gb: 0
+    params:
+      style: S1_anime_jp
+      lora: anime_style_animerus
+      prompt_prefix: 日本2D手绘动漫风, 新海诚式体积光, 青蓝主色+暖橙霓虹点缀, 动漫线稿清晰, 高细节
   params: *id006
+  style: S1_anime_jp
 - id: fx_enhance
   name: ⑤ 特效增强
   primary: &id007
@@ -83,4 +101,119 @@ nodes:
   fallback_chain:
   - *id010
   params: {}
-note: YAML 是数据不是代码；引擎按档位裁剪，运行时可再降级
+dataflow:
+- id: script_struct
+  name: ① 剧本结构化
+  stage: 1
+  inputs:
+  - script_text
+  outputs:
+  - script_nodes
+  - shots
+  depends_on: []
+  depends_on_eff: []
+- id: character_image
+  name: ② 角色图生成
+  stage: 2
+  inputs:
+  - shots
+  outputs:
+  - character_refs
+  depends_on:
+  - script_struct
+  depends_on_eff:
+  - script_struct
+- id: storyboard_prompt
+  name: ③ 分镜提示词
+  stage: 3
+  inputs:
+  - shots
+  - character_refs
+  outputs:
+  - shot_prompts
+  depends_on:
+  - script_struct
+  - character_image
+  depends_on_eff:
+  - script_struct
+  - character_image
+- id: video_shot
+  name: ④ 视频镜头
+  stage: 4
+  inputs:
+  - shot_prompts
+  - character_refs
+  outputs:
+  - video_clips
+  depends_on:
+  - storyboard_prompt
+  depends_on_eff:
+  - storyboard_prompt
+- id: fx_enhance
+  name: ⑤ 特效增强
+  stage: 5
+  inputs:
+  - video_clips
+  outputs:
+  - fx_clips
+  depends_on:
+  - video_shot
+  depends_on_eff:
+  - video_shot
+- id: post_assemble
+  name: ⑥ 后期整合
+  stage: 6
+  inputs:
+  - fx_clips
+  - voice_track
+  - music_track
+  - bgm_track
+  outputs:
+  - assembled_video
+  depends_on:
+  - fx_enhance
+  - music
+  - voice
+  - bgm
+  depends_on_eff:
+  - fx_enhance
+- id: bgm_audio
+  name: ⑦ BGM 音频
+  stage: 7
+  inputs:
+  - assembled_video
+  outputs:
+  - bgm_track
+  depends_on:
+  - post_assemble
+  depends_on_eff:
+  - post_assemble
+- id: package_publish
+  name: ⑧ 包装发布
+  stage: 8
+  inputs:
+  - assembled_video
+  - bgm_track
+  outputs:
+  - final_video
+  depends_on:
+  - post_assemble
+  - bgm_audio
+  depends_on_eff:
+  - post_assemble
+  - bgm_audio
+note: YAML 是数据不是代码；引擎按档位+画风+音频轨裁剪，运行时可再降级
+audio_mode: auto
+audio_advised:
+- bgm
+mode: beginner
+mode_overlay:
+  mode: beginner
+  mode_label: 新手
+  params:
+    style_strength: 0.75
+    resolution: 480
+    steps: 20
+    quality_target: 0.8
+  legacy_workflow_preserved: true
+  note: 三档模式是叠加层；原 tier/style/audio/dataflow 生成逻辑保持不变
