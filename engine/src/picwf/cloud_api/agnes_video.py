@@ -20,15 +20,20 @@ RATIOS = ("21:9","16:9","4:3","1:1","3:4","9:16")
 
 def _req(method: str, path: str, body: Optional[Dict] = None,
          timeout: int = 120) -> Dict[str, Any]:
-    """通用 HTTP 请求。"""
+    """通用 HTTP 请求，含 4xx/5xx 错误体解析。"""
     import urllib.request
+    import urllib.error
     url = f"{API_BASE}{path}" if not path.startswith("http") else path
     headers = {"Authorization": f"Bearer {get_key('agnes_video')}",
                "Content-Type": "application/json"}
     data = json.dumps(body).encode() if body else None
     req = urllib.request.Request(url, data=data, headers=headers, method=method)
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return json.loads(resp.read().decode())
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return json.loads(resp.read().decode())
+    except urllib.error.HTTPError as e:
+        err_body = e.read().decode(errors="replace")
+        raise RuntimeError(f"HTTP {e.code}: {err_body}")
 
 
 def _post(path: str, body: Dict) -> Dict:
