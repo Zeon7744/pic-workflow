@@ -38,3 +38,12 @@ fallback:
   - "OOM -> 切 T4 配置（FLUX fp16 1024 + Wan2.2 14B 720P）"
   - "仍 OOM -> 切 T3 配置（LTX2.3 720P）"
   - "训练 OOM -> 切 LoRA rank 32 或加 --gradient-checkpointing"
+
+# Agnes Image 2.5 Flash 云端参数（T5 推荐：4K + 21:9 cinematic）
+agnes_image:
+  model: "agnes-image-2.5-flash"
+  size: "4K"
+  ratio: "21:9"           #  cinematic 超宽屏
+  prompt_style: |
+    [主体] + [场景/环境] + [风格] + [光照] + [构图] + [质量要求]
+    例：电影级写实镜头，薄雾峡谷发光浮空城市，广角构图，丰富建筑细节，金色光线，高视觉密度

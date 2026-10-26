@@ -42,6 +42,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S2_korean_cool:
     label: 韩系清冷插画
     image_model:
@@ -65,6 +76,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S3_cn_shuimo:
     label: 国风水墨
     image_model:
@@ -88,6 +110,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S4_realistic:
     label: 写实拟真
     image_model:
@@ -111,6 +144,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S5_mmd_2d:
     label: 二次元MMD
     image_model:
@@ -134,6 +178,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S6_shounen_manga:
     label: 少年漫热血
     image_model:
@@ -157,6 +212,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S7_shoujo_manga:
     label: 少女漫恋爱
     image_model:
@@ -180,6 +246,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S8_dark_gothic:
     label: 暗黑哥特
     image_model:
@@ -203,6 +280,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S9_cyberpunk:
     label: 赛博朋克
     image_model:
@@ -226,6 +314,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S10_steampunk:
     label: 蒸汽朋克
     image_model:
@@ -249,6 +348,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S11_lowpoly:
     label: 低多边形
     image_model:
@@ -271,6 +381,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S12_thick_paint:
     label: 厚涂写实
     image_model:
@@ -294,6 +415,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S13_watercolor:
     label: 水彩治愈
     image_model:
@@ -317,6 +449,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S14_flat_illustration:
     label: 扁平插画
     image_model:
@@ -339,6 +482,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S15_pixel_90s:
     label: 复古像素
     image_model:
@@ -361,6 +515,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S16_film_photo:
     label: 胶片摄影
     image_model:
@@ -384,6 +549,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S17_doc_real:
     label: 纪实影像
     image_model:
@@ -406,6 +582,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S18_cel_3d:
     label: 3D卡通
     image_model:
@@ -429,6 +616,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S19_ink_brush_cn:
     label: 工笔重彩
     image_model:
@@ -452,6 +650,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S20_photoreal_8k:
     label: 极致写实
     image_model:
@@ -474,6 +683,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S21_wuxia_samurai:
     label: 国漫武侠/武士
     image_model:
@@ -499,6 +719,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S22_cel_fantasy:
     label: 日系治愈奇幻
     image_model:
@@ -524,6 +755,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S23_noir_detective:
     label: 黑色电影/悬疑
     image_model:
@@ -549,6 +791,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S24_y2k_glam:
     label: Y2K 千禧美艳
     image_model:
@@ -574,6 +827,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S25_clay_stopmotion:
     label: 黏土定格
     image_model:
@@ -599,6 +863,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S26_neon_hongkong:
     label: 港风霓虹80s
     image_model:
@@ -624,6 +899,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S27_chibi_q3d:
     label: Q版3D萌系
     image_model:
@@ -649,6 +935,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
   S28_guofeng_3d:
     label: 国风3D写实
     image_model:
@@ -674,6 +971,17 @@ style_tracks:
       - 9999
       aspect_ratio: '16:9'
       fps: 24
+    agnes_image:
+      model: agnes-image-2.5-flash
+      size_by_tier:
+        T0: 1K
+        T1: 1K
+        T2: 2K
+        T3: 2K
+        T4: 4K
+        T5: 4K
+      default_ratio: '16:9'
+      note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
 music_tracks:
   M1_guoqin_classic:
     label: 国风器乐
