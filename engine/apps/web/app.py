@@ -278,3 +278,39 @@ with col_c:
     - 缺点：每次都要上传
     - 适用：临时测试，快速迭代
     """)
+
+# ─── 底部新增：批量出片入口 ──────────────────────────────
+st.divider()
+st.markdown("### 📦 批量出片（多集并行）")
+st.markdown("一次提交，自动生成全部集数，节省重复操作。")
+
+col_b1, col_b2 = st.columns(2)
+with col_b1:
+    batch_title = st.text_input("剧名", key="batch_title")
+    batch_genre = st.selectbox("题材", FORM_SCHEMA["properties"]["genre"]["enum"], key="batch_genre")
+    batch_eps = st.number_input("总集数", 1, 50, 10, key="batch_eps")
+with col_b2:
+    batch_tier = st.selectbox("档位", ["T0", "T1", "T2", "cloud"], key="batch_tier")
+    batch_style = st.selectbox("画风轨", FORM_SCHEMA["properties"]["style_key"]["enum"], key="batch_style")
+    batch_cloud = st.selectbox("云端模型", ["none", "wan", "kling", "seedream"], key="batch_cloud")
+
+if st.button("🚀 批量生成全部集数", key="btn_batch"):
+    if not batch_title.strip():
+        st.error("请填写剧名")
+    else:
+        from picwf.batch_gen import batch_generate
+        bform = FormInput(
+            title=batch_title, genre=batch_genre, episodes=batch_eps,
+            tier=batch_tier, style_key=batch_style,
+            cloud_model=batch_cloud if batch_cloud != "none" else None,
+        )
+        with st.spinner(f"正在批量生成 {batch_eps} 集..."):
+            import tempfile
+            _bwd = tempfile.mkdtemp(prefix="hookforge_batch_")
+            _bres = batch_generate(bform, workdir=_bwd)
+        st.success(f"✅ 完成 {_bres['success']}/{_bres['total']} 集")
+        if _bres['failed']:
+            st.warning(f"失败: {_bres['failed']} 集")
+        if _bres['errors']:
+            st.error(f"异常: {_bres['errors']} 集")
+        st.json({"成功集数": _bres['success'], "总集数": _bres['total'], "输出目录": _bres['workdir']})
