@@ -53,6 +53,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S2_korean_cool:
     label: 韩系清冷插画
     image_model:
@@ -87,6 +102,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S3_cn_shuimo:
     label: 国风水墨
     image_model:
@@ -121,6 +151,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S4_realistic:
     label: 写实拟真
     image_model:
@@ -155,6 +200,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S5_mmd_2d:
     label: 二次元MMD
     image_model:
@@ -189,6 +249,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S6_shounen_manga:
     label: 少年漫热血
     image_model:
@@ -223,6 +298,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S7_shoujo_manga:
     label: 少女漫恋爱
     image_model:
@@ -257,6 +347,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S8_dark_gothic:
     label: 暗黑哥特
     image_model:
@@ -291,6 +396,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S9_cyberpunk:
     label: 赛博朋克
     image_model:
@@ -325,6 +445,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S10_steampunk:
     label: 蒸汽朋克
     image_model:
@@ -359,6 +494,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S11_lowpoly:
     label: 低多边形
     image_model:
@@ -392,6 +542,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S12_thick_paint:
     label: 厚涂写实
     image_model:
@@ -426,6 +591,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S13_watercolor:
     label: 水彩治愈
     image_model:
@@ -460,6 +640,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S14_flat_illustration:
     label: 扁平插画
     image_model:
@@ -493,6 +688,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S15_pixel_90s:
     label: 复古像素
     image_model:
@@ -526,6 +736,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S16_film_photo:
     label: 胶片摄影
     image_model:
@@ -560,6 +785,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S17_doc_real:
     label: 纪实影像
     image_model:
@@ -593,6 +833,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S18_cel_3d:
     label: 3D卡通
     image_model:
@@ -627,6 +882,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S19_ink_brush_cn:
     label: 工笔重彩
     image_model:
@@ -661,6 +931,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S20_photoreal_8k:
     label: 极致写实
     image_model:
@@ -694,6 +979,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S21_wuxia_samurai:
     label: 国漫武侠/武士
     image_model:
@@ -730,6 +1030,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S22_cel_fantasy:
     label: 日系治愈奇幻
     image_model:
@@ -766,6 +1081,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S23_noir_detective:
     label: 黑色电影/悬疑
     image_model:
@@ -802,6 +1132,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S24_y2k_glam:
     label: Y2K 千禧美艳
     image_model:
@@ -838,6 +1183,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S25_clay_stopmotion:
     label: 黏土定格
     image_model:
@@ -874,6 +1234,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S26_neon_hongkong:
     label: 港风霓虹80s
     image_model:
@@ -910,6 +1285,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S27_chibi_q3d:
     label: Q版3D萌系
     image_model:
@@ -946,6 +1336,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
   S28_guofeng_3d:
     label: 国风3D写实
     image_model:
@@ -982,6 +1387,21 @@ style_tracks:
         T5: 4K
       default_ratio: '16:9'
       note: Agnes Image 2.5 Flash 云端生成，免费额度内；高信息密度+复杂构图优先
+    agnes_video:
+      model: agnes-video-2.5-flash
+      size: 720P
+      default_ratio: '16:9'
+      duration_range_s:
+      - 4
+      - 12
+      mode_by_tier:
+        T0: text
+        T1: text
+        T2: text
+        T3: keyframe
+        T4: reference
+        T5: reference
+      note: Agnes Video 2.5 Flash 云端生成，免费额度内；支持文生视频/首尾帧/图片参考三种模式
 music_tracks:
   M1_guoqin_classic:
     label: 国风器乐
@@ -2147,6 +2567,8 @@ nodes:
         api: Kling
         res: 720
         fa: true
+    - impl: agnes_video_2_5_flash
+      estimated_vram_need_gb: 0
     T1:
     - impl: wan13b_gguf_q4_offload_480
       estimated_vram_need_gb: 5
@@ -2156,6 +2578,8 @@ nodes:
         offload: true
         duration_s: 5
     - impl: cloud_kling
+      estimated_vram_need_gb: 0
+    - impl: agnes_video_2_5_flash
       estimated_vram_need_gb: 0
     - impl: wan13b_fa_480
       estimated_vram_need_gb: 5
@@ -2182,6 +2606,8 @@ nodes:
         duration_s: 5
     - impl: cloud_kling
       estimated_vram_need_gb: 0
+    - impl: agnes_video_2_5_flash
+      estimated_vram_need_gb: 0
     T3:
     - impl: wan13b_fp16_offload_720
       estimated_vram_need_gb: 10
@@ -2196,6 +2622,8 @@ nodes:
         res: '720'
         duration_s: 5
     - impl: cloud_kling
+      estimated_vram_need_gb: 0
+    - impl: agnes_video_2_5_flash
       estimated_vram_need_gb: 0
     T4:
     - impl: wan22_14b_720
@@ -2212,6 +2640,8 @@ nodes:
         duration_s: 5
     - impl: cloud_kling
       estimated_vram_need_gb: 0
+    - impl: agnes_video_2_5_flash
+      estimated_vram_need_gb: 0
     T5:
     - impl: wan22_14b_1080
       estimated_vram_need_gb: 24
@@ -2226,6 +2656,8 @@ nodes:
         res: '720'
         duration_s: 5
     - impl: cloud_kling
+      estimated_vram_need_gb: 0
+    - impl: agnes_video_2_5_flash
       estimated_vram_need_gb: 0
 - id: fx_enhance
   name: ⑤ 特效增强

@@ -30,7 +30,7 @@ def load_api_keys(path: Optional[Path] = None) -> Dict[str, str]:
         return _CACHE
     p = path or DEFAULT_KEYS_PATH
     env = _load_dotenv(p)
-    for k in ("WAN_API_KEY", "KLING_API_KEY", "SEEDREAM_API_KEY", "AGNES_IMAGE_API_KEY"):
+    for k in ("WAN_API_KEY", "KLING_API_KEY", "SEEDREAM_API_KEY", "AGNES_IMAGE_API_KEY", "AGNES_VIDEO_API_KEY"):
         env.setdefault(k, os.environ.get(k, ""))
     _CACHE = env
     return env
@@ -42,6 +42,7 @@ def get_key(service: str) -> str:
         "kling": keys.get("KLING_API_KEY", ""),
         "seedream": keys.get("SEEDREAM_API_KEY", ""),
         "agnes_image": keys.get("AGNES_IMAGE_API_KEY", ""),
+        "agnes_video": keys.get("AGNES_VIDEO_API_KEY", ""),
     }
     return mapping.get(service, "")
 

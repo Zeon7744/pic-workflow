@@ -27,3 +27,4 @@ _s6.txt
 _sig*.txt
 val*.txt
 praise_ledger.jsonl
+engine/config/api_keys.env

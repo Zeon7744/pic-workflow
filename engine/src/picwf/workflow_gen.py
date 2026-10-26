@@ -184,7 +184,7 @@ def generate_workflow(tier: str, matrix_path: str = MATRIX_PATH_DEFAULT,
 def _style_vram(impl: str, tier: str) -> int:
     """画风内某模型实现的显存估算（按档位粗估，0=云端）。"""
     s = (impl or "").lower()
-    if any(k in s for k in ["cloud", "kling", "seedream", "agnes", "api"]):
+    if any(k in s for k in ["cloud", "kling", "seedream", "agnes", "video", "api"]):
         return 0
     if "flux" in s:
         return 12 if tier in ("T0", "T1") else 16

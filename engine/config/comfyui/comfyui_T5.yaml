@@ -47,3 +47,17 @@ agnes_image:
   prompt_style: |
     [主体] + [场景/环境] + [风格] + [光照] + [构图] + [质量要求]
     例：电影级写实镜头，薄雾峡谷发光浮空城市，广角构图，丰富建筑细节，金色光线，高视觉密度
+
+# Agnes Video 2.5 Flash 云端参数（视频镜头兜底）
+# API: POST https://api.agnes-ai.cn/v1/videos
+# 环境变量: AGNES_VIDEO_API_KEY
+# 限制：size 固定 720P（1280x704@16:9），最多 5 张参考图，最多 3 段音频
+agnes_video:
+  model: "agnes-video-2.5-flash"
+  size: "720P"
+  ratio: "16:9"
+  seconds: "5"
+  modes:
+    text: "纯文本生成"
+    keyframe: "首尾帧控制（T3+ 推荐，配合角色图）"
+    reference: "图片/音频参考（T4+ 推荐）"
