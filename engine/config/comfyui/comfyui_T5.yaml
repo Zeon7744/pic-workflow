@@ -1,0 +1,40 @@
+# ComfyUI T5 档启动配置（32GB+，如 RTX 4090 / 5090 / H100，Ada/FP8）
+# 特点：FLUX LoRA 训练 + Wan2.2 14B 1080P + FP8/BF16
+name: "comfyui_T5"
+tier: T5
+launch:
+  entrypoint: "python main.py"
+  args:
+    - "--fp16-vae"
+    - "--bf16-unet"
+    - "--use-sage-attention"
+    - "--cuda"
+    - "--directml"                 # 可选：CPU/GPU 混合（无 CUDA 兜底用）
+attention:
+  type: "sage_attention"
+  sage: true
+quantization:
+  dtype: "fp16"
+  precision: "fp16"              # 主路径不量化；如需更大模型可切 bf16/FP8
+  offload: false
+  vram_budget_gb: 28.0          # 留 4GB 余量给 LoRA 训练
+resolution:
+  image: 1024                    # FLUX fp16 1024 + LoRA 微调
+  video: 1080                    # Wan2.2 14B 1080P
+vae:
+  tiling: false
+models:
+  text_to_image:
+    - {path: "models/checkpoints/FLUX.1-fp16.safetensors", quant: "fp16"}       # 主模型
+    - {path: "models/checkpoints/flux_lora.safetensors", quant: "fp16", note: "LoRA 权重"}
+  text_to_video: {path: "models/wan/Wan2.2-14B-1080p.safetensors", quant: "bf16"}
+  tts: {path: "models/gpt_sovits_full.bin"}
+training:
+  enabled: true
+  lora_rank: 64
+  lora_alpha: 32
+  target_modules: ["attn1", "attn2"]
+fallback:
+  - "OOM -> 切 T4 配置（FLUX fp16 1024 + Wan2.2 14B 720P）"
+  - "仍 OOM -> 切 T3 配置（LTX2.3 720P）"
+  - "训练 OOM -> 切 LoRA rank 32 或加 --gradient-checkpointing"

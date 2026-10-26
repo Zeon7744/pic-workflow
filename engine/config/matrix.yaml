@@ -1701,12 +1701,22 @@ nodes:
     T3:
     - impl: qwen7b_local
       estimated_vram_need_gb: 8
+    - impl: llm_api
+      estimated_vram_need_gb: 0
     T4:
     - impl: qwen14b_local
       estimated_vram_need_gb: 12
+    - impl: qwen7b_local
+      estimated_vram_need_gb: 8
+    - impl: llm_api
+      estimated_vram_need_gb: 0
     T5:
     - impl: qwen14b_lora_local
       estimated_vram_need_gb: 16
+    - impl: qwen14b_local
+      estimated_vram_need_gb: 12
+    - impl: llm_api
+      estimated_vram_need_gb: 0
 - id: character_image
   name: ② 角色图
   fallback_chain:
@@ -1734,89 +1744,46 @@ nodes:
       estimated_vram_need_gb: 4
       style: S19_ink_brush_cn
     T2:
-    - impl: sdxl_turbo_768
-      estimated_vram_need_gb: 8
-      params:
-        model: sdxl_turbo.safetensors
-        res: 768
-        steps: 8
-    - impl: sd15_gguf_q4_512_offload
-      estimated_vram_need_gb: 4
-    - impl: cloud_api_seedream
-      estimated_vram_need_gb: 0
-    - impl: sdxl_anime_lora
-      estimated_vram_need_gb: 12
-      style: S1_anime_jp
     - impl: flux_dev_cool_lora
       estimated_vram_need_gb: 12
       style: S2_korean_cool
     - impl: flux_dev_realistic
       estimated_vram_need_gb: 12
       style: S4_realistic
-    - impl: flux_mmd_lora
-      estimated_vram_need_gb: 12
-      style: S5_mmd_2d
-    - impl: sdxl_shounen_lora
-      estimated_vram_need_gb: 12
-      style: S6_shounen_manga
-    - impl: sdxl_shoujo_lora
-      estimated_vram_need_gb: 12
-      style: S7_shoujo_manga
-    - impl: flux_dark_gothic
-      estimated_vram_need_gb: 12
-      style: S8_dark_gothic
-    - impl: flux_cyberpunk
-      estimated_vram_need_gb: 12
-      style: S9_cyberpunk
-    - impl: flux_steampunk
-      estimated_vram_need_gb: 12
-      style: S10_steampunk
-    - impl: sdxl_lowpoly
-      estimated_vram_need_gb: 12
-      style: S11_lowpoly
-    - impl: flux_thick_paint
-      estimated_vram_need_gb: 12
-      style: S12_thick_paint
-    - impl: sdxl_watercolor
-      estimated_vram_need_gb: 12
-      style: S13_watercolor
-    - impl: sdxl_flat
-      estimated_vram_need_gb: 12
-      style: S14_flat_illustration
-    - impl: sdxl_pixel
-      estimated_vram_need_gb: 12
-      style: S15_pixel_90s
-    - impl: flux_film
-      estimated_vram_need_gb: 12
-      style: S16_film_photo
-    - impl: flux_doc_real
-      estimated_vram_need_gb: 12
-      style: S17_doc_real
-    - impl: flux_cel3d
-      estimated_vram_need_gb: 12
-      style: S18_cel_3d
-    - impl: flux_photoreal_8k
-      estimated_vram_need_gb: 12
-      style: S20_photoreal_8k
+    - impl: cloud_api_seedream
+      estimated_vram_need_gb: 0
     T3:
     - impl: flux_gguf_q4_1024
       estimated_vram_need_gb: 12
-    - impl: sdxl_turbo_768
-      estimated_vram_need_gb: 8
+      params:
+        model: FLUX.1-dev-fp8.safetensors
+        res: '1024'
+        sampler: Euler
+    - impl: sdxl_anime_lora
+      estimated_vram_need_gb: 12
+      style: S1_anime_jp
     - impl: cloud_api_seedream
       estimated_vram_need_gb: 0
     T4:
-    - impl: flux_fp16_1024
-      estimated_vram_need_gb: 16
-    - impl: flux_gguf_q4_1024
+    - impl: flux_dev_fp16_1024
+      estimated_vram_need_gb: 20
+      params:
+        model: FLUX.1-dev-fp16.safetensors
+        res: '1024'
+    - impl: flux_dev_cool_lora
       estimated_vram_need_gb: 12
+      style: S2_korean_cool
     - impl: cloud_api_seedream
       estimated_vram_need_gb: 0
     T5:
-    - impl: flux_lora_trained
-      estimated_vram_need_gb: 20
-    - impl: flux_fp16_1024
-      estimated_vram_need_gb: 16
+    - impl: flux_dev_fp16_1024
+      estimated_vram_need_gb: 24
+      params:
+        model: FLUX.1-dev-fp16.safetensors
+        res: '1024'
+    - impl: flux_dev_cool_lora
+      estimated_vram_need_gb: 12
+      style: S2_korean_cool
     - impl: cloud_api_seedream
       estimated_vram_need_gb: 0
 - id: storyboard_prompt
@@ -1832,18 +1799,22 @@ nodes:
     - impl: llm_api
       estimated_vram_need_gb: 0
     T3:
-    - impl: local_llm
+    - impl: qwen7b_local
       estimated_vram_need_gb: 8
     - impl: llm_api
       estimated_vram_need_gb: 0
     T4:
-    - impl: local_llm
+    - impl: qwen14b_local
+      estimated_vram_need_gb: 12
+    - impl: qwen7b_local
       estimated_vram_need_gb: 8
     - impl: llm_api
       estimated_vram_need_gb: 0
     T5:
-    - impl: local_llm_lora
-      estimated_vram_need_gb: 16
+    - impl: qwen32b_local
+      estimated_vram_need_gb: 24
+    - impl: qwen14b_local
+      estimated_vram_need_gb: 12
     - impl: llm_api
       estimated_vram_need_gb: 0
 - id: video_shot
@@ -1892,23 +1863,33 @@ nodes:
     - impl: cloud_kling
       estimated_vram_need_gb: 0
     T3:
-    - impl: ltx23_720
-      estimated_vram_need_gb: 14
+    - impl: wan13b_fp16_offload_720
+      estimated_vram_need_gb: 10
+      params:
+        model: Wan2.1-T2V-1.3B
+        res: '720'
+        duration_s: 5
+    - impl: ltx095_720
+      estimated_vram_need_gb: 8
       params:
         model: LTX-Video-2.3
-        res: 720
-    - impl: wan13b_fa_480
-      estimated_vram_need_gb: 9
+        res: '720'
+        duration_s: 5
     - impl: cloud_kling
       estimated_vram_need_gb: 0
     T4:
     - impl: wan22_14b_720
-      estimated_vram_need_gb: 20
+      estimated_vram_need_gb: 18
       params:
         model: Wan2.2-14B
-        res: 720
+        res: '720'
+        duration_s: 5
     - impl: ltx23_720
       estimated_vram_need_gb: 14
+      params:
+        model: LTX-Video-2.3
+        res: '720'
+        duration_s: 5
     - impl: cloud_kling
       estimated_vram_need_gb: 0
     T5:
@@ -1916,9 +1897,14 @@ nodes:
       estimated_vram_need_gb: 24
       params:
         model: Wan2.2-14B
-        res: 1080
+        res: '1080'
+        duration_s: 5
     - impl: wan22_14b_720
-      estimated_vram_need_gb: 20
+      estimated_vram_need_gb: 18
+      params:
+        model: Wan2.2-14B
+        res: '720'
+        duration_s: 5
     - impl: cloud_kling
       estimated_vram_need_gb: 0
 - id: fx_enhance
@@ -1934,13 +1920,19 @@ nodes:
     - impl: ffmpeg_local
       estimated_vram_need_gb: 0
     T3:
-    - impl: ffmpeg_local
+    - impl: ffmpeg_pil
+      estimated_vram_need_gb: 0
+    - impl: cloud_template
       estimated_vram_need_gb: 0
     T4:
-    - impl: ffmpeg_local
+    - impl: ffmpeg_pil
+      estimated_vram_need_gb: 0
+    - impl: cloud_template
       estimated_vram_need_gb: 0
     T5:
-    - impl: ffmpeg_local_batch
+    - impl: ffmpeg_pil
+      estimated_vram_need_gb: 0
+    - impl: cloud_template
       estimated_vram_need_gb: 0
 - id: post_assemble
   name: ⑥ 后期整合
@@ -1955,13 +1947,19 @@ nodes:
     - impl: ffmpeg_local
       estimated_vram_need_gb: 0
     T3:
-    - impl: ffmpeg_local
+    - impl: ffmpeg_pil
+      estimated_vram_need_gb: 0
+    - impl: cloud_template
       estimated_vram_need_gb: 0
     T4:
-    - impl: ffmpeg_local
+    - impl: ffmpeg_pil
+      estimated_vram_need_gb: 0
+    - impl: cloud_template
       estimated_vram_need_gb: 0
     T5:
-    - impl: ffmpeg_local_batch
+    - impl: ffmpeg_pil
+      estimated_vram_need_gb: 0
+    - impl: cloud_template
       estimated_vram_need_gb: 0
 - id: bgm_audio
   name: ⑦ BGM 音频
@@ -1982,20 +1980,32 @@ nodes:
     - impl: cloud_generate_music
       estimated_vram_need_gb: 0
     T3:
-    - impl: gpt_sovits_full
-      estimated_vram_need_gb: 6
+    - impl: gpt_sovits_q4
+      estimated_vram_need_gb: 4
+      params:
+        model: GPT-SoVITS(gguf Q4)
+        voice: vivi
     - impl: cloud_generate_music
       estimated_vram_need_gb: 0
     T4:
     - impl: gpt_sovits_full
       estimated_vram_need_gb: 6
+      params:
+        model: GPT-SoVITS(full)
+        voice: vivi
     - impl: cloud_generate_music
       estimated_vram_need_gb: 0
     T5:
     - impl: gpt_sovits_trained
       estimated_vram_need_gb: 8
+      params:
+        model: GPT-SoVITS(trained)
+        voice: custom
     - impl: gpt_sovits_full
       estimated_vram_need_gb: 6
+      params:
+        model: GPT-SoVITS(full)
+        voice: vivi
     - impl: cloud_generate_music
       estimated_vram_need_gb: 0
 - id: package_publish
@@ -2013,11 +2023,17 @@ nodes:
     T3:
     - impl: ffmpeg_pil
       estimated_vram_need_gb: 0
+    - impl: cloud_template
+      estimated_vram_need_gb: 0
     T4:
     - impl: ffmpeg_pil
       estimated_vram_need_gb: 0
+    - impl: cloud_template
+      estimated_vram_need_gb: 0
     T5:
     - impl: ffmpeg_pil_batch
+      estimated_vram_need_gb: 0
+    - impl: cloud_template
       estimated_vram_need_gb: 0
 shot_patterns:
   SP1_extreme_closeup:

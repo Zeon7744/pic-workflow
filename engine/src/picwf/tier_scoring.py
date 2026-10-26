@@ -20,12 +20,14 @@ from typing import Any, Dict, List
 
 TIER_THRESHOLDS = [
     ("T0", 0.0),
-    ("T1", 5.5),
-    ("T2", 9.5),
-    ("T3", 14.5),
-    ("T4", 19.5),
-    ("T5", 26.5),
+    ("T1", 6.0),       # <= 6GB 大致匹配（含架构修正）
+    ("T2", 16.0),      # 6GB < score <= 16GB 大致匹配（含架构修正）
+    ("T3", 20.0),      # 14-16GB
+    ("T4", 26.0),      # 20-24GB
+    ("T5", 32.0),      # 32GB+
 ]
+# MVP_TIERS 保留用于向下兼容标记，但不再钳制档位匹配
+# 二期已支持 T3/T4/T5，高端机可解锁 720P/1080P/LORA
 MVP_TIERS = {"T0", "T1", "T2"}
 
 ARCH_CORRECTION = {
@@ -66,15 +68,15 @@ def match_tier(profile: Dict[str, Any]) -> Dict[str, Any]:
     for name, th in TIER_THRESHOLDS:
         if total >= th:
             tier = name
+    # 二期已支持 T3/T4/T5，不再钳制
     clamped = False
     original = tier
     if tier not in MVP_TIERS:
-        # 钳到最近的 MVP 档：T3->T2, T4->T2, T5->T2（二期再扩）
-        if tier in ("T3", "T4", "T5"):
-            tier = "T2"
-        clamped = True
+        clamped = False  # T3/T4/T5 正式支持
+    else:
+        clamped = tier not in MVP_TIERS  # 仅用于标记是否经过钳制
     return {
-        "tier": tier, "clamped": clamped, "mvp_supported": not clamped,
+        "tier": tier, "clamped": False, "mvp_supported": True,
         "score": sc,
     }
 

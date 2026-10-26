@@ -1,0 +1,32 @@
+# ComfyUI T3 档启动配置（14-16GB，如 RTX 3080 Ti / 4070 Ti，Ampere）
+# 特点：FP16/BF16 + SageAttention + 720P 视频 + SDXL-Turbo 768
+name: "comfyui_T3"
+tier: T3
+launch:
+  entrypoint: "python main.py"
+  args:
+    - "--fp16-vae"
+    - "--bf16-unet"              # Ampere/Ada 支持 BF16，出图更快
+    - "--use-sage-attention"      # Ampere 完全支持 SageAttention
+    - "--high-ram"                # 16GB+ 内存时启用，省显存
+    - "--cuda"
+attention:
+  type: "sage_attention"
+  sage: true
+quantization:
+  dtype: "fp16"
+  precision: "fp16/bf16"        # 不用量化，FP16 已够用
+  offload: false
+  vram_budget_gb: 12.5          # 留 3.5GB 余量
+resolution:
+  image: 768                     # SDXL-Turbo 768，或 FLUX Q4 1024
+  video: 720                     # LTX2.3 720P
+vae:
+  tiling: false                  # 显存够，关 tiling 提速
+models:
+  text_to_image: {path: "models/checkpoints/sdxl_turbo.safetensors", quant: "fp16"}
+  text_to_video: {path: "models/ltx/LTX-Video-2.3.safetensors", quant: "bf16"}
+  tts: {path: "models/gpt_sovits_full.bin"}
+fallback:
+  - "OOM -> 切 T2 配置（SDXL-Turbo 768 + LTX0.95 720P）"
+  - "仍 OOM -> 切 T1 配置（GGUF Q4 + offload）"

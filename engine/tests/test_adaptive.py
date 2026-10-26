@@ -59,6 +59,7 @@ def test_history_cluster():
 
 
 def test_apply_matrix_migrate():
+    """跑挂(OOM)的本地实现不再链首，云端兜底置顶。"""
     d = tempfile.mkdtemp()
     _mk_history(d)
     rows = __import__("picwf.record_metrics", fromlist=["load_history"]).load_history(d)
@@ -67,17 +68,20 @@ def test_apply_matrix_migrate():
     matrix = adaptive._yaml_load(open(_MATRIX_PATH,
                                       encoding="utf-8").read())
     new = adaptive.apply_advice_to_matrix(matrix, advice)
-    # 视频镜头 T1 链首应被提到安全档（cloud/gguf），est_vram 被实测覆盖
     vs = [n for n in new["nodes"] if n["id"] == "video_shot"][0]
     chain = vs["fallback_chain"]["T1"]
-    head = chain[0]["impl"]
-    # 跑挂(OOM)后，本地 wan gguf 应被降级，云端 kling 顶链首
-    assert head == "cloud_kling", f"迁移后链首应为 cloud_kling, got {head}"
-    # 跑挂本地应排到链尾
-    tail = chain[-1]["impl"]
-    assert tail == "wan13b_gguf_q4_offload_480", f"跑挂本地应排尾, got {tail}"
-    print("OK apply: T1 video chain =",
-          [c["impl"] for c in chain])
+    impls = [c["impl"] for c in chain]
+    # 云端兜底必须置顶
+    assert chain[0]["impl"] == "cloud_kling", f"链首应为 cloud_kling, got {impls}"
+    # 跑挂的本地实现必须在云端之后（被降级）
+    cloud_i = impls.index("cloud_kling")
+    fail_i = impls.index("wan13b_gguf_q4_offload_480")
+    assert fail_i > cloud_i, f"跑挂实现 {impls[fail_i]} 应在 cloud 之后, got {impls}"
+    # est_vram 被实机峰值 + headroom 覆盖，且打上自适应标记
+    new_impl = chain[impls.index("wan13b_gguf_q4_offload_480")]
+    assert new_impl.get("estimated_vram_need_gb") > 5.5,         f"est_vram 应被实机覆盖, got {new_impl.get('estimated_vram_need_gb')}"
+    assert new_impl.get("est_vram_source") == "adaptive_history",         f"应标记 est_vram_source=adaptive_history, got {new_impl.get('est_vram_source')}"
+    print("OK apply: T1 video chain =", impls)
 
 
 def test_before_after():

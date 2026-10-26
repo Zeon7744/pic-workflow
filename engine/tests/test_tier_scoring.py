@@ -8,26 +8,39 @@ def _prof(vram, ram, arch, fp8):
             "ram": {"ram_gb": ram}}
 
 def test_1060_is_t1():
-    # 开发机 GTX 1060 6GB Pascal + 32GB 内存 -> 应匹 T1
     p = _prof(6.0, 32.0, "Pascal", False)
     m = match_tier(p)
-    assert m["tier"] == "T1", f"1060 应 T1, got {m['tier']} score={m['score']}"
+    assert m["tier"] == "T1", f"1060 应 T1, got {m['tier']} score={m['score']['total']}"
+
+def test_1080_is_t1():
+    p = _prof(8.0, 32.0, "Pascal", False)
+    m = match_tier(p)
+    assert m["tier"] == "T1", f"1080 应 T1, got {m['tier']}"
 
 def test_3060_12g_is_t2():
     p = _prof(12.0, 32.0, "Ampere", True)
     m = match_tier(p)
-    assert m["tier"] == "T2", f"3060 12G 应 T2, got {m['tier']}"
+    assert m["tier"] == "T2", f"3060 12G 应 T2, got {m['tier']} score={m['score']['total']}"
+
+def test_3080ti_16g_is_t3():
+    p = _prof(16.0, 32.0, "Ampere", True)
+    m = match_tier(p)
+    assert m["tier"] == "T3", f"3080Ti 16G 应 T3, got {m['tier']}"
+
+def test_4090_24g_is_t4():
+    p = _prof(24.0, 64.0, "Ada", True)
+    m = match_tier(p)
+    assert m["tier"] == "T4", f"4090 24G 应 T4, got {m['tier']}"
+
+def test_5090_32g_is_t5():
+    p = _prof(32.0, 128.0, "Ada", True)
+    m = match_tier(p)
+    assert m["tier"] == "T5", f"5090 32G 应 T5, got {m['tier']}"
 
 def test_no_gpu_is_t0():
     p = _prof(0.0, 16.0, "None", False)
     m = match_tier(p)
     assert m["tier"] == "T0", f"无 GPU 应 T0, got {m['tier']}"
-
-def test_4090_clamped_t2_mvp():
-    p = _prof(24.0, 64.0, "Ada", True)
-    m = match_tier(p)
-    # 二期档位被钳到 T2
-    assert m["tier"] == "T2" and m["clamped"] is True
 
 if __name__ == "__main__":
     import traceback

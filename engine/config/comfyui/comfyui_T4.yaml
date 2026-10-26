@@ -1,0 +1,32 @@
+# ComfyUI T4 档启动配置（20-24GB，如 RTX 4080 / 3090，Ada Lovelace）
+# 特点：FLUX fp16 1024 + Wan2.2 14B 720P + SageAttention
+name: "comfyui_T4"
+tier: T4
+launch:
+  entrypoint: "python main.py"
+  args:
+    - "--fp16-vae"
+    - "--bf16-unet"
+    - "--use-sage-attention"
+    - "--high-ram"
+    - "--cuda"
+attention:
+  type: "sage_attention"
+  sage: true
+quantization:
+  dtype: "fp16"
+  precision: "fp16"             # 不量化，直接跑 FLUX fp16
+  offload: false
+  vram_budget_gb: 18.0          # 留 6GB 余量
+resolution:
+  image: 1024                    # FLUX fp16 1024
+  video: 720                     # Wan2.2 14B 720P
+vae:
+  tiling: false
+models:
+  text_to_image: {path: "models/checkpoints/FLUX.1-fp16.safetensors", quant: "fp16"}
+  text_to_video: {path: "models/wan/Wan2.2-14B.safetensors", quant: "bf16"}
+  tts: {path: "models/gpt_sovits_full.bin"}
+fallback:
+  - "OOM -> 切 T3 配置（LTX2.3 720P + SDXL-Turbo 768）"
+  - "仍 OOM -> 切 T2 配置（SDXL-Turbo 768 + LTX0.95 720P）"
