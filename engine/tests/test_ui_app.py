@@ -82,7 +82,7 @@ def test_download_safe_path_only(tmp_path):
     vid = td / "out" / "final.mp4"
     vid.parent.mkdir(parents=True, exist_ok=True)
     vid.write_bytes(b"mp4")
-    r = _client().get(f"/download/{vid}")
+    r = _client().get(f"/download/{rel_dirname}/out/final.mp4")
     assert r.status_code == 200
     # 越权路径（逃出 UI 临时目录）被拒绝
     r2 = _client().get("/download/etc/passwd")

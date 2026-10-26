@@ -158,7 +158,7 @@ def test_apply_exploration_results_adopts_and_applies(tmp_path):
     base = tmp_path / "runs"
     base.mkdir()
 
-    with io.open(r"C:\Users\Administrator\pic-push\engine\config\matrix.yaml", "r", encoding="utf-8") as f:
+    with io.open(os.path.join(os.path.dirname(__file__), "..", "config", "matrix.yaml"), "r", encoding="utf-8") as f:
         m = yaml.safe_load(f)
     with io.open(mx, "w", encoding="utf-8") as f:
         yaml.safe_dump(m, f, allow_unicode=True)
@@ -190,7 +190,7 @@ def test_explore_and_learn_returns_full_loop(tmp_path):
 
     mx = os.path.join(str(tmp_path), "matrix.yaml")
     ad = os.path.join(str(tmp_path), "matrix.adaptive.yaml")
-    with io.open(r"C:\Users\Administrator\pic-push\engine\config\matrix.yaml", "r", encoding="utf-8") as f:
+    with io.open(os.path.join(os.path.dirname(__file__), "..", "config", "matrix.yaml"), "r", encoding="utf-8") as f:
         m = yaml.safe_load(f)
     with io.open(mx, "w", encoding="utf-8") as f:
         yaml.safe_dump(m, f, allow_unicode=True)
