@@ -31,7 +31,8 @@ def run(script_path: str, tier: str = "T1", style: str = "S1_anime_jp",
         workdir: str = "./_pipe_cli", resume_ids: List[str] = None,
         mode: str = "beginner",
         auto_repair: bool = True,
-        local_models_dir: str = "") -> Dict[str, Any]:
+        local_models_dir: str = "",
+        cloud_model: str = "") -> Dict[str, Any]:
     """一条命令端到端出片：剧本 → 8 环节 → 成片，并透传三档模式。"""
     auto_repair_flag = bool(auto_repair)
     os.makedirs(workdir, exist_ok=True)
@@ -42,6 +43,8 @@ def run(script_path: str, tier: str = "T1", style: str = "S1_anime_jp",
     wf["episode"] = ep
     if local_models_dir:
         wf["local_models_dir"] = local_models_dir
+    if cloud_model:
+        wf["cloud_model_override"] = cloud_model
     ex = make_executors(wf, workdir=workdir)
     res = run_pipeline_8stage(wf, ex,
                               upstream_inputs={"script_struct": {"text": script_text}},
@@ -165,13 +168,17 @@ def main(argv=None) -> int:
                     help="本地模型目录（如 D:\\ComfyUI\\...\\checkpoints），"
                          "有真实 checkpoint 时注入实跑 prompt，可把"
                          "真实产物缺口降级为本地可跑")
+    ap.add_argument("--cloud-model", default="",
+                    help="强制使用云端模型：wan / kling / seedream，"
+                         "需在 config/api_keys.env 配置对应 API Key")
     args = ap.parse_args(argv)
     res = run(args.script, tier=args.tier, style=args.style,
               scenario=args.scenario, ep=args.ep, free_vram_gb=args.free_vram_gb,
               audio_mode=args.audio_mode, workdir=args.workdir,
               resume_ids=args.resume, mode=args.mode,
               auto_repair=not args.no_auto_repair,
-              local_models_dir=args.local_models_dir)
+              local_models_dir=args.local_models_dir,
+              cloud_model=args.cloud_model)
     # 主动探索建议（--explore）
     if args.explore:
         try:

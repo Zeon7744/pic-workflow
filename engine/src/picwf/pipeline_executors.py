@@ -10,6 +10,12 @@ A 块：post_assemble / bgm_audio / package_publish 接真执行器
 """
 from typing import Any, Callable, Dict, List, Optional
 
+# 云端模型路由（API Key 配置后才启用）
+try:
+    from .cloud_api import has_key, get_key
+    _HAS_CLOUD_API = True
+except Exception:
+    _HAS_COUND_API = False
 try:
     import yaml as _yaml
 except Exception:
@@ -143,10 +149,34 @@ def make_executors(workflow: Dict[str, Any],
         plan = _efficiency_plan_for_video(up)
         best = plan.get("best") or {}
         chosen_model = best.get("model_id") or "wan13b_gguf_q4_offload_480"
+        # 云端 API 优先：有 API Key 时强制使用 cloud_kling（T0/T1 无 GPU 也能出片）
+        _cloud_force = workflow.get("cloud_model_override")
+        if _cloud_force and _HAS_CLOUD_API and has_key(_cloud_force):
+            chosen_model = f"cloud_{_cloud_force}"
         executed = []
         qa_decisions = []
         for i, sh in enumerate(shots[:10]):
-            out = runner.exec(f"shot_{i+1}", model_impl=chosen_model)
+            # 云端模型分支
+            _is_cloud = chosen_model.startswith("cloud_")
+            if _is_cloud and _HAS_CLOUD_API:
+                _svc = chosen_model.replace("cloud_", "")
+                from .cloud_api import wan, kling, seedream
+                if _svc == "kling":
+                    cloud_res = kling.run_shot(sh.get("prompt", ""), duration=5)
+                    out = {"ok": cloud_res.get("ok"), "backend": chosen_model,
+                           "video_url": cloud_res.get("video_url"), "peak_vram_gb": 0}
+                elif _svc == "wan":
+                    cloud_res = wan.run_shot(sh.get("prompt", ""), resolution="480p")
+                    out = {"ok": cloud_res.get("ok"), "backend": chosen_model,
+                           "video_url": cloud_res.get("video_url"), "peak_vram_gb": 0}
+                elif _svc == "seedream":
+                    cloud_res = seedream.run_image(sh.get("prompt", ""))
+                    out = {"ok": cloud_res.get("ok"), "backend": chosen_model,
+                           "image_url": cloud_res.get("image_url"), "peak_vram_gb": 0}
+                else:
+                    out = runner.exec(f"shot_{i+1}", model_impl=chosen_model)
+            else:
+                out = runner.exec(f"shot_{i+1}", model_impl=chosen_model)
             # 保留原字段位，后续可把 hot_update_enabled / local 资产信息写入审计字段
 
             # 模拟 QA（真实链路后续由 shot_qa 提供真实 CLIP/时长观测）

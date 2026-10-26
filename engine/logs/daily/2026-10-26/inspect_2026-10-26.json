@@ -1,0 +1,321 @@
+{
+  "ts": "2026-10-26T14:18:56Z",
+  "date": "2026-10-26",
+  "git_head": "84aef9a fix(test): 修复硬编码路径和绝对路径下载测试",
+  "bench": {
+    "hardware": {
+      "gpu_name": "CPU-only",
+      "vram_gb": 0.0,
+      "arch": "None",
+      "fp8_support": false,
+      "ram_gb": 15.6
+    },
+    "tier_match": {
+      "tier": "T0",
+      "score": -0.66,
+      "clamped": false,
+      "mvp_supported": true
+    },
+    "results": [
+      {
+        "tier": "T0",
+        "tier_label": "纯云端",
+        "style": "S1_anime_jp",
+        "style_label": "S1_anime_jp",
+        "scenario": "dark_thriller",
+        "elapsed_s": 0.112,
+        "node_count": 8,
+        "nodes": [
+          {
+            "id": "script_struct",
+            "name": "① 剧本结构化",
+            "primary_impl": "llm_api",
+            "primary_vram": 0,
+            "fallback_count": 1,
+            "fallback_impls": [
+              "llm_api"
+            ]
+          },
+          {
+            "id": "character_image",
+            "name": "② 角色图",
+            "primary_impl": "cloud_api_seedream",
+            "primary_vram": 0,
+            "fallback_count": 3,
+            "fallback_impls": [
+              "cloud_api_seedream",
+              "sd15_gguf_q4_512_offload",
+              "sdxl_anime_lora"
+            ]
+          },
+          {
+            "id": "storyboard_prompt",
+            "name": "③ 分镜提示词",
+            "primary_impl": "llm_api",
+            "primary_vram": 0,
+            "fallback_count": 1,
+            "fallback_impls": [
+              "llm_api"
+            ]
+          },
+          {
+            "id": "video_shot",
+            "name": "④ 视频镜头",
+            "primary_impl": "cloud_kling",
+            "primary_vram": 0,
+            "fallback_count": 2,
+            "fallback_impls": [
+              "cloud_kling",
+              "wan13b_gguf_q4_offload_480"
+            ]
+          },
+          {
+            "id": "fx_enhance",
+            "name": "⑤ 特效增强",
+            "primary_impl": "ffmpeg_cloud",
+            "primary_vram": 0,
+            "fallback_count": 1,
+            "fallback_impls": [
+              "ffmpeg_cloud"
+            ]
+          },
+          {
+            "id": "post_assemble",
+            "name": "⑥ 后期整合",
+            "primary_impl": "cloud_assemble",
+            "primary_vram": 0,
+            "fallback_count": 1,
+            "fallback_impls": [
+              "cloud_assemble"
+            ]
+          },
+          {
+            "id": "bgm_audio",
+            "name": "⑦ BGM 音频",
+            "primary_impl": "cloud_generate_music",
+            "primary_vram": 0,
+            "fallback_count": 1,
+            "fallback_impls": [
+              "cloud_generate_music"
+            ]
+          },
+          {
+            "id": "package_publish",
+            "name": "⑧ 包装发布",
+            "primary_impl": "cloud_template",
+            "primary_vram": 0,
+            "fallback_count": 1,
+            "fallback_impls": [
+              "cloud_template"
+            ]
+          }
+        ],
+        "note": "YAML 是数据不是代码；引擎按档位+画风+音频轨裁剪，运行时可再降级"
+      },
+      {
+        "tier": "T1",
+        "tier_label": "6-8GB",
+        "style": "S1_anime_jp",
+        "style_label": "S1_anime_jp",
+        "scenario": "dark_thriller",
+        "elapsed_s": 0.141,
+        "node_count": 8,
+        "nodes": [
+          {
+            "id": "script_struct",
+            "name": "① 剧本结构化",
+            "primary_impl": "llm_api",
+            "primary_vram": 0,
+            "fallback_count": 1,
+            "fallback_impls": [
+              "llm_api"
+            ]
+          },
+          {
+            "id": "character_image",
+            "name": "② 角色图",
+            "primary_impl": "sdxl_anime_lora",
+            "primary_vram": 8,
+            "fallback_count": 3,
+            "fallback_impls": [
+              "sdxl_anime_lora",
+              "sd15_gguf_q4_512_offload",
+              "cloud_api_seedream"
+            ]
+          },
+          {
+            "id": "storyboard_prompt",
+            "name": "③ 分镜提示词",
+            "primary_impl": "llm_api",
+            "primary_vram": 0,
+            "fallback_count": 1,
+            "fallback_impls": [
+              "llm_api"
+            ]
+          },
+          {
+            "id": "video_shot",
+            "name": "④ 视频镜头",
+            "primary_impl": "wan13b_gguf_q4_offload_480",
+            "primary_vram": 5,
+            "fallback_count": 2,
+            "fallback_impls": [
+              "wan13b_gguf_q4_offload_480",
+              "cloud_kling"
+            ]
+          },
+          {
+            "id": "fx_enhance",
+            "name": "⑤ 特效增强",
+            "primary_impl": "ffmpeg_local",
+            "primary_vram": 0,
+            "fallback_count": 1,
+            "fallback_impls": [
+              "ffmpeg_local"
+            ]
+          },
+          {
+            "id": "post_assemble",
+            "name": "⑥ 后期整合",
+            "primary_impl": "ffmpeg_local",
+            "primary_vram": 0,
+            "fallback_count": 1,
+            "fallback_impls": [
+              "ffmpeg_local"
+            ]
+          },
+          {
+            "id": "bgm_audio",
+            "name": "⑦ BGM 音频",
+            "primary_impl": "cloud_generate_music",
+            "primary_vram": 0,
+            "fallback_count": 2,
+            "fallback_impls": [
+              "cloud_generate_music",
+              "ffmpeg_local_mix"
+            ]
+          },
+          {
+            "id": "package_publish",
+            "name": "⑧ 包装发布",
+            "primary_impl": "ffmpeg_pil",
+            "primary_vram": 0,
+            "fallback_count": 1,
+            "fallback_impls": [
+              "ffmpeg_pil"
+            ]
+          }
+        ],
+        "note": "YAML 是数据不是代码；引擎按档位+画风+音频轨裁剪，运行时可再降级"
+      },
+      {
+        "tier": "T2",
+        "tier_label": "10-12GB",
+        "style": "S1_anime_jp",
+        "style_label": "S1_anime_jp",
+        "scenario": "dark_thriller",
+        "elapsed_s": 0.11,
+        "node_count": 8,
+        "nodes": [
+          {
+            "id": "script_struct",
+            "name": "① 剧本结构化",
+            "primary_impl": "llm_api",
+            "primary_vram": 0,
+            "fallback_count": 2,
+            "fallback_impls": [
+              "llm_api",
+              "qwen7b_gguf_q4_local"
+            ]
+          },
+          {
+            "id": "character_image",
+            "name": "② 角色图",
+            "primary_impl": "sdxl_anime_lora",
+            "primary_vram": 8,
+            "fallback_count": 3,
+            "fallback_impls": [
+              "sdxl_anime_lora",
+              "sd15_gguf_q4_512_offload",
+              "cloud_api_seedream"
+            ]
+          },
+          {
+            "id": "storyboard_prompt",
+            "name": "③ 分镜提示词",
+            "primary_impl": "llm_api",
+            "primary_vram": 0,
+            "fallback_count": 1,
+            "fallback_impls": [
+              "llm_api"
+            ]
+          },
+          {
+            "id": "video_shot",
+            "name": "④ 视频镜头",
+            "primary_impl": "wan13b_gguf_q4_offload_480",
+            "primary_vram": 5,
+            "fallback_count": 2,
+            "fallback_impls": [
+              "wan13b_gguf_q4_offload_480",
+              "cloud_kling"
+            ]
+          },
+          {
+            "id": "fx_enhance",
+            "name": "⑤ 特效增强",
+            "primary_impl": "ffmpeg_local",
+            "primary_vram": 0,
+            "fallback_count": 1,
+            "fallback_impls": [
+              "ffmpeg_local"
+            ]
+          },
+          {
+            "id": "post_assemble",
+            "name": "⑥ 后期整合",
+            "primary_impl": "ffmpeg_local",
+            "primary_vram": 0,
+            "fallback_count": 1,
+            "fallback_impls": [
+              "ffmpeg_local"
+            ]
+          },
+          {
+            "id": "bgm_audio",
+            "name": "⑦ BGM 音频",
+            "primary_impl": "gpt_sovits_q4",
+            "primary_vram": 4,
+            "fallback_count": 2,
+            "fallback_impls": [
+              "gpt_sovits_q4",
+              "cloud_generate_music"
+            ]
+          },
+          {
+            "id": "package_publish",
+            "name": "⑧ 包装发布",
+            "primary_impl": "ffmpeg_pil",
+            "primary_vram": 0,
+            "fallback_count": 1,
+            "fallback_impls": [
+              "ffmpeg_pil"
+            ]
+          }
+        ],
+        "note": "YAML 是数据不是代码；引擎按档位+画风+音频轨裁剪，运行时可再降级"
+      }
+    ],
+    "generated_at": "2026-10-26T22:18:59+0800"
+  },
+  "tests": {
+    "passed": 278,
+    "failed": 0,
+    "skipped": 0
+  },
+  "pic_sync": {
+    "status": "UNKNOWN",
+    "raw": "============================================================\npic-sync: 云电脑 vs 本地状态对比\n============================================================\n\n[C 盘] C:\\Users\\Administrator\\pic-push\n  HEAD:    N/A\n"
+  },
+  "elapsed_s": 41.7
+}
