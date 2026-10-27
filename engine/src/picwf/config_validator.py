@@ -279,7 +279,9 @@ def main():
     default = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                            "config", "matrix.yaml")
     res = validate_matrix_file(path or default)
-    print(f"errors={len(res["errors"])} warnings={len(res["warnings"])}")
+    err_count = len(res["errors"])
+    warn_count = len(res["warnings"])
+    print(f"errors={err_count} warnings={warn_count}")
     for e in res["errors"]:
         print("  [E]", e)
     for w in res["warnings"][:20]:

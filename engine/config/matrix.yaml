@@ -2475,6 +2475,38 @@ nodes:
     - impl: sd15_gongbi
       estimated_vram_need_gb: 4
       style: S19_ink_brush_cn
+    - impl: flux_cel3d
+      estimated_vram_need_gb: 6
+    - impl: flux_cyberpunk
+      estimated_vram_need_gb: 6
+    - impl: flux_dark_gothic
+      estimated_vram_need_gb: 6
+    - impl: flux_doc_real
+      estimated_vram_need_gb: 6
+    - impl: flux_film
+      estimated_vram_need_gb: 6
+    - impl: flux_mmd_lora
+      estimated_vram_need_gb: 6
+    - impl: flux_photoreal_8k
+      estimated_vram_need_gb: 6
+    - impl: flux_steampunk
+      estimated_vram_need_gb: 6
+    - impl: flux_thick_paint
+      estimated_vram_need_gb: 6
+    - impl: sdxl_flat
+      estimated_vram_need_gb: 6
+    - impl: sdxl_lowpoly
+      estimated_vram_need_gb: 6
+    - impl: sdxl_pixel
+      estimated_vram_need_gb: 6
+    - impl: sdxl_shoujo_lora
+      estimated_vram_need_gb: 6
+    - impl: sdxl_shounen_lora
+      estimated_vram_need_gb: 6
+    - impl: sdxl_turbo_768
+      estimated_vram_need_gb: 6
+    - impl: sdxl_watercolor
+      estimated_vram_need_gb: 6
     T2:
     - impl: flux_dev_cool_lora
       estimated_vram_need_gb: 12
