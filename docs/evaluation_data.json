@@ -1,0 +1,633 @@
+{
+  "version": "0.3.0",
+  "tiers": {
+    "T0": {
+      "vram_gb": "",
+      "memory_gb_min": "",
+      "features": []
+    },
+    "T1": {
+      "vram_gb": "",
+      "memory_gb_min": "",
+      "features": []
+    },
+    "T2": {
+      "vram_gb": "",
+      "memory_gb_min": "",
+      "features": []
+    },
+    "T3": {
+      "vram_gb": "",
+      "memory_gb_min": "",
+      "features": []
+    },
+    "T4": {
+      "vram_gb": "",
+      "memory_gb_min": "",
+      "features": []
+    },
+    "T5": {
+      "vram_gb": "",
+      "memory_gb_min": "",
+      "features": []
+    }
+  },
+  "nodes_chain": {
+    "script_struct": {
+      "T0": [
+        {
+          "impl": "llm_api",
+          "vram": 0
+        }
+      ],
+      "T1": [
+        {
+          "impl": "llm_api",
+          "vram": 0
+        }
+      ],
+      "T2": [
+        {
+          "impl": "llm_api",
+          "vram": 0
+        },
+        {
+          "impl": "qwen7b_gguf_q4_local",
+          "vram": 6
+        }
+      ],
+      "T3": [
+        {
+          "impl": "qwen7b_local",
+          "vram": 8
+        },
+        {
+          "impl": "llm_api",
+          "vram": 0
+        }
+      ],
+      "T4": [
+        {
+          "impl": "qwen14b_local",
+          "vram": 12
+        },
+        {
+          "impl": "qwen7b_local",
+          "vram": 8
+        },
+        {
+          "impl": "llm_api",
+          "vram": 0
+        }
+      ],
+      "T5": [
+        {
+          "impl": "qwen14b_lora_local",
+          "vram": 16
+        },
+        {
+          "impl": "qwen14b_local",
+          "vram": 12
+        },
+        {
+          "impl": "llm_api",
+          "vram": 0
+        }
+      ]
+    },
+    "character_image": {
+      "T0": [
+        {
+          "impl": "cloud_api_seedream",
+          "vram": 0
+        },
+        {
+          "impl": "agnes_image_2_5_flash",
+          "vram": 0
+        }
+      ],
+      "T1": [
+        {
+          "impl": "sd15_gguf_q4_512_offload",
+          "vram": 4
+        },
+        {
+          "impl": "cloud_api_seedream",
+          "vram": 0
+        },
+        {
+          "impl": "agnes_image_2_5_flash",
+          "vram": 0
+        },
+        {
+          "impl": "sd15_shuimo_lora",
+          "vram": 4
+        },
+        {
+          "impl": "ltx095_720",
+          "vram": 5
+        },
+        {
+          "impl": "sd15_gongbi",
+          "vram": 4
+        }
+      ],
+      "T2": [
+        {
+          "impl": "flux_dev_cool_lora",
+          "vram": 12
+        },
+        {
+          "impl": "flux_dev_realistic",
+          "vram": 12
+        },
+        {
+          "impl": "cloud_api_seedream",
+          "vram": 0
+        },
+        {
+          "impl": "agnes_image_2_5_flash",
+          "vram": 0
+        }
+      ],
+      "T3": [
+        {
+          "impl": "flux_gguf_q4_1024",
+          "vram": 12
+        },
+        {
+          "impl": "sdxl_anime_lora",
+          "vram": 12
+        },
+        {
+          "impl": "cloud_api_seedream",
+          "vram": 0
+        },
+        {
+          "impl": "agnes_image_2_5_flash",
+          "vram": 0
+        }
+      ],
+      "T4": [
+        {
+          "impl": "flux_dev_fp16_1024",
+          "vram": 20
+        },
+        {
+          "impl": "flux_dev_cool_lora",
+          "vram": 12
+        },
+        {
+          "impl": "cloud_api_seedream",
+          "vram": 0
+        },
+        {
+          "impl": "agnes_image_2_5_flash",
+          "vram": 0
+        }
+      ],
+      "T5": [
+        {
+          "impl": "flux_dev_fp16_1024",
+          "vram": 24
+        },
+        {
+          "impl": "flux_dev_cool_lora",
+          "vram": 12
+        },
+        {
+          "impl": "cloud_api_seedream",
+          "vram": 0
+        },
+        {
+          "impl": "agnes_image_2_5_flash",
+          "vram": 0
+        }
+      ]
+    },
+    "storyboard_prompt": {
+      "T0": [
+        {
+          "impl": "llm_api",
+          "vram": 0
+        }
+      ],
+      "T1": [
+        {
+          "impl": "llm_api",
+          "vram": 0
+        }
+      ],
+      "T2": [
+        {
+          "impl": "llm_api",
+          "vram": 0
+        }
+      ],
+      "T3": [
+        {
+          "impl": "qwen7b_local",
+          "vram": 8
+        },
+        {
+          "impl": "llm_api",
+          "vram": 0
+        }
+      ],
+      "T4": [
+        {
+          "impl": "qwen14b_local",
+          "vram": 12
+        },
+        {
+          "impl": "qwen7b_local",
+          "vram": 8
+        },
+        {
+          "impl": "llm_api",
+          "vram": 0
+        }
+      ],
+      "T5": [
+        {
+          "impl": "qwen32b_local",
+          "vram": 24
+        },
+        {
+          "impl": "qwen14b_local",
+          "vram": 12
+        },
+        {
+          "impl": "llm_api",
+          "vram": 0
+        }
+      ]
+    },
+    "video_shot": {
+      "T0": [
+        {
+          "impl": "cloud_kling",
+          "vram": 0
+        },
+        {
+          "impl": "agnes_video_2_5_flash",
+          "vram": 0
+        }
+      ],
+      "T1": [
+        {
+          "impl": "wan13b_gguf_q4_offload_480",
+          "vram": 5
+        },
+        {
+          "impl": "cloud_kling",
+          "vram": 0
+        },
+        {
+          "impl": "agnes_video_2_5_flash",
+          "vram": 0
+        },
+        {
+          "impl": "wan13b_fa_480",
+          "vram": 5
+        },
+        {
+          "impl": "ltx095_720",
+          "vram": 5
+        },
+        {
+          "impl": "cinematic_epic_720",
+          "vram": 6.0
+        }
+      ],
+      "T2": [
+        {
+          "impl": "wan13b_fa_480",
+          "vram": 9
+        },
+        {
+          "impl": "ltx095_720",
+          "vram": 10
+        },
+        {
+          "impl": "cloud_kling",
+          "vram": 0
+        },
+        {
+          "impl": "agnes_video_2_5_flash",
+          "vram": 0
+        }
+      ],
+      "T3": [
+        {
+          "impl": "wan13b_fp16_offload_720",
+          "vram": 10
+        },
+        {
+          "impl": "ltx095_720",
+          "vram": 8
+        },
+        {
+          "impl": "cloud_kling",
+          "vram": 0
+        },
+        {
+          "impl": "agnes_video_2_5_flash",
+          "vram": 0
+        }
+      ],
+      "T4": [
+        {
+          "impl": "wan22_14b_720",
+          "vram": 18
+        },
+        {
+          "impl": "ltx23_720",
+          "vram": 14
+        },
+        {
+          "impl": "cloud_kling",
+          "vram": 0
+        },
+        {
+          "impl": "agnes_video_2_5_flash",
+          "vram": 0
+        }
+      ],
+      "T5": [
+        {
+          "impl": "wan22_14b_1080",
+          "vram": 24
+        },
+        {
+          "impl": "wan22_14b_720",
+          "vram": 18
+        },
+        {
+          "impl": "cloud_kling",
+          "vram": 0
+        },
+        {
+          "impl": "agnes_video_2_5_flash",
+          "vram": 0
+        }
+      ]
+    },
+    "fx_enhance": {
+      "T0": [
+        {
+          "impl": "ffmpeg_cloud",
+          "vram": 0
+        }
+      ],
+      "T1": [
+        {
+          "impl": "ffmpeg_local",
+          "vram": 0
+        }
+      ],
+      "T2": [
+        {
+          "impl": "ffmpeg_local",
+          "vram": 0
+        }
+      ],
+      "T3": [
+        {
+          "impl": "ffmpeg_pil",
+          "vram": 0
+        },
+        {
+          "impl": "cloud_template",
+          "vram": 0
+        }
+      ],
+      "T4": [
+        {
+          "impl": "ffmpeg_pil",
+          "vram": 0
+        },
+        {
+          "impl": "cloud_template",
+          "vram": 0
+        }
+      ],
+      "T5": [
+        {
+          "impl": "ffmpeg_pil",
+          "vram": 0
+        },
+        {
+          "impl": "cloud_template",
+          "vram": 0
+        }
+      ]
+    },
+    "post_assemble": {
+      "T0": [
+        {
+          "impl": "cloud_assemble",
+          "vram": 0
+        }
+      ],
+      "T1": [
+        {
+          "impl": "ffmpeg_local",
+          "vram": 0
+        }
+      ],
+      "T2": [
+        {
+          "impl": "ffmpeg_local",
+          "vram": 0
+        }
+      ],
+      "T3": [
+        {
+          "impl": "ffmpeg_pil",
+          "vram": 0
+        },
+        {
+          "impl": "cloud_template",
+          "vram": 0
+        }
+      ],
+      "T4": [
+        {
+          "impl": "ffmpeg_pil",
+          "vram": 0
+        },
+        {
+          "impl": "cloud_template",
+          "vram": 0
+        }
+      ],
+      "T5": [
+        {
+          "impl": "ffmpeg_pil",
+          "vram": 0
+        },
+        {
+          "impl": "cloud_template",
+          "vram": 0
+        }
+      ]
+    },
+    "bgm_audio": {
+      "T0": [
+        {
+          "impl": "cloud_generate_music",
+          "vram": 0
+        }
+      ],
+      "T1": [
+        {
+          "impl": "cloud_generate_music",
+          "vram": 0
+        },
+        {
+          "impl": "ffmpeg_local_mix",
+          "vram": 0
+        }
+      ],
+      "T2": [
+        {
+          "impl": "gpt_sovits_q4",
+          "vram": 4
+        },
+        {
+          "impl": "cloud_generate_music",
+          "vram": 0
+        }
+      ],
+      "T3": [
+        {
+          "impl": "gpt_sovits_q4",
+          "vram": 4
+        },
+        {
+          "impl": "cloud_generate_music",
+          "vram": 0
+        }
+      ],
+      "T4": [
+        {
+          "impl": "gpt_sovits_full",
+          "vram": 6
+        },
+        {
+          "impl": "cloud_generate_music",
+          "vram": 0
+        }
+      ],
+      "T5": [
+        {
+          "impl": "gpt_sovits_trained",
+          "vram": 8
+        },
+        {
+          "impl": "gpt_sovits_full",
+          "vram": 6
+        },
+        {
+          "impl": "cloud_generate_music",
+          "vram": 0
+        }
+      ]
+    },
+    "package_publish": {
+      "T0": [
+        {
+          "impl": "cloud_template",
+          "vram": 0
+        }
+      ],
+      "T1": [
+        {
+          "impl": "ffmpeg_pil",
+          "vram": 0
+        }
+      ],
+      "T2": [
+        {
+          "impl": "ffmpeg_pil",
+          "vram": 0
+        }
+      ],
+      "T3": [
+        {
+          "impl": "ffmpeg_pil",
+          "vram": 0
+        },
+        {
+          "impl": "cloud_template",
+          "vram": 0
+        }
+      ],
+      "T4": [
+        {
+          "impl": "ffmpeg_pil",
+          "vram": 0
+        },
+        {
+          "impl": "cloud_template",
+          "vram": 0
+        }
+      ],
+      "T5": [
+        {
+          "impl": "ffmpeg_pil_batch",
+          "vram": 0
+        },
+        {
+          "impl": "cloud_template",
+          "vram": 0
+        }
+      ]
+    }
+  },
+  "style_tracks": {
+    "S1_anime_jp": {
+      "image_model": [
+        "sdxl_anime_lora",
+        "sd15_gguf_q4_512_offload",
+        "cloud_api_seedream"
+      ],
+      "video_model": [
+        "wan13b_gguf_q4_offload_480",
+        "cloud_kling"
+      ],
+      "agnes_image_model": "agnes-image-2.5-flash",
+      "agnes_video_model": "agnes-video-2.5-flash",
+      "agnes_video_mode_T3": "keyframe"
+    },
+    "S2_korean_cool": {
+      "image_model": [
+        "flux_dev_cool_lora",
+        "sdxl_turbo_768",
+        "cloud_api_seedream"
+      ],
+      "video_model": [
+        "wan13b_fa_480",
+        "cloud_kling"
+      ],
+      "agnes_image_model": "agnes-image-2.5-flash",
+      "agnes_video_model": "agnes-video-2.5-flash",
+      "agnes_video_mode_T3": "keyframe"
+    },
+    "S4_realistic": {
+      "image_model": [
+        "flux_dev_realistic",
+        "sdxl_turbo_768",
+        "cloud_api_seedream"
+      ],
+      "video_model": [
+        "wan13b_fa_480",
+        "cloud_kling"
+      ],
+      "agnes_image_model": "agnes-image-2.5-flash",
+      "agnes_video_model": "agnes-video-2.5-flash",
+      "agnes_video_mode_T3": "keyframe"
+    }
+  }
+}
