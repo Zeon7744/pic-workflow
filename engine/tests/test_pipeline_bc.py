@@ -67,7 +67,13 @@ def test_cli_exposes_mode_and_delivery_report(tmp_path):
     out_dir = tmp_path / "out_mode"
     res = pipeline_cli.run(str(script), tier="T1", scenario="dark_thriller",
                            ep=3, workdir=str(out_dir), mode="pro")
-    assert res["delivery_readiness"]["ready"] is True
+    # 语义变更：mock 画面不算"可交付"，只算"可预览"。
+    # 流程必须跑通(preview_ready)，但内容等级须诚实标注为 preview。
+    dr = res["delivery_readiness"]
+    assert dr["preview_ready"] is True, dr["gaps"]
+    assert dr["content_grade"] == "preview", dr["content_grade"]
+    assert dr["ready"] is False, "mock 画面不得判为可交付"
+    assert any("占位" in g for g in dr["gaps"]), dr["gaps"]
     import json
     report = json.load(open(res["report"], encoding="utf-8"))
     assert report["mode"] == "pro"

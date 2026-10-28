@@ -118,6 +118,22 @@ def _delivery_readiness(res: Dict[str, Any]) -> Dict[str, Any]:
     video = artifacts.get("video_shot", {}) or {}
     final_video = publish.get("final_video", "")
     has_assembled = bool(post.get("assembled")) and bool(post.get("assembled_video"))
+    # ---- 内容真实性判定：区分"能播的预演"和"真正可交付" ----
+    # 文件存在不等于内容交付：mock 画面 / 未合成配音 / spec_only 音乐都必须暴露
+    real_clips = int(video.get("clip_real_count", 0) or 0)
+    mock_clips = int(video.get("clip_mock_count", 0) or 0)
+    video_is_mock = bool(video.get("video_is_mock")) or (mock_clips > 0 and real_clips == 0)
+
+    v_art = artifacts.get("voice", {}) or {}
+    m_art = artifacts.get("music", {}) or {}
+    b_art = artifacts.get("bgm", {}) or {}
+    voice_path = v_art.get("voice_path", "") or ""
+    music_path = m_art.get("music_path", "") or ""
+    bgm_path = b_art.get("bgm_path", "") or ""
+    # 只有 dataflow 里存在的环节才要求（安静版可裁掉音频轨）
+    wants_voice = bool(v_art)
+    wants_music = bool(m_art) or bool(b_art)
+
     checks = {
         "pipeline_ok": bool(res.get("ok")),
         "publish_ready": bool(publish.get("publish_ready")),
@@ -127,6 +143,13 @@ def _delivery_readiness(res: Dict[str, Any]) -> Dict[str, Any]:
         "qa_loop_visible": "qa_loop_summary" in video,
         "mode_overlay_visible": "mode_overlay" in video,
         "mode_feedback_visible": "mode_feedback" in video,
+        # 内容真实性
+        "video_clips_real": real_clips > 0,
+        "video_is_mock": video_is_mock,
+        "voice_track_present": bool(voice_path and os.path.exists(voice_path)),
+        "music_track_present": bool(music_path and os.path.exists(music_path)),
+        "bgm_track_present": bool(bgm_path and os.path.exists(bgm_path)),
+        "audio_mixed": bool(post.get("mix_ok")),
     }
     gaps = []
     if not checks["pipeline_ok"]:
@@ -135,12 +158,42 @@ def _delivery_readiness(res: Dict[str, Any]) -> Dict[str, Any]:
         gaps.append("成片文件尚未落盘，暂不能直接交付")
     if not checks["video_clips_generated"]:
         gaps.append("视频镜头未产生真实产物，只能作为流程预演交付")
+    elif video_is_mock:
+        gaps.append(
+            f"视频画面是占位片（{mock_clips} 个镜头全部 mock，非 AI 生成），"
+            "成片只能作为流程预演，不能对外发布")
+    elif real_clips < int(video.get("clip_count", 0) or 0):
+        gaps.append(f"部分镜头为占位（真实 {real_clips}/{video.get('clip_count')}）")
+    if wants_voice and not checks["voice_track_present"]:
+        _ve = v_art.get("voice_error") or "TTS 后端不可用"
+        gaps.append(
+            f"配音轨未生成（解析 {v_art.get('voice_line_count', 0)} 句台词，"
+            f"失败 {v_art.get('voice_failed', 0)} 句）：{_ve}")
+    if wants_music and not checks["music_track_present"]:
+        _mb = m_art.get("music_backend") or b_art.get("bgm_backend") or ""
+        gaps.append(
+            f"音乐/BGM 未实际生成（当前后端 {_mb or '无'}，仅输出风格规格，"
+            "需接音乐生成 API 或人工按 style_zh 制作）")
+    if wants_voice and checks["voice_track_present"] and not checks["audio_mixed"]:
+        gaps.append("音轨未做混音（缺对白闪避），对白与 BGM 可能互相压制")
     if not checks["mode_feedback_visible"]:
         gaps.append("模式数据回流尚未接入该环节输出")
+
+    # ready = 真正可交付；preview_ready = 流程已跑通可预览
+    ready = (checks["final_video_present"] and checks["publish_ready"]
+             and checks["video_clips_real"] and not video_is_mock
+             and (not wants_voice or checks["voice_track_present"]))
+    preview_ready = checks["final_video_present"] and checks["pipeline_ok"]
     return {
-        "ready": checks["final_video_present"] and checks["publish_ready"],
+        "ready": ready,
+        "preview_ready": preview_ready,
+        "content_grade": ("deliverable" if ready
+                          else "preview" if preview_ready else "incomplete"),
         "checks": checks,
         "gaps": gaps,
+        "stats": {"clips_real": real_clips, "clips_mock": mock_clips,
+                  "voice_lines": v_art.get("voice_line_count", 0),
+                  "voice_synthesized": v_art.get("voice_synthesized", 0)},
     }
 
 
@@ -233,9 +286,19 @@ def main(argv=None) -> int:
         print(f"  失败环节: {res['failed']}")
     if "delivery_readiness" in res:
         dr = res["delivery_readiness"]
-        print(f"  可交付: {'是' if dr['ready'] else '否'}")
+        grade = dr.get("content_grade", "")
+        grade_cn = {"deliverable": "可交付", "preview": "仅预演",
+                    "incomplete": "不完整"}.get(grade, grade)
+        print(f"  可交付: {'是' if dr['ready'] else '否'}（内容等级: {grade_cn}）")
+        st = dr.get("stats") or {}
+        if st:
+            print(f"  内容统计: 真实镜头 {st.get('clips_real', 0)}/"
+                  f"{st.get('clips_real', 0) + st.get('clips_mock', 0)}，"
+                  f"台词 {st.get('voice_synthesized', 0)}/{st.get('voice_lines', 0)} 句已配音")
         if dr.get("gaps"):
-            print(f"  缺口: {', '.join(dr['gaps'])}")
+            print("  缺口:")
+            for g in dr["gaps"]:
+                print(f"    - {g}")
     if "auto_repair" in res:
         ar = res["auto_repair"]
         print(f"  自动修复: {'达成可交付' if ar.get('ready') else '仍有不可修复项'} "

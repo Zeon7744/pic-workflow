@@ -197,6 +197,10 @@ def make_executors(workflow: Dict[str, Any],
             executed.append({
                 "index": i + 1,
                 "clip": out.get("ok"),
+                # 关键：保留真实产物路径与 mock 标记，否则下游误判"已生成"
+                "path": out.get("path", "") or out.get("image_path", "")
+                        or out.get("video_path", ""),
+                "mock": bool(out.get("mock")),
                 "peak_vram": out.get("peak_vram_gb"),
                 "backend": chosen_model,
                 "efficiency_score": best.get("score"),
@@ -231,15 +235,83 @@ def make_executors(workflow: Dict[str, Any],
             "mode_overlay": workflow.get("mode_overlay") or overlay,
             "mode_feedback": feedback,
         }
+        _mock_n = sum(1 for c in executed if c.get("mock"))
+        _real_n = sum(1 for c in executed
+                      if c.get("path") and not c.get("mock"))
         return {
             "video_clips": executed,
             "clip_count": len(executed),
+            "clip_real_count": _real_n,
+            "clip_mock_count": _mock_n,
+            "video_is_mock": _mock_n > 0 and _real_n == 0,
             "efficiency_best_model": chosen_model,
             "efficiency_plan": plan,
             "qa_loop_summary": qa_summary,
             "accessibility": accessibility,
             "mode_feedback": feedback,
         }
+
+    def _voice_track_exec(up: Dict[str, Any]) -> Dict[str, Any]:
+        """真·配音轨：从分镜台词合成，按镜头时间轴对齐。"""
+        from .voice_track_builder import build_voice_track
+        shots = up.get("script_struct", {}).get("shots", [])
+        out = f"{workdir}/voice_ep{ep}.mp3"
+        res = build_voice_track(shots, out, workdir=f"{workdir}/_voice",
+                                backend=workflow.get("tts_backend", ""))
+        return {"voice_track": voice_track,
+                "voice_path": res.get("path", ""),
+                "voice_ok": bool(res.get("ok")),
+                "voice_line_count": res.get("line_count", 0),
+                "voice_synthesized": res.get("synthesized", 0),
+                "voice_failed": res.get("failed", 0),
+                "voice_overflow_lines": res.get("overflow_lines", []),
+                "voice_duration_s": res.get("duration_s", 0.0),
+                "voice_timeline_s": res.get("timeline_s", 0.0),
+                "voice_backend": res.get("backend", ""),
+                "voice_error": res.get("error", "")}
+
+    def _music_track_exec(up: Dict[str, Any]) -> Dict[str, Any]:
+        """真·音乐轨：从 matrix 风格表构造规格并生成。"""
+        from .music_gen import build_music_spec, generate
+        dur = 0.0
+        try:
+            from .voice_track_builder import total_duration
+            dur = total_duration(up.get("script_struct", {}).get("shots", []), 30.0)
+        except Exception:
+            dur = 30.0
+        spec = build_music_spec(music_track or "M28_anime_jpop",
+                                duration_s=int(max(10, dur)))
+        gen = generate(spec, backend=workflow.get("music_backend", "auto"),
+                       out_path=f"{workdir}/music_ep{ep}.mp3")
+        return {"music_track": music_track,
+                "music_path": gen.get("path", ""),
+                "music_ok": bool(gen.get("ok")),
+                "music_backend": gen.get("backend", ""),
+                "music_duration_ms": gen.get("duration_ms", 0),
+                "music_style_zh": spec.get("style_zh", ""),
+                "music_style_en": spec.get("style_en", ""),
+                "music_spec": spec,
+                "music_error": gen.get("error", "")}
+
+    def _bgm_track_exec(up: Dict[str, Any]) -> Dict[str, Any]:
+        """真·背景轨：B 类曲目，比音乐轨更低调。"""
+        from .music_gen import build_music_spec, generate
+        dur = 0.0
+        try:
+            from .voice_track_builder import total_duration
+            dur = total_duration(up.get("script_struct", {}).get("shots", []), 30.0)
+        except Exception:
+            dur = 30.0
+        key = bgm_track or "B08_suspense_cold"
+        spec = build_music_spec(key, duration_s=int(max(10, dur)))
+        gen = generate(spec, backend=workflow.get("music_backend", "auto"),
+                       out_path=f"{workdir}/bgm_ep{ep}.mp3")
+        return {"bgm_track": key, "bgm_path": gen.get("path", ""),
+                "bgm_ok": bool(gen.get("ok")),
+                "bgm_backend": gen.get("backend", ""),
+                "bgm_duration_ms": gen.get("duration_ms", 0),
+                "bgm_style_zh": spec.get("style_zh", ""),
+                "bgm_spec": spec, "bgm_error": gen.get("error", "")}
 
     def _post_assemble(up: Dict[str, Any]) -> Dict[str, Any]:
         # fx_enhance 透传了 fx_clips（源头 video_shot 的 video_clips）
@@ -250,11 +322,43 @@ def make_executors(workflow: Dict[str, Any],
         # 真·ffmpeg 合成：不存在的 clip 自动占位，接 BGM/voice 音频轨
         assembled_path = f"{workdir}/assembled_ep{ep}.mp4"
         from .assembler import assemble as _asm
+
+        # ---- 真·混音：优先用上游真生成的音轨，走 bgm_mix（含对白闪避）----
+        import os as _os
+        v_up = up.get("voice", {})
+        m_up = up.get("music", {})
+        b_up = up.get("bgm", {})
+        voice_path = v_up.get("voice_path") or ""
+        music_path = m_up.get("music_path") or ""
+        bgm_path = b_up.get("bgm_path") or ""
+        for _k, _p in (("voice", voice_path), ("music", music_path), ("bgm", bgm_path)):
+            if _p and not _os.path.exists(_p):
+                if _k == "voice":
+                    voice_path = ""
+                elif _k == "music":
+                    music_path = ""
+                else:
+                    bgm_path = ""
+
+        mix_res: Dict[str, Any] = {}
         _audio = []
-        if voice_track:
-            _audio.append(f"{workdir}/voice_ep{ep}.wav")
-        if bgm_track:
-            _audio.append(f"{workdir}/bgm_ep{ep}.wav")
+        if voice_path or music_path or bgm_path:
+            try:
+                from .bgm_mix import mix as _mix
+                mixed = f"{workdir}/mixed_audio_ep{ep}.mp3"
+                mix_res = _mix(voice_path=voice_path or None,
+                               bgm_path=bgm_path or None,
+                               music_path=music_path or None,
+                               out_path=mixed)
+                if mix_res.get("ok"):
+                    _audio.append(mixed)
+            except Exception as _e:  # noqa: BLE001
+                mix_res = {"ok": False, "error": f"混音异常: {_e}"}
+
+        # 混音失败/无音轨时退回原始单轨直挂
+        if not _audio:
+            _audio = [p for p in (voice_path, music_path, bgm_path) if p]
+
         asm_res = _asm(clips_paths or [""]*max(len(clips_raw),1),
                         audio_tracks=_audio or None,
                         out_path=assembled_path, workdir=workdir)
@@ -262,11 +366,26 @@ def make_executors(workflow: Dict[str, Any],
                 "clip_count": asm_res.get("clip_count", len(clips_raw)),
                 "music": music_track, "voice": voice_track, "bgm": bgm_track,
                 "duration_s": asm_res.get("duration_s", 0),
-        "assembled": bool(asm_res.get("ok") or asm_res.get("assembled_video") or assembled_path),                "assembled_ffmpeg": asm_res.get("ffmpeg", False)}
+                "audio_tracks_used": _audio,
+                "mix_ok": bool(mix_res.get("ok")),
+                "mix_duck_db": mix_res.get("duck_db"),
+                "mix_duration_ms": mix_res.get("duration_ms", 0),
+                "mix_error": mix_res.get("error", ""),
+                "assembled": bool(asm_res.get("ok") or asm_res.get("assembled_video") or assembled_path),
+                "assembled_ffmpeg": asm_res.get("ffmpeg", False)}
 
     def _bgm_audio(up: Dict[str, Any]) -> Dict[str, Any]:
-        # B 轨真建议（advise_tracks 出 B08_suspense_cold）
-        return {"bgm_track": bgm_track, "bgm_path": f"{workdir}/bgm_ep{ep}.wav"}
+        # 复用 bgm 轨真执行器产出的文件；缺失时给建议 key 但标明未生成
+        b = up.get("bgm", {}) or {}
+        path = b.get("bgm_path", "")
+        import os as _os
+        exists = bool(path) and _os.path.exists(path)
+        return {"bgm_track": b.get("bgm_track", bgm_track),
+                "bgm_path": path,
+                "bgm_ok": exists,
+                "bgm_backend": b.get("bgm_backend", ""),
+                "bgm_style_zh": b.get("bgm_style_zh", ""),
+                "note": "" if exists else "BGM 未实际生成（无可用后端），仅给出曲目建议"}
 
     def _package_publish(up: Dict[str, Any]) -> Dict[str, Any]:
         pa = up.get("post_assemble", {})
@@ -352,8 +471,8 @@ def make_executors(workflow: Dict[str, Any],
         "post_assemble": _post_assemble,
         "bgm_audio": _bgm_audio,
         "package_publish": _package_publish,
-        # 叠加音频轨（可选，被裁时不在 dataflow）
-        "music": lambda up: {"music_track": music_track},
-        "voice": lambda up: {"voice_track": voice_track},
-        "bgm": lambda up: {"bgm_track": bgm_track},
+        # 叠加音频轨（可选，被裁时不在 dataflow）—— 真执行器
+        "music": _music_track_exec,
+        "voice": _voice_track_exec,
+        "bgm": _bgm_track_exec,
     }
