@@ -40,8 +40,9 @@ def _req(method: str, path: str, body: Optional[Dict] = None,
         raise RuntimeError(f"HTTP {e.code}: {err_body}")
 
 
-def _post(path: str, body: Dict) -> Dict:
-    return _req("POST", path, body, timeout=30)
+def _post(path: str, body: Dict, timeout: int = 30) -> Dict:
+    # 图像生成（尤其是带参考图的 i2i）耗时波动大，30s 会打出 read timeout
+    return _req("POST", path, body, timeout=timeout)
 
 
 def _get(path: str) -> Dict:

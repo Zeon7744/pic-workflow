@@ -8,6 +8,9 @@ A 块：post_assemble / bgm_audio / package_publish 接真执行器
 
 非视频环节用 audio_advisor 出真音频轨建议；视频环节 video_shot 已接 orchestrator。
 """
+import json
+import os
+import re
 from typing import Any, Callable, Dict, List, Optional
 
 # 云端模型路由（API Key 配置后才启用）
@@ -30,6 +33,152 @@ def _load_matrix():
         raise RuntimeError("缺少 PyYAML")
     with open(p, encoding="utf-8") as f:
         return _yaml.safe_load(f)
+
+
+def _ensure_char_refs(characters: Optional[Dict[str, Any]],
+                      workdir: str) -> Dict[str, str]:
+    """为每个角色出定妆照，返回 {名字: 图片URL}，落盘缓存避免重复出图。
+
+    定妆照是分镜图 i2i 的视觉锚点：只靠文字描述，同一个角色每个镜头都会变脸；
+    拿定妆照做参考图，脸型/发型/服装才稳定。
+    """
+    if not characters:
+        return {}
+    from .cloud_api import agnes_image
+    refs: Dict[str, str] = {}
+    for name, c in characters.items():
+        if not name:
+            continue
+        cache = f"{workdir}/_charref_{name}.json"
+        if os.path.isfile(cache):
+            try:
+                with open(cache, encoding="utf-8") as f:
+                    d = json.load(f)
+                if d.get("url") and d.get("path") and os.path.isfile(d["path"]):
+                    refs[name] = d["url"]
+                    continue
+            except Exception:
+                pass
+        age = c.get("age")
+        gender = {"female": "女性", "male": "男性"}.get(
+            str(c.get("gender") or "").lower(), "人物")
+        head = f"{name}，{age}岁{gender}" if age else f"{name}，{gender}"
+        desc = str(c.get("desc") or "")
+        prompt = (f"{head}，{desc}，角色定妆照，正面半身，纯色浅灰背景，"
+                  f"写实电影质感，皮肤质感真实，年轻精致，无文字无水印")
+        r = agnes_image.run_image(prompt, out_path=f"{workdir}/_charref_{name}.png",
+                                  ratio="3:4")
+        if r.get("ok") and r.get("image_url"):
+            refs[name] = r["image_url"]
+            try:
+                with open(cache, "w", encoding="utf-8") as f:
+                    json.dump({"url": r["image_url"], "path": r.get("path", "")},
+                              f, ensure_ascii=False)
+            except OSError:
+                pass
+    return refs
+
+
+# 图像模型没有跨镜头记忆，同一角色每次都会长成不同的人。
+# 把角色表里的外形描述拼进 prompt 做「文字锚点」，是当前成本最低的一致性手段。
+_STYLE = "都市职场短剧分镜，写实电影质感，自然光，浅景深，竖屏构图"
+
+
+_SPEAKER = re.compile(r"^\s*([^：:]{1,8}?)\s*(?:[（(][^）)]{0,20}[）)])?\s*[：:]")
+
+
+def _on_screen_chars(text: str,
+                     characters: Optional[Dict[str, Any]]) -> List[str]:
+    """判断画面里真正出场的角色。
+
+    关键：台词里被提到的名字不算出场。
+    「陈姐：还不去？周总要的是坑你。」画面上只有陈姐，
+    如果把周总的定妆照也丢进 i2i，两张脸会被模型揉成一个人。
+    """
+    names = [n for n in (characters or {}) if n]
+    txt = str(text or "")
+    m = _SPEAKER.match(txt)
+    if m:
+        who = m.group(1).strip()
+        for n in names:
+            if n in who or (who and who in n):
+                return [n]
+        return []
+    # 叙述句按出现先后排序，先出场的通常是画面主体（参考图取第一个）
+    return sorted([n for n in names if n in txt], key=lambda n: txt.find(n))
+
+
+def _char_anchor(text: str, characters: Optional[Dict[str, Any]]) -> str:
+    """从分镜原文里找出场角色，返回其外形描述锚点。"""
+    if not characters:
+        return ""
+    parts = []
+    for name, c in characters.items():
+        if not name or name not in (text or ""):
+            continue
+        seg = [f"{name}"]
+        age = c.get("age")
+        gender = {"female": "女性", "male": "男性"}.get(
+            str(c.get("gender") or "").lower(), "")
+        if age and gender:
+            seg.append(f"{age}岁{gender}")
+        elif gender:
+            seg.append(gender)
+        if c.get("desc"):
+            seg.append(str(c["desc"]))
+        parts.append("：".join([seg[0], "，".join(seg[1:])]) if len(seg) > 1 else seg[0])
+    return "；".join(parts)
+
+
+def _agnes_image_shot(i: int, shot: Dict[str, Any], workdir: str,
+                      est_s: float, clip_path: str, animator,
+                      characters: Optional[Dict[str, Any]] = None,
+                      char_refs: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+    """agnes 视频拿不到配额时的降级路径：真图 + 推拉 → 动态分镜。
+
+    比占位测试图案强得多，且时长严格对齐分镜，配音轨能直接对上。
+    """
+    from .cloud_api import agnes_image
+    frame = f"{workdir}/_frame_{i + 1:03d}.png"
+    prompt = str(shot.get("prompt") or shot.get("raw") or "").strip()
+    # 只传一张参考图，所以必须指明谁是画面主体，否则双人镜头会把两张脸揉到一起
+    raw_text = str(shot.get("raw") or prompt)
+    _who = _on_screen_chars(raw_text, characters)
+    main = _who[0] if _who else ""
+    others = _who[1:]
+    anchor = _char_anchor(main, characters)
+    if others:
+        brief = []
+        for n in others:
+            c = (characters or {}).get(n) or {}
+            g = {"female": "女", "male": "男"}.get(
+                str(c.get("gender") or "").lower(), "")
+            brief.append(f"{n}（{c.get('age') or ''}岁{g}）" if c.get("age")
+                         else f"{n}（{g}）")
+        anchor = "；".join([x for x in (anchor, "、".join(brief)) if x])
+    comp = f"画面主体：{main}，正面清晰呈现" if main else ""
+    if others:
+        comp += f"；{'、'.join(others)}作为次要人物出现在画面中，不与主体混淆"
+    full = "；".join([x for x in (prompt, comp,
+                                  anchor and f"角色外观固定：{anchor}",
+                                  _STYLE) if x])
+    # 画面里出现的角色，用其定妆照做 i2i 参考（最多 3 张），锁定长相
+    # 参考图取主体角色：多张不同人物的图会被 i2i 揉成混合脸
+    ref_urls = next((char_refs[n] for n in _who
+                     if n in (char_refs or {})), None)
+    img = agnes_image.run_image(full, out_path=frame, ratio="9:16",
+                                ref_image=ref_urls)
+    if not img.get("ok") or not img.get("path"):
+        return {"ok": False, "path": "", "mock": True, "peak_vram_gb": 0,
+                "backend": "agnes_image", "error": img.get("error", "出图失败")}
+    motion = animator.pick_motion(str(shot.get("shot_type") or ""), i)
+    anim = animator.animate_still(img["path"], clip_path, est_s, motion=motion)
+    if not anim.get("ok"):
+        return {"ok": False, "path": "", "mock": True, "peak_vram_gb": 0,
+                "backend": "agnes_image", "error": anim.get("error", "动态化失败")}
+    return {"ok": True, "path": clip_path, "mock": False, "peak_vram_gb": 0,
+            "backend": f"cloud_agnes_image({motion})", "image_url": img.get("image_url"),
+            "error": ""}
 
 
 def make_executors(workflow: Dict[str, Any],
@@ -143,6 +292,7 @@ def make_executors(workflow: Dict[str, Any],
         return plan
 
     def _video_shot(up: Dict[str, Any]) -> Dict[str, Any]:
+        _chars = (up.get("script_struct", {}) or {}).get("characters") or {}
         # 取上游分镜提示词 → 效率规划择优 → 执行
         shots = (up.get("storyboard_prompt", {}) or {}).get("shots",
                   (up.get("script_struct", {}) or {}).get("shots", []))
@@ -161,6 +311,8 @@ def make_executors(workflow: Dict[str, Any],
                 pass
         if _cloud_force and _HAS_CLOUD_API and has_key(_cloud_force):
             chosen_model = f"cloud_{_cloud_force}"
+        # 角色定妆照只出一次，后续所有分镜复用同一批 URL 做 i2i 参考
+        _refs = _ensure_char_refs(_chars, workdir) if _chars else {}
         executed = []
         qa_decisions = []
         for i, sh in enumerate(shots[:10]):
@@ -169,26 +321,40 @@ def make_executors(workflow: Dict[str, Any],
             if _is_cloud and _HAS_CLOUD_API:
                 _svc = chosen_model.replace("cloud_", "")
                 from .cloud_api import wan, kling, seedream
-                if _svc in ("agnes", "agnes_video"):
+                if _svc in ("agnes", "agnes_video", "agnes_image"):
                     from .cloud_api import agnes_video
+                    from . import storyboard_animator as _sa
                     clip_path = f"{workdir}/_clip_{i+1:03d}.mp4"
-                    cloud_res = agnes_video.run_shot(
-                        sh.get("prompt", ""),
-                        out_path=clip_path,
-                        # flash 是默认免费档；pro 只能由 cloud_model_override 点名
-                        model=(agnes_video.MODEL_PRO
-                               if workflow.get("video_model_tier") == "pro"
-                               else agnes_video.MODEL_FLASH),
-                        seconds=int(min(12, max(4, round(float(sh.get("est_s") or 5))))),
-                    )
-                    out = {"ok": cloud_res.get("ok"),
-                           "backend": f"cloud_agnes({cloud_res.get('model','')})",
-                           # 本地文件路径：下游剪辑靠它，绝不能只留 URL
-                           "path": cloud_res.get("path", ""),
-                           "video_url": cloud_res.get("video_url"),
-                           "mock": False,
-                           "peak_vram_gb": 0,
-                           "error": cloud_res.get("error", "")}
+                    _est = float(sh.get("est_s") or 5.4)
+                    cloud_res: Dict[str, Any] = {"ok": False, "error": ""}
+
+                    if _svc != "agnes_image":
+                        cloud_res = agnes_video.run_shot(
+                            sh.get("prompt", ""),
+                            out_path=clip_path,
+                            # flash 是默认免费档；pro 只能由 cloud_model_override 点名
+                            model=(agnes_video.MODEL_PRO
+                                   if workflow.get("video_model_tier") == "pro"
+                                   else agnes_video.MODEL_FLASH),
+                            seconds=int(min(12, max(4, round(_est)))),
+                        )
+
+                    if cloud_res.get("ok"):
+                        out = {"ok": True,
+                               "backend": f"cloud_agnes({cloud_res.get('model','')})",
+                               "path": cloud_res.get("path", ""),
+                               "video_url": cloud_res.get("video_url"),
+                               "mock": False, "peak_vram_gb": 0, "error": ""}
+                    else:
+                        # 视频配额/队列不可用时降级到「真实分镜图 + 推拉」动态分镜。
+                        # 画面仍是 AI 生成的真图，不是占位测试图案，配音照样能对上。
+                        _downgrade = _agnes_image_shot(
+                            i, sh, workdir, _est, clip_path, _sa,
+                            characters=_chars, char_refs=_refs)
+                        out = _downgrade
+                        if not _downgrade.get("ok"):
+                            out = dict(_downgrade)
+                            out["video_error"] = cloud_res.get("error", "")
                 elif _svc == "kling":
                     cloud_res = kling.run_shot(sh.get("prompt", ""), duration=5)
                     out = {"ok": cloud_res.get("ok"), "backend": chosen_model,
@@ -232,7 +398,9 @@ def make_executors(workflow: Dict[str, Any],
                 # 分镜时长：合成环节要靠它把片段拉到与配音一致的时长
                 "est_s": float(sh.get("est_s") or 5.4),
                 "peak_vram": out.get("peak_vram_gb"),
-                "backend": chosen_model,
+                # 失败原因必须落盘：否则一个镜头变占位就成黑盒，无从排查
+                "error": str(out.get("error", "") or out.get("video_error", "") or "")[:300],
+                "backend": out.get("backend") or chosen_model,
                 "efficiency_score": best.get("score"),
                 "efficiency_gate": plan.get("gate", {}),
                 "fallback_paths": [p.get("model_id") for p in plan.get("paths", [])][:3],

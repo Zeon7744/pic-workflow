@@ -285,7 +285,8 @@ NODE_DATAFLOW = [
      "depends_on": ["script_struct", "character_image"]},
     {"id": "video_shot", "name": "④ 视频镜头", "stage": 4,
      "inputs": ["shot_prompts", "character_refs"], "outputs": ["video_clips"],
-     "depends_on": ["storyboard_prompt"]},
+     # 必须依赖 script_struct：要拿角色表出定妆照，做分镜图的 i2i 视觉锚点
+     "depends_on": ["storyboard_prompt", "script_struct"]},
     {"id": "fx_enhance", "name": "⑤ 特效增强", "stage": 5,
      "inputs": ["video_clips"], "outputs": ["fx_clips"], "depends_on": ["video_shot"]},
     {"id": "post_assemble", "name": "⑥ 后期整合", "stage": 6,
