@@ -33,20 +33,26 @@ from typing import Any, Dict, Optional
 # 后端注册
 # ---------------------------------------------------------------------------
 _BACKENDS = {}
-_ADAPTER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                             "..", "..", "..", "minimax_tts_adapter.py")
 
 
 def _load_minimax_adapter():
-    """定位并加载 minimax_tts_adapter(若存在)。返回模块或 None。"""
+    """加载 minimax_tts_adapter。优先同包导入(引擎正式路径), 再退到外部文件。"""
     if "minimax" in _BACKENDS:
         return _BACKENDS["minimax"]
+
+    # 1) 同包优先(引擎自包含, 推荐)
+    try:
+        from . import minimax_tts_adapter as mod
+        _BACKENDS["minimax"] = mod
+        return mod
+    except ImportError:
+        pass
+
+    # 2) 外部文件兜底: 同目录 -> 用户 home -> 项目共享目录
     import importlib.util
+    here = os.path.dirname(os.path.abspath(__file__))
     candidates = [
-        _ADAPTER_PATH,
-        os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                     "minimax_tts_adapter.py"),
-        # 项目共享目录兜底(云设备与 Windows 互通)
+        os.path.join(here, "minimax_tts_adapter.py"),
         os.path.expanduser("~/minimax_tts_adapter.py"),
         "/Coze/Drive/简化画廊/minimax_tts_adapter.py",
     ]
@@ -112,10 +118,13 @@ def _provider_available(provider: str) -> bool:
         if mod is None:
             return False
         try:
-            import minimax_client  # noqa: F401
-            return True
-        except Exception:
-            return False
+            from . import minimax_client  # noqa: F401
+        except ImportError:
+            try:
+                import minimax_client  # noqa: F401
+            except Exception:
+                return False
+        return True
     return False
 
 
@@ -179,7 +188,10 @@ def _do_minimax(text, voice_id, out_path, emotion="neutral",
                               backend="minimax", character=character)
     # 无 adapter 时直接调 minimax_client(若已导入)
     try:
-        import minimax_client
+        try:
+            from . import minimax_client
+        except ImportError:
+            import minimax_client
         vid = _resolve_voice_id("minimax", voice_id, character)
         result = minimax_client.tts(text=text, voice_id=vid,
                                      speed=float(speed), emotion=emotion,
