@@ -309,10 +309,17 @@ def make_executors(workflow: Dict[str, Any],
                     _cloud_force = "agnes"
             except Exception:
                 pass
-        if _cloud_force and _HAS_CLOUD_API and has_key(_cloud_force):
+        # 注意：密钥名是 agnes_video / agnes_image，"agnes" 只是服务族名，
+        # 直接 has_key("agnes") 会查不到 → 默认路径静默回落到本地占位模型。
+        _agnes_ok = (_cloud_force in ("agnes", "agnes_video", "agnes_image")
+                     and (has_key("agnes_video") or has_key("agnes_image")))
+        if _cloud_force and _HAS_CLOUD_API and (_agnes_ok or has_key(_cloud_force)):
             chosen_model = f"cloud_{_cloud_force}"
         # 角色定妆照只出一次，后续所有分镜复用同一批 URL 做 i2i 参考
         _refs = _ensure_char_refs(_chars, workdir) if _chars else {}
+        # 视频通道一旦确认不可用（队列满/额度不足），整集直接走分镜图路径。
+        # 否则 10 个镜头每个都排队退避，一集要跑一两个小时。
+        _video_gave_up = [False]
         executed = []
         qa_decisions = []
         for i, sh in enumerate(shots[:10]):
@@ -328,7 +335,7 @@ def make_executors(workflow: Dict[str, Any],
                     _est = float(sh.get("est_s") or 5.4)
                     cloud_res: Dict[str, Any] = {"ok": False, "error": ""}
 
-                    if _svc != "agnes_image":
+                    if _svc != "agnes_image" and not _video_gave_up[0]:
                         cloud_res = agnes_video.run_shot(
                             sh.get("prompt", ""),
                             out_path=clip_path,
@@ -337,7 +344,11 @@ def make_executors(workflow: Dict[str, Any],
                                    if workflow.get("video_model_tier") == "pro"
                                    else agnes_video.MODEL_FLASH),
                             seconds=int(min(12, max(4, round(_est)))),
+                            # 只探测性重试：真排不上就整集切图，别让一集等一小时
+                            queue_retry=2,
                         )
+                        if not cloud_res.get("ok"):
+                            _video_gave_up[0] = True
 
                     if cloud_res.get("ok"):
                         out = {"ok": True,
