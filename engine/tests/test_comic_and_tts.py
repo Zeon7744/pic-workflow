@@ -63,31 +63,35 @@ def test_unknown_template_raises():
 
 
 # ---------------------------------------------------------- 自有 TTS
+# 注意: voice_tts 已升级为可插拔多后端架构(新签名 synthesize/text,
+# voice_id, emotion, speed, backend), 旧 _resolve_voice 改名 _resolve_voice_id,
+# 返回字段 provider 改 backend。详见 test_voice_tts_v2.py。
 def test_voice_preset_keys():
     for k in ("male", "female", "child", "narrator", "default"):
-        v = voice_tts._resolve_voice(k)
+        v = voice_tts._resolve_voice_id("edge", k)
         assert "Neural" in v, f"{k} 应映射到 edge 音色, got {v}"
 
 
 def test_auto_provider_graceful_without_backend():
-    out = voice_tts.synthesize("你好世界", provider="auto",
+    out = voice_tts.synthesize("你好世界", backend="auto",
                                out_path="/tmp/_tts_probe.mp3")
-    assert isinstance(out, dict) and "ok" in out and "provider" in out and "error" in out
+    assert isinstance(out, dict) and "ok" in out and "backend" in out and "error" in out
     if not out.get("ok"):
         assert out.get("error"), "失败应带 error 信息"
 
 
 def test_list_voices_shape():
-    r = voice_tts.list_voices("edge")
+    r = voice_tts.list_voices(backend="edge")
     assert "voices" in r and isinstance(r["voices"], list)
-    r2 = voice_tts.list_voices("openai_compat")
+    r2 = voice_tts.list_voices(backend="openai_compat")
     assert "voices" in r2
 
 
 def test_batch_shape():
     out = voice_tts.batch_synthesize({"l1": "第一句", "l2": "第二句"},
-                                     tmp_dir="/tmp/_tts_batch_probe")
-    assert "results" in out and "ok" in out
+                                     out_dir="/tmp/_tts_batch_probe",
+                                     backend="edge")
+    assert "results" in out and "ok" in out and "ok_count" in out
     assert "l1" in out["results"] and "l2" in out["results"]
 
 
