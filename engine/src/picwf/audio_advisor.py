@@ -13,8 +13,14 @@ def advise_tracks(scenario: str, matrix: Dict, audio_mode: str = "auto",
     """
     srm = matrix.get("scenario_resource_map", {})
     s = srm.get(scenario) or srm.get(DEFAULT_SCENARIO, {})
-    tracks = s.get("full_tracks" if audio_mode == "full" else "default_tracks",
-                   ["bgm"])
+    tracks = list(s.get("full_tracks" if audio_mode == "full" else "default_tracks",
+                        ["bgm"]))
+
+    # voice 是必备轨：auto 原会裁掉配音，但短剧没有对白就是废片，
+    # 裁 voice 属于伪优化（白皇 2026-10-28 定）。这里显式兜底补齐。
+    # 需要静音版时由调用方显式传 audio_mode="silent" 明确表达。
+    if audio_mode != "silent" and "voice" not in tracks:
+        tracks.append("voice")
 
     result: List[Dict] = []
     for t in tracks:

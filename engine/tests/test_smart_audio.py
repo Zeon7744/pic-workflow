@@ -13,14 +13,25 @@ def test_scenario_blocks_exist():
     assert len(m["scenario_resource_map"]) >= 10
     assert len(m["emotion_arc_map"]) >= 5
 
-def test_audio_advisor_auto_trims():
+def test_audio_advisor_auto_keeps_voice():
+    """语义变更(白皇 2026-10-28)：voice 是必备轨，auto 不得裁掉配音。
+
+    短剧没有对白就是废片，auto 省 voice 属于伪优化。
+    需要静音版时显式传 audio_mode="silent"。
+    """
     m = yaml.safe_load(open(MATRIX, encoding="utf-8"))
-    # 轻喜剧 auto 只 1 条
-    assert [t["id"] for t in advise_tracks("light_comedy", m, "auto", 3)] == ["bgm"]
-    # 男频逆袭 auto 2 条
-    assert set(t["id"] for t in advise_tracks("male_revenge", m, "auto", 8)) == {"bgm", "music"}
-    # full 3 条
-    assert len(advise_tracks("light_comedy", m, "full", 3)) == 3
+    for sc in ("light_comedy", "male_revenge", "dark_thriller"):
+        ids = [t["id"] for t in advise_tracks(sc, m, "auto", 3)]
+        assert "voice" in ids, f"{sc} auto 模式丢失配音轨: {ids}"
+        assert "bgm" in ids, f"{sc} auto 模式缺背景轨: {ids}"
+
+    # auto 仍比 full 省：music 轨可按剧种裁掉
+    assert len(advise_tracks("light_comedy", m, "auto", 3)) < \
+        len(advise_tracks("light_comedy", m, "full", 3))
+
+    # silent 显式静音：可去掉 voice
+    silent_ids = [t["id"] for t in advise_tracks("light_comedy", m, "silent", 3)]
+    assert "voice" not in silent_ids, silent_ids
 
 def test_combo_optimizer_scores():
     m = yaml.safe_load(open(MATRIX, encoding="utf-8"))
@@ -41,8 +52,11 @@ def test_workflow_gen_new_params():
     b = generate_workflow(tier="T1", style="S1_anime_jp", scenario="light_comedy",
                           ep=3, audio_mode="auto", free_vram_gb=4.9)
     ids = [n["id"] for n in b["nodes"] if n["id"] in ("music", "voice", "bgm")]
-    assert ids == ["bgm"]  # 轻喜剧 auto 只 1 条
-    assert b.get("audio_advised") == ["bgm"]
+    # 语义变更：auto 保留必备的 voice，music 仍可按剧种裁掉
+    assert "voice" in ids, f"auto 模式丢失配音轨: {ids}"
+    assert "bgm" in ids, ids
+    assert "music" not in ids, f"轻喜剧 auto 不应带 music: {ids}"
+    assert "voice" in (b.get("audio_advised") or [])
     assert b.get("combo_best")  # 优化器补了
     # 旧调用兼容（不传 scenario/ep，直接传 music/voice/bgm）
     b2 = generate_workflow(tier="T1", style="S1_anime_jp",
