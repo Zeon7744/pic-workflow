@@ -10,6 +10,7 @@
 市场短板补口：现有 orchestrator 只做"镜头级"失败路由；本模块补"8 环节 dataflow 拓扑级"
 编排，把 6 维全赢从指标领先落到可执行管线。
 """
+import re
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 
@@ -182,6 +183,133 @@ def _classify_emotion(text: str) -> str:
     return "推进"
 
 
+# Markdown 元信息行：**类型：** xxx / **集数：** ...
+_META_LINE = re.compile(r"^\*\*[^*]{1,12}\*\*\s*[:：]?")
+# 表格行 / 分隔线
+_TABLE_LINE = re.compile(r"^\|.*\|?$")
+_HR_LINE = re.compile(r"^-{3,}$|^_{3,}$|^\*{3,}$")
+
+
+def _extract_body_lines(script_text: str) -> List[str]:
+    """从剧本文本里抽取真正的正文行，剔除 Markdown 排版噪声。
+
+    必须剔除的东西（否则会被当成台词去配音）：
+    - 标题行 `# xxx`
+    - 元信息行 `**类型：** 职场复仇`
+    - 表格行 `| 角色 | 定位 |` / `|------|------|`
+    - 分隔线 `---`
+    保留：场景标记 `### 【开场】...`、动作描述行、对白行
+    """
+    out: List[str] = []
+    for raw in (script_text or "").splitlines():
+        ln = raw.strip()
+        if not ln:
+            continue
+        if ln.startswith("#"):
+            continue
+        if _HR_LINE.match(ln):
+            continue
+        if _TABLE_LINE.match(ln):
+            continue
+        if _META_LINE.match(ln):
+            continue
+        out.append(ln)
+    return out
+
+
+# ---------------------------------------------------------------------------
+# 角色表解析 + 性别推断（配音分轨靠它，否则全剧一个声音）
+# ---------------------------------------------------------------------------
+_CHAR_TABLE_HEAD = re.compile(r"^#+\s*角色")
+# 表格行：| 林夏 | 主角，27岁，助理 | 黑色中分微卷… |
+_ROW = re.compile(r"^\|(.+)\|\s*$")
+
+_FEMALE_HINTS = ("女", "姐", "妈", "姨", "太太", "少女", "姑娘", "闺蜜",
+                 "嫂", "婆", "妹", "娘", "女士", "女主", "夫人",
+                 # 外形特征
+                 "马尾", "连衣裙", "高跟鞋", "长发", "妆容", "睫毛", "口红")
+_MALE_HINTS = ("男", "哥", "叔", "爸", "爹", "先生", "少爷", "兄",
+               "弟", "爷", "汉子", "丈夫", "小伙",
+               # 外形特征
+               "油头", "胡茬", "胡须", "络腮胡", "喉结", "寸头", "板寸")
+# 名字末字常见性别字（中文短剧角色名，命中率够用）
+_FEMALE_NAME_CHARS = set("夏雪晴婷娜丽芳雅玲薇琳媛倩颖洁静梅兰菊竹霞凤燕娟秀珍娥娇媚"
+                         "妍蕊璐瑶琦玮蓉蓓薇蕾萱莹莉萍红艳丹彤欣怡雯")
+_MALE_NAME_CHARS = set("刚强军伟明杰勇峰涛鹏辉磊超斌鑫浩然健斌豪毅虎龙飞宇")
+_AGE = re.compile(r"(\d{1,3})\s*岁")
+
+
+def _guess_gender(name: str, role: str, desc: str) -> str:
+    """角色性别：中文关键词 > 名字末字 > unknown。"""
+    # 名字本身也带强信号：「陈姐」的「姐」、「李哥」的「哥」
+    blob = f"{name} {role} {desc}"
+    for kw in _FEMALE_HINTS:
+        if kw in blob:
+            return "female"
+    for kw in _MALE_HINTS:
+        if kw in blob:
+            return "male"
+    if name:
+        last = name[-1]
+        if last in _FEMALE_NAME_CHARS:
+            return "female"
+        if last in _MALE_NAME_CHARS:
+            return "male"
+    return "unknown"
+
+
+def parse_characters(script_text: str) -> Dict[str, Dict[str, Any]]:
+    """解析剧本「角色设定」表 → {角色名: {role, age, desc, gender}}。
+
+    解析失败返回 {}，上层按 unknown 兜底，不影响出片。
+    """
+    text = script_text or ""
+    lines = text.splitlines()
+    start = -1
+    for i, ln in enumerate(lines):
+        if _CHAR_TABLE_HEAD.match(ln.strip()):
+            start = i
+            break
+    if start < 0:
+        return {}
+
+    chars: Dict[str, Dict[str, Any]] = {}
+    seen_sep = False
+    for ln in lines[start + 1:]:
+        t = ln.strip()
+        if not t:
+            continue  # 表格内空行/表前后空行不算结束
+        if t.startswith("#"):
+            break  # 遇到下一个标题才算表格结束
+        m = _ROW.match(t)
+        if not m:
+            if chars:
+                break
+            continue
+        cells = [c.strip() for c in m.group(1).split("|")]
+        if not cells or not cells[0]:
+            continue
+        # 「|------|------|」分隔行
+        if all(set(c) <= set("-: ") for c in cells if c):
+            seen_sep = True
+            continue
+        if not seen_sep:
+            continue  # 表头行
+        name = cells[0]
+        if name in ("角色", "") or len(name) > 10:
+            continue
+        role = cells[1] if len(cells) > 1 else ""
+        desc = cells[2] if len(cells) > 2 else ""
+        age_m = _AGE.search(f"{role} {desc}")
+        chars[name] = {
+            "role": role,
+            "age": int(age_m.group(1)) if age_m else 0,
+            "desc": desc,
+            "gender": _guess_gender(name, role, desc),
+        }
+    return chars
+
+
 def script_to_shots(script_text: str, shots_per_ep: int = 10,
                     use_llm: bool = False,
                     llm_fn: Optional[Callable] = None) -> Dict[str, Any]:
@@ -191,8 +319,7 @@ def script_to_shots(script_text: str, shots_per_ep: int = 10,
     视频生成。use_llm=True 且提供 llm_fn 时走 LLM 拆解（llm_fn(text)->list[dict]），
     否则用规则化专业拆解（_SHOT_TYPES 轮替 + 情绪分类）。返回结构兼容旧调用。
     """
-    lines = [ln.strip() for ln in (script_text or "").splitlines()
-             if ln.strip() and not ln.strip().startswith("#")]
+    lines = _extract_body_lines(script_text)
     shots: List[Dict[str, Any]] = []
 
     if use_llm and llm_fn is not None:
@@ -207,6 +334,7 @@ def script_to_shots(script_text: str, shots_per_ep: int = 10,
             shots = []  # LLM 失败回退规则拆解
         if len(shots) >= shots_per_ep:
             return {"shots": shots, "shot_count": len(shots), "script_lines": len(lines),
+                    "characters": parse_characters(script_text),
                     "mode": "llm"}
 
     # 规则化专业拆解（默认 / LLM 失败回退）
@@ -231,4 +359,5 @@ def script_to_shots(script_text: str, shots_per_ep: int = 10,
                       "shot_type": st[0], "motion": st[1], "emotion": "沉淀",
                       "est_s": 5.4})
     return {"shots": shots, "shot_count": len(shots), "script_lines": len(lines),
+            "characters": parse_characters(script_text),
             "mode": "llm" if use_llm and llm_fn else "rules"}

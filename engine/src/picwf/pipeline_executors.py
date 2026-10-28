@@ -254,11 +254,15 @@ def make_executors(workflow: Dict[str, Any],
     def _voice_track_exec(up: Dict[str, Any]) -> Dict[str, Any]:
         """真·配音轨：从分镜台词合成，按镜头时间轴对齐。"""
         from .voice_track_builder import build_voice_track
-        shots = up.get("script_struct", {}).get("shots", [])
+        ss = up.get("script_struct", {}) or {}
+        shots = ss.get("shots", [])
+        chars = ss.get("characters") or {}
         out = f"{workdir}/voice_ep{ep}.mp3"
         res = build_voice_track(shots, out, workdir=f"{workdir}/_voice",
-                                backend=workflow.get("tts_backend", ""))
+                                backend=workflow.get("tts_backend", ""),
+                                characters=chars)
         return {"voice_track": voice_track,
+                "voice_characters": chars,
                 "voice_path": res.get("path", ""),
                 "voice_ok": bool(res.get("ok")),
                 "voice_line_count": res.get("line_count", 0),

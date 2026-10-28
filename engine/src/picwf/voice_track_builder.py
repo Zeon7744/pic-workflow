@@ -33,8 +33,14 @@ def _clean(text: str) -> str:
 
 
 def parse_line(raw: str) -> Optional[Dict[str, str]]:
-    """解析一行台词。返回 {character, text} 或 None（非台词行）。"""
-    s = _clean(raw)
+    """解析一行台词。返回 {character, text, hint} 或 None（非台词行）。
+
+    hint 是括号里的表演提示（冷笑/面无表情/抬头…），不朗读，但用于挑情绪。
+    """
+    src = raw or ""
+    hints = _PAREN.findall(src)
+    hint = " ".join(h.strip("（）() ") for h in hints).strip()
+    s = _clean(src)
     if not s:
         return None
     m = _LINE.match(s)
@@ -45,7 +51,7 @@ def parse_line(raw: str) -> Optional[Dict[str, str]]:
     if len(char) > 6 or not text:
         return None
     # 排除以句号结尾的伪冒号（如 "他知道：这件事" 少见，忽略）
-    return {"character": char, "text": text}
+    return {"character": char, "text": text, "hint": hint}
 
 
 def extract_lines(shots: List[Dict[str, Any]],
@@ -64,6 +70,7 @@ def extract_lines(shots: List[Dict[str, Any]],
                 "line_id": f"s{int(sh.get('index', 0)):03d}",
                 "shot_index": int(sh.get("index", 0) or 0),
                 "character": parsed["character"],
+                "hint": parsed.get("hint", ""),
                 "text": parsed["text"],
                 "start_s": round(t, 3),
                 "shot_est_s": est,
@@ -92,17 +99,61 @@ def _probe_duration(path: str) -> float:
 
 
 # 分镜情绪 -> TTS 情绪词（对齐 minimax adapter）
+# script_to_shots 的 _classify_emotion 输出：反转/爆发/紧张/铺垫/推进
+# 这里必须全覆盖，否则一律降级 neutral，等于丢掉表演差异。
 _EMO_MAP = {
     "爆发": "angry", "反转": "surprised", "压抑": "sad", "沉淀": "neutral",
     "紧张": "fearful", "温情": "happy", "悲伤": "sad", "愤怒": "angry",
+    "铺垫": "neutral", "推进": "neutral",
     "neutral": "neutral",
 }
 
+# 台词括号里的表演提示（原 parse_line 直接丢掉，白扔了最好的情绪信号）
+_HINT_EMO = (
+    ("冷笑", "angry"), ("嘲讽", "angry"), ("讥", "angry"), ("怒", "angry"),
+    ("吼", "angry"), ("瞪", "angry"), ("咬牙", "angry"), ("质问", "angry"),
+    ("面无表情", "neutral"), ("平静", "neutral"), ("淡淡", "neutral"),
+    ("沉", "neutral"), ("停顿", "neutral"), ("顿", "neutral"),
+    ("哽咽", "sad"), ("低声", "sad"), ("低头", "sad"), ("委屈", "sad"),
+    ("哭", "sad"), ("叹气", "sad"), ("苦笑", "sad"),
+    ("颤", "fearful"), ("害怕", "fearful"), ("紧张", "fearful"),
+    ("犹豫", "fearful"), ("小心", "fearful"),
+    ("惊讶", "surprised"), ("震惊", "surprised"), ("愣", "surprised"),
+    ("笑", "happy"), ("微笑", "happy"), ("柔", "happy"), ("轻声", "happy"),
+)
+
+
+def _emotion_from_hint(hint: str) -> str:
+    """括号提示 → 情绪。'' 表示没命中。"""
+    h = hint or ""
+    for kw, emo in _HINT_EMO:
+        if kw in h:
+            return emo
+    return ""
+
+
+# 性别+年龄 → VOICE_PRESET 键（adapter 再映射到 MiniMax 系统音色）
+# 剧本角色名千变万化，靠 CHARACTER_PRESET 精确命中覆盖不了，必须按性别兜底。
+def _pick_voice(character: str, characters: Optional[Dict[str, Any]] = None) -> str:
+    c = (characters or {}).get(character or "") or {}
+    g = str(c.get("gender") or "unknown").lower()
+    try:
+        age = int(c.get("age") or 0)
+    except (TypeError, ValueError):
+        age = 0
+    if g == "female":
+        return "serious" if age >= 32 else "female"
+    if g == "male":
+        return "male"
+    # 推不出性别时用成年男声兜底：比童声/少女声更不容易出戏
+    return "male"
+
 
 def synthesize_lines(lines: List[Dict[str, Any]], out_dir: str,
-                     backend: str = "", default_emotion: str = "neutral"
+                     backend: str = "", default_emotion: str = "neutral",
+                     characters: Optional[Dict[str, Any]] = None
                      ) -> Dict[str, Any]:
-    """逐句合成，按角色走不同 voice_id。返回每句的音频路径。"""
+    """逐句合成，按角色性别/年龄走不同 voice_id。返回每句的音频路径。"""
     from .cloud_api import voice_tts
 
     os.makedirs(out_dir, exist_ok=True)
@@ -110,14 +161,19 @@ def synthesize_lines(lines: List[Dict[str, Any]], out_dir: str,
     failures: List[Dict[str, Any]] = []
 
     for ln in lines:
-        emo = _EMO_MAP.get(str(ln.get("emotion", "")).strip(), default_emotion)
+        # 括号表演提示 > 分镜情绪字段 > 默认
+        emo = (_emotion_from_hint(ln.get("hint", ""))
+               or _EMO_MAP.get(str(ln.get("emotion", "")).strip(), "")
+               or default_emotion)
+        voice = _pick_voice(ln["character"], characters)
         out_path = os.path.join(out_dir, f"{ln['line_id']}.mp3")
         r = voice_tts.synthesize(
             ln["text"], out_path=out_path, backend=backend or "auto",
-            emotion=emo, character=ln["character"],
+            emotion=emo, character=ln["character"], voice_id=voice,
         )
         item = dict(ln)
         item["emotion_used"] = emo
+        item["voice_preset"] = voice
         item["ok"] = bool(r.get("ok"))
         item["path"] = r.get("path") or ""
         item["backend"] = r.get("backend") or ""
@@ -185,7 +241,8 @@ def compose_track(lines: List[Dict[str, Any]], total_s: float,
 
 def build_voice_track(shots: List[Dict[str, Any]], out_path: str,
                       workdir: str = "", backend: str = "",
-                      start_offset_s: float = 0.0) -> Dict[str, Any]:
+                      start_offset_s: float = 0.0,
+                      characters: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """一站式：shots -> 台词解析 -> 合成 -> 时间轴对齐拼接。"""
     lines = extract_lines(shots, start_offset_s=start_offset_s)
     if not lines:
@@ -195,7 +252,7 @@ def build_voice_track(shots: List[Dict[str, Any]], out_path: str,
 
     # 溢出检测：台词比所在镜头长
     syn = synthesize_lines(lines, workdir or os.path.dirname(out_path) or ".",
-                           backend=backend)
+                           backend=backend, characters=characters)
     for ln in syn["lines"]:
         spare = ln["shot_est_s"] * 1000 - ln["duration_ms"]
         ln["overflow_ms"] = max(0, int(-spare))

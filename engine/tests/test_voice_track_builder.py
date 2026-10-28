@@ -20,7 +20,9 @@ HAS_FFMPEG = vtb.FFMPEG is not None
 
 def test_parse_normal_line():
     r = vtb.parse_line("周总：这个案子你来做。")
-    assert r == {"character": "周总", "text": "这个案子你来做。"}
+    assert r["character"] == "周总"
+    assert r["text"] == "这个案子你来做。"
+    assert r["hint"] == "", "无括号时 hint 应为空"
 
 
 def test_parse_line_with_action_paren():
@@ -126,8 +128,19 @@ def test_compose_track_no_usable_lines():
     assert r["ok"] is False and "没有可用" in r["error"]
 
 
-def test_synthesize_lines_degrades_without_backend():
-    """无可用 TTS 后端时必须优雅失败，不能抛异常。"""
+def test_synthesize_lines_degrades_without_backend(monkeypatch):
+    """TTS 后端不可用时必须优雅降级，不能抛异常打挂管线。
+
+    不能靠「环境里恰好没有 key」来构造失败：key 一旦落地测试就假通过。
+    这里直接注入必失败后端，才真正测到降级路径。
+    """
+    from picwf.cloud_api import voice_tts
+
+    def _boom(*a, **k):
+        return {"ok": False, "path": "", "error": "模拟后端不可用",
+                "duration_ms": 0, "backend": "mock"}
+
+    monkeypatch.setattr(voice_tts, "synthesize", _boom)
     lines = vtb.extract_lines(_shots())
     with tempfile.TemporaryDirectory() as td:
         r = vtb.synthesize_lines(lines, td, backend="minimax")
@@ -147,8 +160,14 @@ def test_build_voice_track_no_lines():
         assert "未解析到台词" in r["error"]
 
 
-def test_build_voice_track_reports_timeline_even_when_tts_fails():
+def test_build_voice_track_reports_timeline_even_when_tts_fails(monkeypatch):
     """TTS 失败时仍应回报时间轴与台词数，便于诊断而非静默。"""
+    from picwf.cloud_api import voice_tts
+
+    monkeypatch.setattr(
+        voice_tts, "synthesize",
+        lambda *a, **k: {"ok": False, "path": "", "error": "模拟不可用",
+                         "duration_ms": 0, "backend": "mock"})
     with tempfile.TemporaryDirectory() as td:
         r = vtb.build_voice_track(_shots(), os.path.join(td, "v.mp3"),
                                   workdir=td, backend="minimax")
@@ -172,3 +191,107 @@ if __name__ == "__main__":
             failed.append(fn.__name__)
     print(f"\n=== {len(passed)}/{len(fns)} passed, {len(failed)} failed ===")
     sys.exit(1 if failed else 0)
+
+
+# ---------------------------------------------------------------------------
+# 角色表解析 + 性别音色 + 括号情绪提示
+# ---------------------------------------------------------------------------
+_SCRIPT = """# 《测试剧》
+
+**类型：** 职场复仇 / 女性成长
+
+---
+
+## 角色设定
+
+| 角色 | 定位 | 外景描述 |
+|------|------|----------|
+| 林夏 | 主角，27岁，助理 | 黑色中分微卷，气质冷峻 |
+| 周总 | 反派，45岁，部门总监 | 西装革履，油头，金丝眼镜 |
+| 陈姐 | 配角，35岁，老员工 | 朴素干练 |
+
+---
+
+## 剧本正文
+
+周总（冷笑）：没做过就学。
+"""
+
+
+def test_parse_characters_extracts_table():
+    from picwf.pipeline_runner import parse_characters
+
+    chars = parse_characters(_SCRIPT)
+    assert set(chars) == {"林夏", "周总", "陈姐"}
+    assert chars["周总"]["age"] == 45
+
+
+def test_parse_characters_infers_gender():
+    """剧本角色名千变万化，靠预设表覆盖不了，必须能推断性别。"""
+    from picwf.pipeline_runner import parse_characters
+
+    chars = parse_characters(_SCRIPT)
+    assert chars["林夏"]["gender"] == "female", "名字末字「夏」应判女"
+    assert chars["陈姐"]["gender"] == "female", "「姐」应判女"
+    assert chars["周总"]["gender"] == "male", "「油头」应判男"
+
+
+def test_parse_characters_no_table():
+    from picwf.pipeline_runner import parse_characters
+
+    assert parse_characters("随便一段没有角色表的文本") == {}
+
+
+def test_pick_voice_by_gender_and_age():
+    chars = {"林夏": {"gender": "female", "age": 27},
+             "陈姐": {"gender": "female", "age": 35},
+             "周总": {"gender": "male", "age": 45},
+             "无名": {"gender": "unknown", "age": 0}}
+    assert vtb._pick_voice("林夏", chars) == "female"
+    assert vtb._pick_voice("陈姐", chars) == "serious", "35 岁女配走御姐音"
+    assert vtb._pick_voice("周总", chars) == "male"
+    assert vtb._pick_voice("无名", chars) == "male", "推不出性别用成年男声兜底"
+    assert vtb._pick_voice("不存在", chars) == "male"
+
+
+def test_parse_line_keeps_hint():
+    r = vtb.parse_line("周总（冷笑）：没做过就学。")
+    assert r["character"] == "周总"
+    assert r["text"] == "没做过就学。", "括号内容不能念出来"
+    assert r["hint"] == "冷笑", "但必须留下当情绪信号"
+
+
+def test_emotion_from_hint():
+    assert vtb._emotion_from_hint("冷笑") == "angry"
+    assert vtb._emotion_from_hint("面无表情") == "neutral"
+    assert vtb._emotion_from_hint("哽咽") == "sad"
+    assert vtb._emotion_from_hint("") == ""
+
+
+def test_emotion_map_covers_split_enum():
+    """_classify_emotion 的输出枚举必须被 _EMO_MAP 全覆盖，否则全降级 neutral。"""
+    from picwf.pipeline_runner import _classify_emotion
+
+    need = {"反转", "爆发", "紧张", "铺垫", "推进"}
+    missing = need - set(vtb._EMO_MAP)
+    assert not missing, f"情绪枚举缺口: {missing}"
+    assert _classify_emotion("完全无关的一句话") in vtb._EMO_MAP
+
+
+def test_hint_overrides_shot_emotion(monkeypatch):
+    """括号提示的优先级要高于分镜粗分类的 emotion。"""
+    from picwf.cloud_api import voice_tts
+
+    seen = {}
+
+    def _fake(text, **kw):
+        seen.setdefault("emo", []).append(kw.get("emotion"))
+        return {"ok": False, "path": "", "error": "x", "duration_ms": 0, "backend": "mock"}
+
+    monkeypatch.setattr(voice_tts, "synthesize", _fake)
+    lines = [{"line_id": "s1", "character": "周总", "text": "走。",
+              "hint": "冷笑", "emotion": "铺垫", "start_s": 0.0,
+              "est_s": 5.0, "shot_est_s": 5.0}]
+    with tempfile.TemporaryDirectory() as td:
+        vtb.synthesize_lines(lines, td, backend="minimax")
+    assert seen["emo"] == ["angry"], "hint=冷笑 应压过 emotion=铺垫"

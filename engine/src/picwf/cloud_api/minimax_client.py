@@ -58,12 +58,19 @@ def _load_key() -> tuple[str, str]:
     except Exception:
         pass
 
-    # 3) 本地 .minimax_key 文件（开发兜底）
-    for cand in (Path(__file__).parent / ".minimax_key", Path(".minimax_key")):
+    # 3) .minimax_key 文件（开发兜底）。按优先级逐处查找：
+    #    同包目录 -> ~/.minimax_key -> 当前目录 -> 项目共享目录
+    _cands = [
+        Path(__file__).parent / ".minimax_key",
+        Path.home() / ".minimax_key",
+        Path(".minimax_key"),
+        Path("/Coze/Drive/简化画廊/.minimax_key"),
+    ]
+    for cand in _cands:
         if cand.exists():
             lines = cand.read_text(encoding="utf-8").splitlines()
             if not lines:
-                raise RuntimeError(".minimax_key 空")
+                continue
             key = lines[0].strip()
             base = lines[1].strip() if len(lines) > 1 and lines[1].startswith("http") else BASE_URL
             return key, base
@@ -74,6 +81,57 @@ def _load_key() -> tuple[str, str]:
 
 def _headers(key: str) -> dict:
     return {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+
+
+# ---------------------------------------------------------------------------
+# 限流控制
+# MiniMax 有 RPM 上限：一串连续请求会中途开始返回 rate limit exceeded(RPM)。
+# 配音是逐句合成，天然会连续打很多条，所以这里做两件事：
+#   1) 请求前保证最小间隔，尽量不触发限流
+#   2) 真触发了就指数退避重试，不要把「限流」变成「丢台词」
+# ---------------------------------------------------------------------------
+_MIN_INTERVAL_S = float(os.environ.get("MINIMAX_MIN_INTERVAL_S", "1.5"))
+_RETRY_MAX = int(os.environ.get("MINIMAX_RETRY_MAX", "4"))
+_RATE_HINTS = ("rate limit", "rpm", "too many", "429", "频繁")
+_last_ts = [0.0]
+
+
+def _throttle() -> None:
+    """保证相邻请求间隔不小于 _MIN_INTERVAL_S。"""
+    if _MIN_INTERVAL_S <= 0:
+        return
+    gap = time.time() - _last_ts[0]
+    if gap < _MIN_INTERVAL_S:
+        time.sleep(_MIN_INTERVAL_S - gap)
+    _last_ts[0] = time.time()
+
+
+def _is_rate_limited(text: str) -> bool:
+    low = (text or "").lower()
+    return any(h in low for h in _RATE_HINTS)
+
+
+def _post_retry(url: str, key: str, payload: dict) -> dict:
+    """带限流退避的 _post。退避 4/8/16/32s，用尽后抛最后一次错误。"""
+    last = ""
+    for i in range(_RETRY_MAX + 1):
+        _throttle()
+        try:
+            resp = _post(url, key, payload)
+        except RuntimeError as e:
+            last = str(e)
+            if not _is_rate_limited(last) or i >= _RETRY_MAX:
+                raise
+            time.sleep(min(32, 4 * (2 ** i)))
+            continue
+        # 有些限流是 200 + base_resp 里报错
+        msg = json.dumps(resp.get("base_resp") or {}, ensure_ascii=False)
+        if _is_rate_limited(msg) and i < _RETRY_MAX:
+            last = msg
+            time.sleep(min(32, 4 * (2 ** i)))
+            continue
+        return resp
+    raise RuntimeError(f"限流重试 {_RETRY_MAX} 次仍失败: {last}")
 
 
 def _post(url: str, key: str, payload: dict) -> dict:
@@ -327,7 +385,12 @@ def tts(
         payload["voice_setting"]["emotion"] = emotion
 
     key, _ = _load_key()
-    resp = _post(TTS, key, payload)
+    if not key:
+        # 本地就拦住：别拿空 key 去撞服务端，省一次往返且错误信息更清楚
+        return {"ok": False, "audio_bytes": b"", "path": None, "duration_ms": 0,
+                "error": "MiniMax 密钥缺失：请设置 MINIMAX_API_KEY 环境变量，"
+                         "或在 ~/.minimax_key 写入密钥"}
+    resp = _post_retry(TTS, key, payload)
 
     base_resp = resp.get("base_resp") or {}
     if base_resp.get("status_code") not in (0, None):
