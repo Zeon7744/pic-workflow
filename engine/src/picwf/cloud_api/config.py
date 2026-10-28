@@ -30,7 +30,7 @@ def load_api_keys(path: Optional[Path] = None) -> Dict[str, str]:
         return _CACHE
     p = path or DEFAULT_KEYS_PATH
     env = _load_dotenv(p)
-    for k in ("WAN_API_KEY", "KLING_API_KEY", "SEEDREAM_API_KEY", "AGNES_IMAGE_API_KEY", "AGNES_VIDEO_API_KEY"):
+    for k in ("WAN_API_KEY", "KLING_API_KEY", "SEEDREAM_API_KEY", "AGNES_IMAGE_API_KEY", "AGNES_VIDEO_API_KEY", "TTS_OPENAI_API_KEY", "TTS_OPENAI_BASE_URL", "TTS_OPENAI_MODEL", "TTS_EDGE"):
         env.setdefault(k, os.environ.get(k, ""))
     _CACHE = env
     return env

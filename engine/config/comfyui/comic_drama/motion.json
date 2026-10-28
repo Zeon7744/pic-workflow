@@ -1,0 +1,23 @@
+{
+  "name": "motion",
+  "description": "漫剧运动帧工作流：基于分镜首尾帧做视频生成(LTX/Wan2.2)，输出单镜头运动片段供后期整合。",
+  "tier_compat": ["T3","T4","T5"],
+  "inputs": {
+    "first_frame": "story_f0.png", "last_frame": "story_f2.png",
+    "motion_prompt": "character walks forward through neon city, smooth cinematic motion, consistent",
+    "negative_prompt": "flicker, jitter, morphing, deformed, off-model, blur",
+    "width": 1280, "height": 704, "seconds": 5, "frames": 60, "ckpt_name": "LTX-Video-2.3.safetensors"
+  },
+  "workflow": {
+    "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": "{{ckpt_name}}"}},
+    "8": {"class_type": "LoadImage", "inputs": {"image": "{{first_frame}}"}},
+    "8b": {"class_type": "LoadImage", "inputs": {"image": "{{last_frame}}"}},
+    "2": {"class_type": "CLIPTextEncode", "inputs": {"text": "{{motion_prompt}}", "clip": ["1", 1]}},
+    "3": {"class_type": "CLIPTextEncode", "inputs": {"text": "{{negative_prompt}}", "clip": ["1", 1]}},
+    "5": {"class_type": "LTXVVideoToVideo", "inputs": {"model": ["1", 0], "seed": 0, "steps": 20, "cfg": 5.0, "sampler_name": "euler", "scheduler": "normal", "positive": ["2", 0], "negative": ["3", 0], "start_image": ["8", 0], "end_image": ["8b", 0], "width": "{{width}}", "height": "{{height}}", "frames": "{{frames}}", "denoise": 0.9}},
+    "6": {"class_type": "VAEDecode", "inputs": {"samples": ["5", 0], "vae": ["1", 2]}},
+    "7": {"class_type": "SaveVideo", "inputs": {"images": ["6", 0], "filename_prefix": "motion_clip"}}
+  },
+  "outputs": ["motion_clip.mp4"],
+  "cloud_fallback": "agnes_video_2_5_flash", "cloud_fallback_mode": "keyframe"
+}

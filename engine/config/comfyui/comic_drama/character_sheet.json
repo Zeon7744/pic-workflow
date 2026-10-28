@@ -1,0 +1,22 @@
+{
+  "name": "character_sheet",
+  "description": "漫剧角色卡工作流：以角色描述生成同一角色多角度一致性参考图，供分镜/视频节点复用，保证跨镜头角色一致性。",
+  "tier_compat": ["T1","T2","T3","T4","T5"],
+  "inputs": {
+    "character_prompt": "a young anime girl, long silver hair, blue eyes, white sailor uniform, anime style, character reference sheet",
+    "negative_prompt": "lowres, blurry, distorted, watermark, multiple people, deformed hands",
+    "width": 768, "height": 768, "steps": 24, "cfg": 6.5, "seed": 0,
+    "variant_count": 4, "ckpt_name": "sdxl_turbo.safetensors"
+  },
+  "workflow": {
+    "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": "{{ckpt_name}}"}},
+    "2": {"class_type": "CLIPTextEncode", "inputs": {"text": "{{character_prompt}}", "clip": ["1", 1]}},
+    "3": {"class_type": "CLIPTextEncode", "inputs": {"text": "{{negative_prompt}}", "clip": ["1", 1]}},
+    "4": {"class_type": "EmptyLatentImage", "inputs": {"width": "{{width}}", "height": "{{height}}", "batch_size": 1}},
+    "5": {"class_type": "KSampler", "inputs": {"model": ["1", 0], "seed": "{{seed}}", "steps": "{{steps}}", "cfg": "{{cfg}}", "sampler_name": "euler", "scheduler": "normal", "positive": ["2", 0], "negative": ["3", 0], "latent_image": ["4", 0], "denoise": 1.0}},
+    "6": {"class_type": "VAEDecode", "inputs": {"samples": ["5", 0], "vae": ["1", 2]}},
+    "7": {"class_type": "SaveImage", "inputs": {"images": ["6", 0], "filename_prefix": "char_v{{variant}}"}}
+  },
+  "outputs": ["character_ref_front","character_ref_side","character_ref_back","character_ref_full"],
+  "lora_hook": true, "consistency_score_target": 0.85
+}

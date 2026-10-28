@@ -1,0 +1,24 @@
+{
+  "name": "storyboard",
+  "description": "漫剧分镜工作流：以角色参考图+分镜描述生成连贯剧情帧序列(首/关键/尾帧)，供视频镜头做首尾帧驱动。",
+  "tier_compat": ["T2","T3","T4","T5"],
+  "inputs": {
+    "shot_prompt": "cinematic short drama scene, character walking through neon city at night, dramatic lighting, 16:9",
+    "negative_prompt": "lowres, blurry, distorted, watermark, deformed, off-model",
+    "width": 1024, "height": 576, "steps": 20, "cfg": 6.0, "seed": 0,
+    "character_ref": "char_v0.png", "frames_per_shot": 3, "ckpt_name": "sdxl_turbo.safetensors"
+  },
+  "workflow": {
+    "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": "{{ckpt_name}}"}},
+    "2": {"class_type": "CLIPTextEncode", "inputs": {"text": "{{shot_prompt}}", "clip": ["1", 1]}},
+    "3": {"class_type": "CLIPTextEncode", "inputs": {"text": "{{negative_prompt}}", "clip": ["1", 1]}},
+    "8": {"class_type": "LoadImage", "inputs": {"image": "{{character_ref}}"}},
+    "9": {"class_type": "VAEEncode", "inputs": {"pixels": ["8", 0], "vae": ["1", 2]}},
+    "4": {"class_type": "EmptyLatentImage", "inputs": {"width": "{{width}}", "height": "{{height}}", "batch_size": 1}},
+    "5": {"class_type": "KSampler", "inputs": {"model": ["1", 0], "seed": "{{seed}}", "steps": "{{steps}}", "cfg": "{{cfg}}", "sampler_name": "euler", "scheduler": "normal", "positive": ["2", 0], "negative": ["3", 0], "latent_image": ["9", 0], "denoise": 0.75}},
+    "6": {"class_type": "VAEDecode", "inputs": {"samples": ["5", 0], "vae": ["1", 2]}},
+    "7": {"class_type": "SaveImage", "inputs": {"images": ["6", 0], "filename_prefix": "story_f{{frame}}"}}
+  },
+  "outputs": ["frame_first","frame_key","frame_last"],
+  "lora_hook": true, "first_last_frame_mode": true
+}
