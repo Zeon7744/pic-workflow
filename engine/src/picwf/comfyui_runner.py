@@ -343,6 +343,29 @@ def make_comfyui_runner(base_url: Optional[str] = None,
                         local_models_dir=local_models_dir)
 
 
+def exec_comic_workflow(comic_template="character_sheet", overrides=None, tier="T3"):
+    """渲染单个漫剧工作流模板，返回可直接 POST 的 payload + 校验结果。"""
+    from .comic_drama_workflow import build_prompt_payload, validate_rendered
+    payload = build_prompt_payload(comic_template, overrides, tier)
+    issues = validate_rendered(payload["prompt"])
+    payload["template"] = comic_template
+    payload["valid"] = not issues
+    payload["issues"] = issues
+    return payload
+
+
+def exec_comic_pipeline(tier="T3", character_overrides=None,
+                        story_overrides=None, motion_overrides=None):
+    """渲染完整漫剧链路（角色卡 -> 分镜 -> 运动），含衔接与档位预检。"""
+    from .comic_drama_pipeline import render_pipeline, pipeline_summary
+    result = render_pipeline(tier=tier,
+                             character_overrides=character_overrides,
+                             story_overrides=story_overrides,
+                             motion_overrides=motion_overrides)
+    result["summary"] = pipeline_summary(result)
+    return result
+
+
 def main(argv=None):
     """CLI 入口：探测 ComfyUI 服务 + 跑 1 镜头 mock 验证。"""
     import argparse
@@ -352,9 +375,31 @@ def main(argv=None):
     p.add_argument("--mock", action="store_true",
                    help="强制 mock 模式（不连 ComfyUI）")
     p.add_argument("--shot", default="shot_test_1", help="测试镜头 id")
+    p.add_argument("--comic", default=None,
+                   help="渲染单个漫剧工作流模板：character_sheet/storyboard/motion")
+    p.add_argument("--pipeline", action="store_true",
+                   help="渲染完整漫剧链路（角色卡 -> 分镜 -> 运动）并输出摘要")
+    p.add_argument("--tier", default="T3", help="硬件档位 T0~T5（默认 T3）")
     p.add_argument("--local-models-dir", default=None,
                    help="本地模型目录（如 D:\\ComfyUI\\...\\checkpoints）")
     args = p.parse_args(argv)
+
+    # ---- 漫剧分支：只渲染工作流，不需要连 ComfyUI ----
+    if args.comic or args.pipeline:
+        if args.pipeline:
+            r = exec_comic_pipeline(tier=args.tier)
+            print(r["summary"])
+            print(json.dumps({"ok": r["ok"], "can_instantiate": r["can_instantiate"],
+                              "blocking": r["blocking"]}, ensure_ascii=False, indent=2))
+            return 0 if r["ok"] else 1
+        payload = exec_comic_workflow(args.comic, tier=args.tier)
+        print(f"模板: {payload['template']}  valid={payload['valid']}")
+        if payload["issues"]:
+            print(f"  问题: {payload['issues']}")
+        if payload["warnings"]:
+            print(f"  告警: {payload['warnings']}")
+        print(json.dumps(payload["prompt"], ensure_ascii=False, indent=2)[:2000])
+        return 0 if payload["valid"] else 1
 
     # 探测
     svc = detect_comfyui_service(args.url)
