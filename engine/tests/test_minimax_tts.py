@@ -148,3 +148,55 @@ def test_post_retry_gives_up_on_non_rate_error(monkeypatch):
         assert "bad key" in str(e)
     else:
         raise AssertionError("非限流错误应直接抛出，不该重试")
+
+
+# ---------------------------------------------------------------------------
+# Agnes 视频：key 文件兜底 / 队列满退避 / 下载成本地
+# ---------------------------------------------------------------------------
+def test_agnes_queue_full_detected():
+    from picwf.cloud_api import agnes_video as av
+
+    assert av._is_queue_full('{"code":"video_queue_full"}')
+    assert av._is_queue_full("视频队列已满，请稍后重试")
+    assert not av._is_queue_full("invalid prompt")
+
+
+def test_agnes_default_model_is_flash():
+    """白皇 22:05：引擎侧默认 flash（免费档），禁止把 pro 写成默认。"""
+    from picwf.cloud_api import agnes_video as av
+
+    assert av.MODEL == av.MODEL_FLASH
+    assert "flash" in av.MODEL_FLASH
+    assert av.MODEL_PRO != av.MODEL
+
+
+def test_agnes_download_creates_file(tmp_path, monkeypatch):
+    from picwf.cloud_api import agnes_video as av
+
+    class _Resp:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def read(self):
+            return b"fake-mp4-bytes" * 100
+
+    monkeypatch.setattr("urllib.request.urlopen", lambda *a, **k: _Resp())
+    out = str(tmp_path / "v.mp4")
+    r = av.download("http://x/v.mp4", out)
+    assert r["ok"] and r["bytes"] > 0
+    import os
+    assert os.path.exists(out)
+
+
+def test_agnes_key_file_fallback(tmp_path, monkeypatch):
+    """红剑 22:19：key 在项目目录 .agnes_key，不走环境变量。"""
+    from picwf.cloud_api import config as cfg
+
+    (tmp_path / ".agnes_key").write_text("sk-test-key-123", encoding="utf-8")
+    monkeypatch.setattr(cfg, "_KEY_SEARCH", [str(tmp_path)], raising=False)
+    monkeypatch.setattr(cfg, "_CACHE", {}, raising=False)
+    cfg._CACHE = {}
+    assert cfg._read_key_file("agnes_video") == "sk-test-key-123"

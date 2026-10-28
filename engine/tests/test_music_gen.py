@@ -146,3 +146,80 @@ if __name__ == "__main__":
             failed.append(fn.__name__)
     print(f"\n=== {passed}/{len(fns)} passed, {len(failed)} failed ===")
     sys.exit(1 if failed else 0)
+
+
+# ---------------------------------------------------------------------------
+# 本地素材模式（无 SUNO key / MiniMax 音乐端点已停用）
+# ---------------------------------------------------------------------------
+def _mk_audio(path, dur=3.0):
+    import subprocess
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi",
+                    "-i", f"sine=frequency=220:duration={dur}",
+                    "-c:a", "libmp3lame", path], check=True, capture_output=True)
+
+
+def _dur(path):
+    import subprocess
+    r = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
+                        "format=duration", "-of", "csv=p=0", path],
+                       capture_output=True, text=True)
+    return float(r.stdout.strip())
+
+
+def test_find_local_asset_finds_ep_file(tmp_path):
+    from picwf.music_gen import find_local_asset
+
+    p = str(tmp_path / "music_ep1.mp3")
+    _mk_audio(p, 3.0)
+    assert find_local_asset(str(tmp_path), "music", 1) == p
+
+
+def test_find_local_asset_in_assets_dir(tmp_path):
+    from picwf.music_gen import find_local_asset
+
+    d = tmp_path / "assets"
+    d.mkdir()
+    p = str(d / "bgm_ep2.mp3")
+    _mk_audio(p, 3.0)
+    assert find_local_asset(str(tmp_path), "bgm", 2) == p
+
+
+def test_find_local_asset_missing(tmp_path):
+    from picwf.music_gen import find_local_asset
+
+    assert find_local_asset(str(tmp_path), "music", 1) == ""
+
+
+def test_fit_local_asset_loops_to_target(tmp_path):
+    """3s 素材配 12s 音轨：必须循环补齐，不是只给 3s。"""
+    from picwf.music_gen import fit_local_asset
+
+    src = str(tmp_path / "s.mp3")
+    _mk_audio(src, 3.0)
+    out = str(tmp_path / "out.mp3")
+    r = fit_local_asset(src, 12, out)
+    assert r["ok"], r.get("error")
+    assert abs(_dur(out) - 12) < 0.6
+
+
+def test_fit_local_asset_same_path_as_source(tmp_path):
+    """素材常就叫 music_ep1.mp3，与输出同路径；ffmpeg 会拒绝 same as Input。"""
+    from picwf.music_gen import fit_local_asset
+
+    src = str(tmp_path / "bgm_ep1.mp3")
+    _mk_audio(src, 3.0)
+    r = fit_local_asset(src, 10, src)
+    assert r["ok"], r.get("error")
+    assert abs(_dur(src) - 10) < 0.6
+
+
+def test_generate_local_file_backend(tmp_path):
+    from picwf.music_gen import build_music_spec, generate
+
+    src = str(tmp_path / "music_ep1.mp3")
+    _mk_audio(src, 3.0)
+    spec = build_music_spec("M1", duration_s=8)
+    r = generate(spec, backend="auto", out_path=str(tmp_path / "o.mp3"),
+                 local_src=src)
+    assert r["backend"] == "local_file", "有本地素材时 auto 应走 local_file"
+    assert r["ok"] and r["path"]

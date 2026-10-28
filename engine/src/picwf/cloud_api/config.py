@@ -45,7 +45,40 @@ def get_key(service: str) -> str:
         "agnes_video": keys.get("AGNES_VIDEO_API_KEY", ""),
         "minimax": keys.get("MINIMAX_API_KEY", ""),
     }
-    return mapping.get(service, "")
+    val = mapping.get(service, "")
+    if not val:
+        val = _read_key_file(service)
+    return val
+
+# 项目级 key 文件兜底：/Coze/Drive/简化画廊/.agnes_key 等
+_KEY_FILES = {
+    "agnes_video": ".agnes_key",
+    "agnes_image": ".agnes_key",
+}
+_KEY_SEARCH = [
+    "/Coze/Drive/简化画廊",                      # 云端项目共享目录
+    "~",                                         # 用户 home
+    ".",                                         # 当前工作目录
+]
+
+
+def _read_key_file(service: str) -> str:
+    """从 .agnes_key 之类的项目级 key 文件读密钥（红剑 22:19 指定路径）。"""
+    fname = _KEY_FILES.get(service)
+    if not fname:
+        return ""
+    import pathlib
+    for base in _KEY_SEARCH:
+        p = pathlib.Path(base).expanduser() / fname
+        try:
+            if p.is_file():
+                txt = p.read_text(encoding="utf-8").strip()
+                if txt:
+                    return txt
+        except OSError:
+            continue
+    return ""
+
 
 def has_key(service: str) -> bool:
     return bool(get_key(service))

@@ -169,11 +169,19 @@ def _delivery_readiness(res: Dict[str, Any]) -> Dict[str, Any]:
         gaps.append(
             f"配音轨未生成（解析 {v_art.get('voice_line_count', 0)} 句台词，"
             f"失败 {v_art.get('voice_failed', 0)} 句）：{_ve}")
-    if wants_music and not checks["music_track_present"]:
+    # music 与 bgm 是两选一的关系：剧情类可能只配 bgm，不必强求 music 环节在
+    if wants_music and not (checks["music_track_present"]
+                            or checks["bgm_track_present"]):
         _mb = m_art.get("music_backend") or b_art.get("bgm_backend") or ""
-        gaps.append(
-            f"音乐/BGM 未实际生成（当前后端 {_mb or '无'}，仅输出风格规格，"
-            "需接音乐生成 API 或人工按 style_zh 制作）")
+        _need = m_art.get("music_need_api") or b_art.get("bgm_need_api")
+        if _need:
+            gaps.append(
+                "音乐/BGM 缺本地素材：把 music_ep1.mp3 / bgm_ep1.mp3 放进项目目录"
+                "（或 assets/）即可自动接上，管线只做循环裁切，不调音乐 API"
+                f"（已产出风格规格 {_mb or 'spec_only'}，可人工按 style_zh 生成）")
+        else:
+            gaps.append(
+                f"音乐/BGM 未实际生成（当前后端 {_mb or '无'}，仅输出风格规格）")
     if wants_voice and checks["voice_track_present"] and not checks["audio_mixed"]:
         gaps.append("音轨未做混音（缺对白闪避），对白与 BGM 可能互相压制")
     if not checks["mode_feedback_visible"]:

@@ -22,6 +22,10 @@
 """
 import json
 import os
+import subprocess
+import shutil
+
+FFMPEG = shutil.which("ffmpeg")
 import time
 import urllib.request
 from typing import Any, Dict, List, Optional
@@ -295,9 +299,80 @@ def _do_suno(spec: Dict[str, Any], out_path: str, poll_timeout: int = 600) -> Di
                 "duration_ms": 0, "error": "%s: %s" % (type(e).__name__, e)}
 
 
+# ---------------------------------------------------------------------------
+# 本地素材模式（白皇 2026-10-28 定：SUNO key 没有，MiniMax 音乐端点已停用 410）
+# 素材由平台侧 generate_music 产出、落进项目目录，管线只负责「循环/裁切到时长」，
+# 本环节不调任何音乐生成 API。
+# ---------------------------------------------------------------------------
+_AUDIO_EXT = ("mp3", "wav", "m4a", "aac", "flac", "ogg")
+# 素材落点，按优先级。平台侧只要把文件放进来，管线就能自动接上。
+_ASSET_DIRS = ("", "assets", "music", "audio", "bgm", "素材", "音乐")
+
+
+def find_local_asset(workdir: str, kind: str = "music", ep: int = 1,
+                     track_key: str = "") -> str:
+    """在项目目录里找本地音乐/BGM 素材，找不到返回 ''。
+
+    认这些命名（kind=music）：
+        music_ep1.mp3 / music_ep01.mp3 / music.mp3 / <track_key>.mp3
+    kind=bgm 同理换 bgm_ 前缀。
+    """
+    if not workdir or not os.path.isdir(workdir):
+        return ""
+    names = []
+    for e in (str(ep), "%02d" % ep):
+        names.append("%s_ep%s" % (kind, e))
+    names.append(kind)
+    if track_key:
+        names.append(str(track_key))
+    for d in _ASSET_DIRS:
+        base = os.path.join(workdir, d) if d else workdir
+        for nm in names:
+            for ext in _AUDIO_EXT:
+                p = os.path.join(base, "%s.%s" % (nm, ext))
+                if os.path.isfile(p) and os.path.getsize(p) > 1024:
+                    return p
+    return ""
+
+
+def fit_local_asset(src: str, duration_s: float, out_path: str,
+                    fade_ms: int = 1200) -> Dict[str, Any]:
+    """把本地素材循环/裁切到目标时长，带淡入淡出避免接缝爆音。"""
+    if not src or not os.path.isfile(src):
+        return {"ok": False, "path": "", "backend": "local_file",
+                "error": "本地素材不存在: %s" % src}
+    if not FFMPEG:
+        return {"ok": False, "path": "", "backend": "local_file",
+                "error": "ffmpeg 不可用"}
+    dur = max(1.0, float(duration_s or 0))
+    fade = min(fade_ms / 1000.0, dur / 4.0)
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    # 素材常常就叫 music_ep1.mp3 / bgm_ep1.mp3，和输出路径完全同一条。
+    # ffmpeg 会直接拒绝 "same as Input"，所以必须走临时文件再替换。
+    tmp = out_path + ".tmp_fit.mp3"
+    cmd = [FFMPEG, "-y", "-v", "error", "-stream_loop", "-1", "-i", src,
+           "-t", "%.3f" % dur,
+           "-af", "afade=t=in:st=0:d=%.2f,afade=t=out:st=%.2f:d=%.2f"
+                  % (fade, max(0.0, dur - fade), fade),
+           "-c:a", "libmp3lame", "-q:a", "4", tmp]
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode != 0 or not os.path.isfile(tmp):
+        try:
+            if os.path.isfile(tmp):
+                os.remove(tmp)
+        except OSError:
+            pass
+        return {"ok": False, "path": "", "backend": "local_file",
+                "error": "ffmpeg 失败: %s" % (r.stderr or "")[:300]}
+    os.replace(tmp, out_path)
+    return {"ok": True, "path": out_path, "backend": "local_file",
+            "duration_ms": int(dur * 1000), "source": src, "error": ""}
+
+
 def generate(spec_or_key, backend: str = "auto", out_path: Optional[str] = None,
              matrix=None, duration_s: int = 30, mood_hint: str = "",
-             poll_timeout: int = 600, tmp_dir: str = "music_out") -> Dict[str, Any]:
+             poll_timeout: int = 600, tmp_dir: str = "music_out",
+             local_src: str = "") -> Dict[str, Any]:
     """生成音乐。spec_or_key 可以是 build_music_spec 的结果或 track_key 字符串。
 
     backend=auto 时：有 SUNO 配置走 suno_api，否则退到 spec_only（只给规格）。
@@ -308,7 +383,22 @@ def generate(spec_or_key, backend: str = "auto", out_path: Optional[str] = None,
                          mood_hint=mood_hint)
 
     if backend in ("", "auto"):
-        backend = "suno_api" if _provider_available("suno_api") else "spec_only"
+        if local_src:
+            backend = "local_file"
+        elif _provider_available("suno_api"):
+            backend = "suno_api"
+        else:
+            backend = "spec_only"
+
+    if backend == "local_file":
+        _dur = float(spec.get("duration_s") or duration_s or 30)
+        if not out_path:
+            return {"ok": False, "path": "", "backend": "local_file", "spec": spec,
+                    "duration_ms": 0, "error": "local_file 模式必须给 out_path"}
+        res = fit_local_asset(local_src, _dur, out_path)
+        res["spec"] = spec
+        res.setdefault("duration_ms", 0)
+        return res
 
     if backend == "spec_only":
         return {"ok": True, "path": "", "backend": "spec_only",

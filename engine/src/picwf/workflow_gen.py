@@ -293,7 +293,9 @@ NODE_DATAFLOW = [
      "outputs": ["assembled_video"], "depends_on": ["fx_enhance", "music", "voice", "bgm"]},
     {"id": "bgm_audio", "name": "⑦ BGM 音频", "stage": 7,
      "inputs": ["assembled_video"], "outputs": ["bgm_track"],
-     "depends_on": ["post_assemble"]},
+     # 必须依赖 bgm：本环节复用的是 bgm 环节真生成的音频文件，
+     # 不声明依赖就拿不到 up["bgm"]，会误报「BGM 未生成」。
+     "depends_on": ["post_assemble", "bgm"]},
     {"id": "package_publish", "name": "⑧ 包装发布", "stage": 8,
      "inputs": ["assembled_video", "bgm_track"], "outputs": ["final_video"],
      "depends_on": ["post_assemble", "bgm_audio"]},

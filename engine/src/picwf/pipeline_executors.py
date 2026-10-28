@@ -151,6 +151,14 @@ def make_executors(workflow: Dict[str, Any],
         chosen_model = best.get("model_id") or "wan13b_gguf_q4_offload_480"
         # 云端 API 优先：有 API Key 时强制使用 cloud_kling（T0/T1 无 GPU 也能出片）
         _cloud_force = workflow.get("cloud_model_override")
+        if not _cloud_force and _HAS_CLOUD_API:
+            # 白皇 22:05：引擎侧视频优先 agnes 自家模型，flash 默认（免费档）。
+            # 不写死 pro——pro 只有调用方显式传 cloud_model_override 才用。
+            try:
+                if has_key("agnes_video"):
+                    _cloud_force = "agnes"
+            except Exception:
+                pass
         if _cloud_force and _HAS_CLOUD_API and has_key(_cloud_force):
             chosen_model = f"cloud_{_cloud_force}"
         executed = []
@@ -161,7 +169,27 @@ def make_executors(workflow: Dict[str, Any],
             if _is_cloud and _HAS_CLOUD_API:
                 _svc = chosen_model.replace("cloud_", "")
                 from .cloud_api import wan, kling, seedream
-                if _svc == "kling":
+                if _svc in ("agnes", "agnes_video"):
+                    from .cloud_api import agnes_video
+                    clip_path = f"{workdir}/_clip_{i+1:03d}.mp4"
+                    cloud_res = agnes_video.run_shot(
+                        sh.get("prompt", ""),
+                        out_path=clip_path,
+                        # flash 是默认免费档；pro 只能由 cloud_model_override 点名
+                        model=(agnes_video.MODEL_PRO
+                               if workflow.get("video_model_tier") == "pro"
+                               else agnes_video.MODEL_FLASH),
+                        seconds=int(min(12, max(4, round(float(sh.get("est_s") or 5))))),
+                    )
+                    out = {"ok": cloud_res.get("ok"),
+                           "backend": f"cloud_agnes({cloud_res.get('model','')})",
+                           # 本地文件路径：下游剪辑靠它，绝不能只留 URL
+                           "path": cloud_res.get("path", ""),
+                           "video_url": cloud_res.get("video_url"),
+                           "mock": False,
+                           "peak_vram_gb": 0,
+                           "error": cloud_res.get("error", "")}
+                elif _svc == "kling":
                     cloud_res = kling.run_shot(sh.get("prompt", ""), duration=5)
                     out = {"ok": cloud_res.get("ok"), "backend": chosen_model,
                            "video_url": cloud_res.get("video_url"), "peak_vram_gb": 0}
@@ -201,6 +229,8 @@ def make_executors(workflow: Dict[str, Any],
                 "path": out.get("path", "") or out.get("image_path", "")
                         or out.get("video_path", ""),
                 "mock": bool(out.get("mock")),
+                # 分镜时长：合成环节要靠它把片段拉到与配音一致的时长
+                "est_s": float(sh.get("est_s") or 5.4),
                 "peak_vram": out.get("peak_vram_gb"),
                 "backend": chosen_model,
                 "efficiency_score": best.get("score"),
@@ -276,18 +306,24 @@ def make_executors(workflow: Dict[str, Any],
 
     def _music_track_exec(up: Dict[str, Any]) -> Dict[str, Any]:
         """真·音乐轨：从 matrix 风格表构造规格并生成。"""
-        from .music_gen import build_music_spec, generate
+        from .music_gen import build_music_spec, generate, find_local_asset
         dur = 0.0
         try:
             from .voice_track_builder import total_duration
             dur = total_duration(up.get("script_struct", {}).get("shots", []), 30.0)
         except Exception:
             dur = 30.0
-        spec = build_music_spec(music_track or "M28_anime_jpop",
-                                duration_s=int(max(10, dur)))
+        key = music_track or "M28_anime_jpop"
+        spec = build_music_spec(key, duration_s=int(max(10, dur)))
+        out_mp3 = f"{workdir}/music_ep{ep}.mp3"
+        # 本地素材优先（白皇 2026-10-28：无 SUNO key，素材由平台侧产出落盘）
+        src = find_local_asset(workdir, "music", ep, key)
         gen = generate(spec, backend=workflow.get("music_backend", "auto"),
-                       out_path=f"{workdir}/music_ep{ep}.mp3")
+                       out_path=out_mp3, local_src=src)
         return {"music_track": music_track,
+                "music_local_src": src,
+                "music_pending_asset": not bool(src) and not gen.get("ok"),
+                "music_need_api": not bool(src),
                 "music_path": gen.get("path", ""),
                 "music_ok": bool(gen.get("ok")),
                 "music_backend": gen.get("backend", ""),
@@ -299,7 +335,7 @@ def make_executors(workflow: Dict[str, Any],
 
     def _bgm_track_exec(up: Dict[str, Any]) -> Dict[str, Any]:
         """真·背景轨：B 类曲目，比音乐轨更低调。"""
-        from .music_gen import build_music_spec, generate
+        from .music_gen import build_music_spec, generate, find_local_asset
         dur = 0.0
         try:
             from .voice_track_builder import total_duration
@@ -308,9 +344,14 @@ def make_executors(workflow: Dict[str, Any],
             dur = 30.0
         key = bgm_track or "B08_suspense_cold"
         spec = build_music_spec(key, duration_s=int(max(10, dur)))
+        out_mp3 = f"{workdir}/bgm_ep{ep}.mp3"
+        src = find_local_asset(workdir, "bgm", ep, key)
         gen = generate(spec, backend=workflow.get("music_backend", "auto"),
-                       out_path=f"{workdir}/bgm_ep{ep}.mp3")
+                       out_path=out_mp3, local_src=src)
         return {"bgm_track": key, "bgm_path": gen.get("path", ""),
+                "bgm_local_src": src,
+                "bgm_pending_asset": not bool(src) and not gen.get("ok"),
+                "bgm_need_api": not bool(src),
                 "bgm_ok": bool(gen.get("ok")),
                 "bgm_backend": gen.get("backend", ""),
                 "bgm_duration_ms": gen.get("duration_ms", 0),
@@ -363,9 +404,12 @@ def make_executors(workflow: Dict[str, Any],
         if not _audio:
             _audio = [p for p in (voice_path, music_path, bgm_path) if p]
 
+        _durs = [float(c.get("est_s") or 5.4)
+                 for c in clips_raw if isinstance(c, dict)] or None
         asm_res = _asm(clips_paths or [""]*max(len(clips_raw),1),
                         audio_tracks=_audio or None,
-                        out_path=assembled_path, workdir=workdir)
+                        out_path=assembled_path, workdir=workdir,
+                        durations=_durs)
         return {"assembled_video": assembled_path,
                 "clip_count": asm_res.get("clip_count", len(clips_raw)),
                 "music": music_track, "voice": voice_track, "bgm": bgm_track,

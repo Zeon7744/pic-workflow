@@ -63,10 +63,33 @@ def _probe_duration(path: str) -> float:
         return 0.0
 
 
+def _normalize_clip(src: str, dst: str, dur: float,
+                    w: int, h: int, fps: int = 30) -> bool:
+    """把单个 clip 规整成「时长=dur、尺寸=w×h」的标准片段。
+
+    视频生成出来的片段时长几乎不会刚好等于分镜 est_s（mock 2.02s vs 分镜 5.4s），
+    不对齐的话成片和配音时间轴会整体错位，等于废片。
+    - 长了：-t 裁掉
+    - 短了：tpad 定格尾帧补齐
+    """
+    if dur <= 0:
+        dur = 1.0
+    vf = (f"scale={w}:{h}:force_original_aspect_ratio=decrease,"
+          f"pad={w}:{h}:(ow-iw)/2:(oh-ih)/2,setsar=1,fps={fps},"
+          f"tpad=stop_mode=clone:stop_duration={dur:.3f}")
+    r = subprocess.run(
+        ["ffmpeg", "-y", "-v", "error", "-i", src, "-t", "%.3f" % dur,
+         "-vf", vf, "-an", "-c:v", "libx264", "-preset", "veryfast",
+         "-pix_fmt", "yuv420p", dst],
+        capture_output=True, timeout=180)
+    return r.returncode == 0 and os.path.exists(dst) and os.path.getsize(dst) > 0
+
+
 def assemble(clips: List[str], audio_tracks: Optional[List[str]] = None,
              out_path: str = "", workdir: str = "",
              colors: Optional[List[str]] = None,
-             shot_labels: Optional[List[str]] = None) -> Dict[str, Any]:
+             shot_labels: Optional[List[str]] = None,
+             durations: Optional[List[float]] = None) -> Dict[str, Any]:
     """真·ffmpeg 合成：占位/真 clips + 音频轨 → 可播放成片 mp4。
 
     clips: 视频片段路径列表；若路径不存在则生成占位 clip（mock 模式）。
@@ -111,6 +134,26 @@ def assemble(clips: List[str], audio_tracks: Optional[List[str]] = None,
         return {"ok": False, "assembled": False, "assembled_video": "", "ffmpeg": True, "out": out_path,
                 "clip_count": 0, "mode": "clip_gen_failed"}
 
+    # 1.5) 按分镜时长规整每个片段（视频与配音时间轴必须一致）
+    if durations and len(durations) == len(usable):
+        try:
+            probe = subprocess.run(
+                ["ffprobe", "-v", "error", "-select_streams", "v:0",
+                 "-show_entries", "stream=width,height", "-of", "csv=p=0",
+                 usable[0]], capture_output=True, text=True, timeout=30)
+            wh = [int(x) for x in probe.stdout.strip().split(",") if x.strip()]
+            w, h = (wh[0], wh[1]) if len(wh) == 2 else (720, 1280)
+        except Exception:
+            w, h = 720, 1280
+        normed: List[str] = []
+        for i, (c, d) in enumerate(zip(usable, durations)):
+            dst = os.path.join(workdir, f"_norm_{i+1:03d}.mp4")
+            if _normalize_clip(c, dst, float(d), w, h):
+                normed.append(dst)
+            else:
+                normed.append(c)  # 规整失败保留原片，至少不丢镜头
+        usable = normed
+
     # 2) 拼接视频
     concat_list = os.path.join(workdir, "_concat.txt")
     with open(concat_list, "w", encoding="utf-8") as f:
@@ -143,16 +186,18 @@ def assemble(clips: List[str], audio_tracks: Optional[List[str]] = None,
             audio_in.append(ph_audio)
 
     if audio_in:
-        # 视频 + 第一条音频轨混音（多轨可后续扩展 amix）
+        # 必须显式 -map：concat 出来的视频自带一条静音音轨，
+        # 不给 -map 时 ffmpeg 默认选它，成片就是全静音（实测 -91dB）。
         r = subprocess.run(
             ["ffmpeg", "-y", "-i", concat_video, "-i", audio_in[0],
+             "-map", "0:v:0", "-map", "1:a:0",
              "-c:v", "copy", "-c:a", "aac", "-shortest", out_path],
             capture_output=True, timeout=60)
         if r.returncode != 0 or not os.path.exists(out_path):
             # 混音失败回退仅视频
             r = subprocess.run(
-                ["ffmpeg", "-y", "-i", concat_video, "-c:v", "copy",
-                 "-c:a", "aac", out_path], capture_output=True, timeout=60)
+                ["ffmpeg", "-y", "-i", concat_video, "-map", "0:v:0",
+                 "-an", "-c:v", "copy", out_path], capture_output=True, timeout=60)
 
     okb = bool(os.path.exists(out_path) and os.path.getsize(out_path) > 0)
     return {"ok": okb,
