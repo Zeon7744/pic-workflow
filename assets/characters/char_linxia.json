@@ -1,21 +1,26 @@
 {
   "id": "char_linxia",
   "name": "林夏",
-  "type": "female",
+  "gender": "female",
   "age": 27,
-  "role": "主角，27岁，助理",
+  "role": "主角，助理",
   "desc": "黑色中分微卷，简约都市通勤装，气质冷峻克制",
-  "ref_image": "/Coze/Drive/简化画廊/_out/ep1_bgm/_charref_林夏.png",
-  "three_view": "/Coze/Drive/简化画廊/_out/ep1_bgm/char_ref_主角_3view.png",
-  "voice_id": "female-yujie",
-  "source": "_out/ep1_bgm/pipeline_report.json → script_struct.characters",
+  "three_view": "char_ref_主角_3view.png",
+  "charref": "_charref_林夏.png",
+  "charref_json": "/Coze/Drive/简化画廊/_out/ep1_bgm/_charref_林夏.json",
+  "tts_voice": "female-yujie",
+  "episodes": [
+    1
+  ],
   "version": 1,
-  "created_at": "2026-10-30T01:24:07.856254",
+  "created_at": "2026-10-30T01:26:21.037425",
   "history": [
     {
       "version": 1,
-      "action": "红剑据 pipeline_report 重建（原沈临/苏晚为示例角色，已废弃）",
-      "timestamp": "2026-10-30T01:24:07.856254"
+      "action": "import",
+      "timestamp": "2026-10-30T01:26:21.037425",
+      "note": "从 ep1 pipeline_report script_struct.characters 迁入"
     }
-  ]
+  ],
+  "checksum": "5ab2ad7b3992a7d6e4b8673b2c6ccaa851b346f80cf1c3af35be463b192d11af"
 }

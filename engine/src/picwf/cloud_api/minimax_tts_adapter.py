@@ -57,10 +57,16 @@ VOICE_PRESET = {
     "default":  "male-qn-qingse",
 }
 
-# 项目角色 → 预设键（沈临/苏雪晴是当前两条主线角色）
+# 项目角色 → 预设键
+# ep1（助理反击）：林夏/周总/陈姐；历史：沈临/苏雪晴（MiniMax TTS 示范，已弃用）
 CHARACTER_PRESET = {
-    "沈临":   "male",
-    "苏雪晴": "female",
+    # ep1 真实角色（剧本角色 = 定妆图 = TTS 音色 三者统一）
+    "林夏":    "serious",        # female-yujie，27岁冷峻，御姐偏冷
+    "周总":    "male",          # male-qn-jingying，45岁城府深
+    "陈姐":    "serious",       # female-yujie，35岁疲惫但坚定
+    # 历史角色（保留，不删；新 ep 不再用）
+    "沈临":    "male",
+    "苏雪晴":  "female",
 }
 
 # emotion 白名单，非白名单值一律降级为 neutral（避免上游脏数据打挂请求）

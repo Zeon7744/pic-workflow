@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updated_at": "2026-10-30T01:24:07.856254",
+  "updated_at": "2026-10-30T01:26:52.137286",
   "episodes": {
     "1": [
       "shot_ep1_001",
@@ -73,5 +73,19 @@
   "deprecated": [
     "char_沈临",
     "char_苏晚"
-  ]
+  ],
+  "tts_voice_mapping": {
+    "char_linxia": {
+      "voice_id": "female-yujie",
+      "note": "27岁冷峻，御姐偏冷"
+    },
+    "char_zhouzong": {
+      "voice_id": "male-qn-jingying",
+      "note": "45岁城府深，精英需降速"
+    },
+    "char_chenjie": {
+      "voice_id": "female-yujie",
+      "note": "35岁疲惫但坚定"
+    }
+  }
 }

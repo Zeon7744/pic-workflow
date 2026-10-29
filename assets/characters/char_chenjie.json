@@ -1,21 +1,26 @@
 {
   "id": "char_chenjie",
   "name": "陈姐",
-  "type": "female",
+  "gender": "female",
   "age": 35,
-  "role": "配角，35岁，老员工",
+  "role": "配角，老员工",
   "desc": "朴素干练，眼神疲惫但坚定",
-  "ref_image": "/Coze/Drive/简化画廊/_out/ep1_bgm/_charref_陈姐.png",
   "three_view": null,
-  "voice_id": "female-yujie",
-  "source": "_out/ep1_bgm/pipeline_report.json → script_struct.characters",
+  "charref": "_charref_陈姐.png",
+  "charref_json": "/Coze/Drive/简化画廊/_out/ep1_bgm/_charref_陈姐.json",
+  "tts_voice": "female-yujie",
+  "episodes": [
+    1
+  ],
   "version": 1,
-  "created_at": "2026-10-30T01:24:07.856254",
+  "created_at": "2026-10-30T01:26:21.037425",
   "history": [
     {
       "version": 1,
-      "action": "红剑据 pipeline_report 重建（原沈临/苏晚为示例角色，已废弃）",
-      "timestamp": "2026-10-30T01:24:07.856254"
+      "action": "import",
+      "timestamp": "2026-10-30T01:26:21.037425",
+      "note": "从 ep1 pipeline_report script_struct.characters 迁入"
     }
-  ]
+  ],
+  "checksum": "ef7b1beaeb022307c0ee87798812bc549ede9a381cc17cd823a42156b5f66f88"
 }
