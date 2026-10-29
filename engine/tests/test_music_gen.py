@@ -296,3 +296,61 @@ def test_find_asset_by_keyword_no_keywords(tmp_path):
 
 def test_find_asset_by_keyword_bad_workdir():
     assert M.find_asset_by_keyword("/nonexistent/xyz", ["a"]) == ""
+
+# ---------------- 主题曲稳定命名 ----------------
+
+def _theme_env(tmp_path, monkeypatch):
+    """把检索根指到临时目录，避免读到真实项目里的资产。"""
+    monkeypatch.setenv("PICWF_ASSET_ROOTS", str(tmp_path))
+    monkeypatch.chdir(str(tmp_path))
+    return str(tmp_path)
+
+
+def test_theme_prefers_stable_name(tmp_path, monkeypatch):
+    base = _theme_env(tmp_path, monkeypatch)
+    _touch(os.path.join(base, "05_音频", "助理反击_主题曲_主用版.mp3"))
+    _touch(os.path.join(base, "05_音频", "助理反击_主题曲_主歌副歌版.mp3"))
+    hit = M.find_theme_song(base, "main")
+    assert hit.endswith("助理反击_主题曲_主用版.mp3"), hit
+
+
+def test_theme_falls_back_to_mother_version(tmp_path, monkeypatch):
+    """旧工程只有母版名时不能掉，要能兜到。"""
+    base = _theme_env(tmp_path, monkeypatch)
+    _touch(os.path.join(base, "05_音频", "助理反击_主题曲_主歌副歌版.mp3"))
+    hit = M.find_theme_song(base, "main")
+    assert hit.endswith("助理反击_主题曲_主歌副歌版.mp3"), hit
+
+
+def test_theme_end_uses_instrumental(tmp_path, monkeypatch):
+    base = _theme_env(tmp_path, monkeypatch)
+    _touch(os.path.join(base, "05_音频", "助理反击_主题曲_主用版.mp3"))
+    _touch(os.path.join(base, "05_音频", "助理反击_主题曲_片尾版.mp3"))
+    assert M.find_theme_song(base, "end").endswith("助理反击_主题曲_片尾版.mp3")
+
+
+def test_theme_unknown_kind_defaults_to_main(tmp_path, monkeypatch):
+    base = _theme_env(tmp_path, monkeypatch)
+    _touch(os.path.join(base, "05_音频", "助理反击_主题曲_主用版.mp3"))
+    assert M.find_theme_song(base, "whatever").endswith("主用版.mp3")
+
+
+def test_theme_ignores_preview_clips(tmp_path, monkeypatch):
+    """试听摘要/ 下是 10s 预览剪辑，已弃用，进管线会拿到片段。"""
+    base = _theme_env(tmp_path, monkeypatch)
+    _touch(os.path.join(base, "05_音频", "试听摘要",
+                        "助理反击_主题曲_主用版_preview.mp3"))
+    assert M.find_theme_song(base, "main") == ""
+
+
+def test_theme_found_from_nested_workdir(tmp_path, monkeypatch):
+    base = _theme_env(tmp_path, monkeypatch)
+    _touch(os.path.join(base, "05_音频", "助理反击_主题曲_主用版.mp3"))
+    sub = os.path.join(base, "_out", "ep1")
+    os.makedirs(sub, exist_ok=True)
+    assert M.find_theme_song(sub, "main").endswith("主用版.mp3")
+
+
+def test_theme_missing_returns_empty(tmp_path, monkeypatch):
+    base = _theme_env(tmp_path, monkeypatch)
+    assert M.find_theme_song(base, "main") == ""

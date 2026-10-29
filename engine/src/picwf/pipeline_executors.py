@@ -707,10 +707,18 @@ def make_executors(workflow: Dict[str, Any],
                 import shutil; shutil.copyfile(assembled, final_path)
             except Exception:
                 final_path = assembled
+        # 主题曲只做交付附件，不进混音：它带人声，铺在底上会和配音打架。
+        # 片头/片尾要不要加、加多长，由白皇定，这里只保证资产定位稳定。
+        from .music_gen import find_theme_song
+        theme_main = find_theme_song(workdir, "main")
+        theme_end = find_theme_song(workdir, "end")
         return {"final_video": final_path,
                 "bgm_track": bgm,
                 "publish_ready": bool(pa.get("assembled")) and bool(final_path),
-                "duration_s": pa.get("duration_s", 0)}
+                "duration_s": pa.get("duration_s", 0),
+                "theme_main": theme_main,
+                "theme_end": theme_end,
+                "theme_ready": bool(theme_main and theme_end)}
 
     def _fx_enhance(up: Dict[str, Any]) -> Dict[str, Any]:
         clips = up.get("video_shot", {}).get("video_clips", [])

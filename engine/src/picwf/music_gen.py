@@ -398,6 +398,56 @@ def find_asset_by_keyword(workdir: str, keywords, subdirs=None,
     return sorted(hits)[0][1]
 
 
+# ---------------------------------------------------------------------------
+# 主题曲（红剑 2026-10-29 定版）
+# 管线只认「主用版 / 片尾版」两个稳定名；原始母版名留作向后兼容兜底。
+# 只在 05_音频/ 根找：试听摘要/ 下是弃用的 _preview 剪辑，进管线会拿到 10s 片段。
+# ---------------------------------------------------------------------------
+THEME_NAMES = {
+    "main": ("助理反击_主题曲_主用版", "助理反击_主题曲_主歌副歌版"),
+    "end": ("助理反击_主题曲_片尾版", "助理反击_主题曲_纯器乐版"),
+}
+THEME_DIRS = ("05_音频",)
+
+
+def find_theme_song(workdir: str, kind: str = "main", up_levels: int = 3) -> str:
+    """按稳定命名找主题曲，返回路径，找不到返回 ''。
+
+    kind: main=主用版（片头/宣传统一用这条）、end=片尾版（片尾/合集/长版）
+    母版名（主歌副歌版/纯器乐版）作为 fallback，保证旧工程不掉。
+    """
+    names = THEME_NAMES.get(kind) or THEME_NAMES["main"]
+    bases = []
+    seen = set()
+
+    def _add(base):
+        if base not in seen and os.path.isdir(base):
+            seen.add(base)
+            bases.append(base)
+
+    cur = os.path.abspath(workdir) if workdir else ""
+    for _ in range(up_levels + 1):
+        if not cur:
+            break
+        for d in THEME_DIRS:
+            _add(os.path.join(cur, d))
+        parent = os.path.dirname(cur)
+        if parent == cur:
+            break
+        cur = parent
+    for root in _extra_asset_roots():
+        for d in THEME_DIRS:
+            _add(os.path.join(root, d))
+
+    for nm in names:
+        for base in bases:
+            for ext in _AUDIO_EXT:
+                p = os.path.join(base, "%s.%s" % (nm, ext))
+                if os.path.isfile(p) and os.path.getsize(p) > 1024:
+                    return p
+    return ""
+
+
 def find_local_asset(workdir: str, kind: str = "music", ep: int = 1,
                      track_key: str = "") -> str:
     """在项目目录里找本地音乐/BGM 素材，找不到返回 ''。
