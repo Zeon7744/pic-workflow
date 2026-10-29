@@ -306,7 +306,96 @@ def _do_suno(spec: Dict[str, Any], out_path: str, poll_timeout: int = 600) -> Di
 # ---------------------------------------------------------------------------
 _AUDIO_EXT = ("mp3", "wav", "m4a", "aac", "flac", "ogg")
 # 素材落点，按优先级。平台侧只要把文件放进来，管线就能自动接上。
-_ASSET_DIRS = ("", "assets", "music", "audio", "bgm", "素材", "音乐")
+_ASSET_DIRS = ("", "assets", "music", "audio", "bgm", "素材", "音乐",
+               # 红剑交付的资产目录：命名形如 bgm_悬疑压迫.mp3 / 特效音/sfx_冲击_打脸.mp3
+               "05_音频", "05_音频/bgm", "05_音频/特效音", "05_音频/音乐")
+
+
+_DELIVERY_DIRS = ("05_音频", "05_音频/bgm", "05_音频/特效音", "05_音频/音乐")
+
+
+def _extra_asset_roots():
+    """交付目录可能和 workdir 不在同一棵树（资产通常落项目根的 05_音频/）。
+
+    优先级：PICWF_ASSET_ROOTS（冒号分隔，显式指定）> 当前工作目录。
+    不硬编码项目路径：换项目/换机器时会读到别的工程的素材。
+    """
+    roots = []
+    env = os.environ.get("PICWF_ASSET_ROOTS", "")
+    for r in env.split(os.pathsep):
+        if r.strip():
+            roots.append(r.strip())
+    roots.append(os.getcwd())
+    out = []
+    for r in roots:
+        if os.path.isdir(r) and r not in out:
+            out.append(r)
+    return out
+
+
+def find_asset_by_keyword(workdir: str, keywords, subdirs=None,
+                          min_size=1024, up_levels=3) -> str:
+    """按关键词模糊找本地音频素材，返回文件名最短的匹配。
+
+    平台侧命名不固定（bgm_悬疑压迫.mp3 / BGM-悬疑-压迫.mp3 都出现过），
+    精确名匹配不到时用这个兜底：文件名同时含全部关键词即命中。
+    交付目录 05_音频/ 常在 workdir 的上级（项目根），所以会向上找几层。
+    """
+    if not workdir:
+        return ""
+    kws = [str(k) for k in (keywords or []) if k]
+    if not kws:
+        return ""
+    bases = []
+    seen = set()
+    cur = os.path.abspath(workdir)
+    for _ in range(up_levels + 1):
+        for d in (subdirs if subdirs is not None else _ASSET_DIRS):
+            p = os.path.join(cur, d) if d else cur
+            if p not in seen and os.path.isdir(p):
+                seen.add(p)
+                bases.append(p)
+        for d in _DELIVERY_DIRS:
+            p = os.path.join(cur, d)
+            if p not in seen and os.path.isdir(p):
+                seen.add(p)
+                bases.append(p)
+        parent = os.path.dirname(cur)
+        if parent == cur:
+            break
+        cur = parent
+    # workdir 的上级树里没有，再看显式指定的交付根
+    for root in _extra_asset_roots():
+        if root in seen:
+            continue
+        seen.add(root)
+        for d in ("",) + _DELIVERY_DIRS:
+            p = os.path.join(root, d) if d else root
+            if p not in seen and os.path.isdir(p):
+                seen.add(p)
+                bases.append(p)
+    hits = []
+    for base in bases:
+        try:
+            files = os.listdir(base)
+        except OSError:
+            continue
+        for fn in files:
+            stem, ext = os.path.splitext(fn)
+            if ext.lower().lstrip(".") not in _AUDIO_EXT:
+                continue
+            if not all(k in stem for k in kws):
+                continue
+            p = os.path.join(base, fn)
+            try:
+                if os.path.getsize(p) <= min_size:
+                    continue
+            except OSError:
+                continue
+            hits.append((len(fn), p))
+    if not hits:
+        return ""
+    return sorted(hits)[0][1]
 
 
 def find_local_asset(workdir: str, kind: str = "music", ep: int = 1,

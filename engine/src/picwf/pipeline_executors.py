@@ -513,29 +513,93 @@ def make_executors(workflow: Dict[str, Any],
                 "music_error": gen.get("error", "")}
 
     def _bgm_track_exec(up: Dict[str, Any]) -> Dict[str, Any]:
-        """真·背景轨：B 类曲目，比音乐轨更低调。"""
-        from .music_gen import build_music_spec, generate, find_local_asset
-        dur = 0.0
+        """背景轨：场景级 BGM 床 + SFX 轨。
+
+        为什么不是一首铺到底：短剧一集情绪是分段走的（施压 → 隐忍 → 反转），
+        单曲会让反转毫无冲击力。这里按分镜内容切段换曲，并在段落切换点插音效。
+        """
+        from .music_gen import (build_music_spec, generate, find_local_asset,
+                                find_asset_by_keyword)
+        from . import audio_scene_mix as _asmix
+
+        shots = up.get("script_struct", {}).get("shots", []) or []
         try:
             from .voice_track_builder import total_duration
-            dur = total_duration(up.get("script_struct", {}).get("shots", []), 30.0)
+            dur = total_duration(shots, 30.0)
         except Exception:
             dur = 30.0
+        total_s = float(max(10.0, dur))
         key = bgm_track or "B08_suspense_cold"
-        spec = build_music_spec(key, duration_s=int(max(10, dur)))
+        spec = build_music_spec(key, duration_s=int(total_s))
+
+        # ---- 单曲铺底（分段素材缺失时的兜底）----
         out_mp3 = f"{workdir}/bgm_ep{ep}.mp3"
         src = find_local_asset(workdir, "bgm", ep, key)
         gen = generate(spec, backend=workflow.get("music_backend", "auto"),
                        out_path=out_mp3, local_src=src)
+
+        # ---- 场景级 BGM 床 ----
+        _BGM_KWS = {"悬疑压迫": ("悬疑", "压迫"),
+                    "热血逆袭": ("热血", "逆袭"),
+                    "情感铺垫": ("情感", "铺垫")}
+        asset_map = {}
+        for label, kws in _BGM_KWS.items():
+            hit = find_asset_by_keyword(workdir, kws)
+            if hit:
+                asset_map[label] = hit
+        segments = _asmix.auto_segments(shots, asset_map, total_s) if asset_map else []
+        bed_path, bed_res = "", {}
+        if segments:
+            cand = f"{workdir}/bgm_bed_ep{ep}.m4a"
+            bed_res = _asmix.build_scene_bed(
+                segments, total_s, cand, f"{workdir}/_bgmbed")
+            if bed_res.get("ok"):
+                bed_path = bed_res.get("path", "")
+
+        # ---- SFX 轨 ----
+        _SFX_KWS = {"转场": ("转场",), "冲击": ("冲击", "打脸"),
+                    "压抑": ("情绪", "压抑")}
+        sfx_map = {}
+        for label, kws in _SFX_KWS.items():
+            hit = find_asset_by_keyword(workdir, kws)
+            if hit:
+                sfx_map[label] = hit
+        cues = _asmix.auto_cues(shots, segments, sfx_map) if sfx_map else []
+        sfx_path, sfx_res = "", {}
+        if cues:
+            cand = f"{workdir}/sfx_ep{ep}.m4a"
+            sfx_res = _asmix.build_sfx_track(cues, total_s, cand, f"{workdir}/_sfx")
+            if sfx_res.get("ok"):
+                sfx_path = sfx_res.get("path", "")
+
         return {"bgm_track": key, "bgm_path": gen.get("path", ""),
                 "bgm_local_src": src,
                 "bgm_pending_asset": not bool(src) and not gen.get("ok"),
                 "bgm_need_api": not bool(src),
-                "bgm_ok": bool(gen.get("ok")),
+                # spec_only 只给了风格规格、没落文件，不能算 ok
+                "bgm_ok": bool(gen.get("ok")) and bool(gen.get("path")),
                 "bgm_backend": gen.get("backend", ""),
                 "bgm_duration_ms": gen.get("duration_ms", 0),
                 "bgm_style_zh": spec.get("style_zh", ""),
-                "bgm_spec": spec, "bgm_error": gen.get("error", "")}
+                "bgm_spec": spec, "bgm_error": gen.get("error", ""),
+                # 场景级分段床（优先于单曲被后期采用）
+                "bgm_bed_path": bed_path,
+                "bgm_bed_ok": bool(bed_path),
+                "bgm_bed_segments": [{"label": x.get("label"),
+                                      "start_s": round(x.get("start_s"), 2),
+                                      "end_s": round(x.get("end_s"), 2)}
+                                     for x in segments],
+                "bgm_bed_assets": asset_map,
+                "bgm_bed_error": bed_res.get("error", ""),
+                # 音效轨
+                "sfx_track_path": sfx_path,
+                "sfx_ok": bool(sfx_path),
+                "sfx_cues": [{"at_s": round(float(c.get("at_s") or 0), 2),
+                              "gain_db": c.get("gain_db"),
+                              "file": os.path.basename(c.get("file") or "")}
+                             for c in cues],
+                "sfx_assets": sfx_map,
+                "sfx_error": sfx_res.get("error", "")}
 
     def _post_assemble(up: Dict[str, Any]) -> Dict[str, Any]:
         # fx_enhance 透传了 fx_clips（源头 video_shot 的 video_clips）
@@ -554,25 +618,31 @@ def make_executors(workflow: Dict[str, Any],
         b_up = up.get("bgm", {})
         voice_path = v_up.get("voice_path") or ""
         music_path = m_up.get("music_path") or ""
-        bgm_path = b_up.get("bgm_path") or ""
-        for _k, _p in (("voice", voice_path), ("music", music_path), ("bgm", bgm_path)):
+        # 优先用场景级分段床（悬疑→情感→悬疑→逆袭），没有才退回单曲铺底
+        bgm_path = b_up.get("bgm_bed_path") or b_up.get("bgm_path") or ""
+        sfx_path = b_up.get("sfx_track_path") or ""
+        for _k, _p in (("voice", voice_path), ("music", music_path),
+                       ("bgm", bgm_path), ("sfx", sfx_path)):
             if _p and not _os.path.exists(_p):
                 if _k == "voice":
                     voice_path = ""
                 elif _k == "music":
                     music_path = ""
+                elif _k == "sfx":
+                    sfx_path = ""
                 else:
                     bgm_path = ""
 
         mix_res: Dict[str, Any] = {}
         _audio = []
-        if voice_path or music_path or bgm_path:
+        if voice_path or music_path or bgm_path or sfx_path:
             try:
                 from .bgm_mix import mix as _mix
                 mixed = f"{workdir}/mixed_audio_ep{ep}.mp3"
                 mix_res = _mix(voice_path=voice_path or None,
                                bgm_path=bgm_path or None,
                                music_path=music_path or None,
+                               sfx_path=sfx_path or None,
                                out_path=mixed)
                 if mix_res.get("ok"):
                     _audio.append(mixed)
@@ -581,7 +651,7 @@ def make_executors(workflow: Dict[str, Any],
 
         # 混音失败/无音轨时退回原始单轨直挂
         if not _audio:
-            _audio = [p for p in (voice_path, music_path, bgm_path) if p]
+            _audio = [p for p in (voice_path, music_path, bgm_path, sfx_path) if p]
 
         _durs = [float(c.get("est_s") or 5.4)
                  for c in clips_raw if isinstance(c, dict)] or None
@@ -595,6 +665,10 @@ def make_executors(workflow: Dict[str, Any],
                 "duration_s": asm_res.get("duration_s", 0),
                 "audio_tracks_used": _audio,
                 "mix_ok": bool(mix_res.get("ok")),
+                "bgm_bed_used": bool(b_up.get("bgm_bed_path")) and bgm_path == b_up.get("bgm_bed_path"),
+                "sfx_used": bool(sfx_path),
+                "bgm_bed_segments": b_up.get("bgm_bed_segments", []),
+                "sfx_cues": b_up.get("sfx_cues", []),
                 "mix_duck_db": mix_res.get("duck_db"),
                 "mix_duration_ms": mix_res.get("duration_ms", 0),
                 "mix_error": mix_res.get("error", ""),
@@ -610,6 +684,12 @@ def make_executors(workflow: Dict[str, Any],
         return {"bgm_track": b.get("bgm_track", bgm_track),
                 "bgm_path": path,
                 "bgm_ok": exists,
+                "bgm_bed_path": b.get("bgm_bed_path", ""),
+                "bgm_bed_ok": bool(b.get("bgm_bed_path")),
+                "bgm_bed_segments": b.get("bgm_bed_segments", []),
+                "sfx_track_path": b.get("sfx_track_path", ""),
+                "sfx_ok": bool(b.get("sfx_track_path")),
+                "sfx_cues": b.get("sfx_cues", []),
                 "bgm_backend": b.get("bgm_backend", ""),
                 "bgm_style_zh": b.get("bgm_style_zh", ""),
                 "note": "" if exists else "BGM 未实际生成（无可用后端），仅给出曲目建议"}

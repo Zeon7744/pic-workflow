@@ -129,7 +129,9 @@ def _delivery_readiness(res: Dict[str, Any]) -> Dict[str, Any]:
     b_art = artifacts.get("bgm", {}) or {}
     voice_path = v_art.get("voice_path", "") or ""
     music_path = m_art.get("music_path", "") or ""
-    bgm_path = b_art.get("bgm_path", "") or ""
+    # 优先认场景级分段床：它才是本集实际铺的那条 BGM
+    bgm_path = b_art.get("bgm_bed_path", "") or b_art.get("bgm_path", "") or ""
+    sfx_path = b_art.get("sfx_track_path", "") or ""
     # 只有 dataflow 里存在的环节才要求（安静版可裁掉音频轨）
     wants_voice = bool(v_art)
     wants_music = bool(m_art) or bool(b_art)
@@ -149,6 +151,9 @@ def _delivery_readiness(res: Dict[str, Any]) -> Dict[str, Any]:
         "voice_track_present": bool(voice_path and os.path.exists(voice_path)),
         "music_track_present": bool(music_path and os.path.exists(music_path)),
         "bgm_track_present": bool(bgm_path and os.path.exists(bgm_path)),
+        "bgm_bed_present": bool(b_art.get("bgm_bed_path")
+                                and os.path.exists(b_art.get("bgm_bed_path"))),
+        "sfx_track_present": bool(sfx_path and os.path.exists(sfx_path)),
         "audio_mixed": bool(post.get("mix_ok")),
     }
     gaps = []
@@ -201,7 +206,11 @@ def _delivery_readiness(res: Dict[str, Any]) -> Dict[str, Any]:
         "gaps": gaps,
         "stats": {"clips_real": real_clips, "clips_mock": mock_clips,
                   "voice_lines": v_art.get("voice_line_count", 0),
-                  "voice_synthesized": v_art.get("voice_synthesized", 0)},
+                  "voice_synthesized": v_art.get("voice_synthesized", 0),
+                  "bgm_segments": b_art.get("bgm_bed_segments", []) or [],
+                  "sfx_cues": b_art.get("sfx_cues", []) or [],
+                  "bgm_bed_ok": checks["bgm_bed_present"],
+                  "sfx_ok": checks["sfx_track_present"]},
     }
 
 
@@ -303,6 +312,17 @@ def main(argv=None) -> int:
             print(f"  内容统计: 真实镜头 {st.get('clips_real', 0)}/"
                   f"{st.get('clips_real', 0) + st.get('clips_mock', 0)}，"
                   f"台词 {st.get('voice_synthesized', 0)}/{st.get('voice_lines', 0)} 句已配音")
+            _segs = st.get("bgm_segments") or []
+            if _segs:
+                _desc = " → ".join("%s(%.1f-%.1fs)" % (x.get("label"),
+                                                       float(x.get("start_s") or 0),
+                                                       float(x.get("end_s") or 0))
+                                   for x in _segs)
+                print(f"  BGM 分段: {_desc}")
+            if st.get("sfx_cues"):
+                _c = "、".join("%.1fs" % float(x.get("at_s") or 0)
+                              for x in st["sfx_cues"])
+                print(f"  音效点位: {len(st['sfx_cues'])} 个（{_c}）")
         if dr.get("gaps"):
             print("  缺口:")
             for g in dr["gaps"]:

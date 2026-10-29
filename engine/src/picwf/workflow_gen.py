@@ -309,7 +309,9 @@ NODE_DATAFLOW = [
      "clip": True},
     {"id": "bgm", "name": "B背景轨", "stage": 6,
      "inputs": ["music_track", "shots"], "outputs": ["bgm_track"],
-     "depends_on": ["music"], "clip": True},
+     # 必须依赖 script_struct：场景级 BGM 分段和 SFX 对齐都按分镜 est_s 走，
+     # 只声明 music 拿不到 up["script_struct"]，分段会静默变空。
+     "depends_on": ["music", "script_struct"], "clip": True},
 ]
 
 

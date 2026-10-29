@@ -186,13 +186,31 @@ def assemble(clips: List[str], audio_tracks: Optional[List[str]] = None,
             audio_in.append(ph_audio)
 
     if audio_in:
+        # 多轨必须先混成一条再上视频：之前只取 audio_in[0]，
+        # 配音/BGM/SFX 三条轨会静默丢掉两条，成片只剩人声。
+        mixed = audio_in[0]
+        if len(audio_in) > 1:
+            mixed = os.path.join(workdir, "_mix_all.m4a")
+            args = ["ffmpeg", "-y", "-v", "error"]
+            for a in audio_in:
+                args += ["-i", a]
+            chains = "".join(f"[{i}:a]" for i in range(len(audio_in)))
+            # normalize=0：保持各轨原始电平，不让人声被 BGM 拉到同一响度
+            args += ["-filter_complex",
+                     f"{chains}amix=inputs={len(audio_in)}:duration=longest"
+                     f":dropout_transition=0:normalize=0[m]",
+                     "-map", "[m]", "-c:a", "aac", "-b:a", "192k", mixed]
+            r = subprocess.run(args, capture_output=True, timeout=180)
+            if r.returncode != 0 or not os.path.exists(mixed):
+                mixed = audio_in[0]
+
         # 必须显式 -map：concat 出来的视频自带一条静音音轨，
         # 不给 -map 时 ffmpeg 默认选它，成片就是全静音（实测 -91dB）。
         r = subprocess.run(
-            ["ffmpeg", "-y", "-i", concat_video, "-i", audio_in[0],
+            ["ffmpeg", "-y", "-i", concat_video, "-i", mixed,
              "-map", "0:v:0", "-map", "1:a:0",
              "-c:v", "copy", "-c:a", "aac", "-shortest", out_path],
-            capture_output=True, timeout=60)
+            capture_output=True, timeout=120)
         if r.returncode != 0 or not os.path.exists(out_path):
             # 混音失败回退仅视频
             r = subprocess.run(

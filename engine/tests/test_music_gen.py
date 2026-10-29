@@ -5,9 +5,12 @@ import os
 import sys
 import tempfile
 
+import pytest
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from picwf import music_gen as mg
+from picwf import music_gen as M
 
 
 def test_build_spec_m_track():
@@ -223,3 +226,73 @@ def test_generate_local_file_backend(tmp_path):
                  local_src=src)
     assert r["backend"] == "local_file", "有本地素材时 auto 应走 local_file"
     assert r["ok"] and r["path"]
+
+
+# ---------------- 本地素材查找（含交付目录 05_音频/） ----------------
+
+def _touch(path, size=4096):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "wb") as f:
+        f.write(b"\0" * size)
+    return path
+
+
+def test_find_local_asset_exact_name(tmp_path):
+    _touch(os.path.join(str(tmp_path), "music", "music_ep1.mp3"))
+    hit = M.find_local_asset(str(tmp_path), "music", 1)
+    assert hit.endswith("music_ep1.mp3")
+
+
+def test_find_local_asset_ignores_tiny_file(tmp_path):
+    _touch(os.path.join(str(tmp_path), "music", "music_ep1.mp3"), size=10)
+    assert M.find_local_asset(str(tmp_path), "music", 1) == ""
+
+
+def test_find_asset_by_keyword_basic(tmp_path):
+    p = _touch(os.path.join(str(tmp_path), "bgm_悬疑压迫.mp3"))
+    assert M.find_asset_by_keyword(str(tmp_path), ["悬疑", "压迫"]) == p
+
+
+def test_find_asset_by_keyword_requires_all_keywords(tmp_path):
+    _touch(os.path.join(str(tmp_path), "bgm_悬疑压迫.mp3"))
+    assert M.find_asset_by_keyword(str(tmp_path), ["悬疑", "逆袭"]) == ""
+
+
+def test_find_asset_by_keyword_prefers_shortest_name(tmp_path):
+    _touch(os.path.join(str(tmp_path), "bgm_悬疑压迫_加长版_最终_混音v3.mp3"))
+    short = _touch(os.path.join(str(tmp_path), "bgm_悬疑压迫.mp3"))
+    assert M.find_asset_by_keyword(str(tmp_path), ["悬疑"]) == short
+
+
+def test_find_asset_by_keyword_scans_delivery_dirs(tmp_path):
+    """红剑把资产落 05_音频/ 及 05_音频/特效音/，这两个目录必须在检索路径里。"""
+    base = str(tmp_path)
+    a = _touch(os.path.join(base, "05_音频", "bgm_热血逆袭.mp3"))
+    b = _touch(os.path.join(base, "05_音频", "特效音", "sfx_冲击_打脸.mp3"))
+    assert M.find_asset_by_keyword(base, ["热血", "逆袭"]) == a
+    assert M.find_asset_by_keyword(base, ["冲击", "打脸"]) == b
+
+
+def test_find_asset_by_keyword_finds_parent_project_root(tmp_path):
+    """资产在 workdir 的上级（项目根），子目录里跑也要找得到。"""
+    base = str(tmp_path)
+    p = _touch(os.path.join(base, "05_音频", "bgm_情感铺垫.mp3"))
+    sub = os.path.join(base, "out", "ep1")
+    os.makedirs(sub, exist_ok=True)
+    assert M.find_asset_by_keyword(sub, ["情感", "铺垫"]) == p
+
+
+def test_find_asset_by_keyword_dedup_across_levels(tmp_path):
+    """同一目录被向上查找和交付根扫描重复命中时不能重复收集。"""
+    base = str(tmp_path)
+    p = _touch(os.path.join(base, "05_音频", "music_ep1.mp3"))
+    hits = [M.find_asset_by_keyword(base, ["music_ep1"]) for _ in range(3)]
+    assert hits == [p, p, p]
+
+
+def test_find_asset_by_keyword_no_keywords(tmp_path):
+    assert M.find_asset_by_keyword(str(tmp_path), []) == ""
+
+
+def test_find_asset_by_keyword_bad_workdir():
+    assert M.find_asset_by_keyword("/nonexistent/xyz", ["a"]) == ""

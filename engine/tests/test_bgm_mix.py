@@ -236,3 +236,36 @@ def test_assemble_aligns_clip_to_shot_duration(tmp_path):
                  durations=[5.0, 5.0, 5.0])
     assert r["ok"]
     assert abs(r["duration_s"] - 15.0) < 1.0, f"应对齐到 15s，实得 {r['duration_s']}"
+
+@needs_ffmpeg
+def test_mix_accepts_sfx_track(tone_dir):
+    """SFX 轨要能独立叠加，且不进 ducking 侧链（闪避会把它一起压掉）。"""
+    v = _tone(os.path.join(tone_dir, "v.mp3"), 300, 6.0)
+    b = _tone(os.path.join(tone_dir, "b.mp3"), 120, 6.0)
+    x = _tone(os.path.join(tone_dir, "x.mp3"), 900, 1.0)
+    out = os.path.join(tone_dir, "mix_sfx.mp3")
+    r = bgm_mix.mix(voice_path=v, bgm_path=b, sfx_path=x, out_path=out)
+    assert r["ok"], r.get("error")
+    assert "sfx" in r["inputs"]
+    assert bgm_mix.probe_duration(out) > 3.0
+
+
+@needs_ffmpeg
+def test_mix_sfx_increases_peak(tone_dir):
+    """同一份底噪下，叠上音效后峰值应变大——证明 SFX 真的在输出里。"""
+    b = _tone(os.path.join(tone_dir, "b2.mp3"), 120, 5.0, 0.05)
+    x = _tone(os.path.join(tone_dir, "x2.mp3"), 900, 1.0, 0.8)
+    o1 = os.path.join(tone_dir, "no_sfx.mp3")
+    o2 = os.path.join(tone_dir, "with_sfx.mp3")
+    assert bgm_mix.mix(bgm_path=b, out_path=o1, normalize=False)["ok"]
+    assert bgm_mix.mix(bgm_path=b, sfx_path=x, out_path=o2, normalize=False)["ok"]
+
+    def peak(p):
+        r = subprocess.run(["ffmpeg", "-v", "info", "-i", p, "-af", "volumedetect",
+                            "-f", "null", "/dev/null"], capture_output=True, text=True)
+        for line in r.stderr.splitlines():
+            if "max_volume" in line:
+                return float(line.split("max_volume:")[1].split("dB")[0])
+        return -99.0
+
+    assert peak(o2) > peak(o1) + 3.0, (peak(o1), peak(o2))

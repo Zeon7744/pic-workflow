@@ -62,10 +62,12 @@ def _db_to_volume(db: float) -> float:
 def mix(voice_path: Optional[str] = None,
         bgm_path: Optional[str] = None,
         music_path: Optional[str] = None,
+        sfx_path: Optional[str] = None,
         out_path: str = "mix_out.mp3",
         duck_db: float = DEFAULT_DUCK_DB,
         bgm_gain_db: float = -6.0,
         music_gain_db: float = -12.0,
+        sfx_gain_db: float = 0.0,
         attack_ms: int = DEFAULT_ATTACK_MS,
         release_ms: int = DEFAULT_RELEASE_MS,
         normalize: bool = True) -> Dict[str, Any]:
@@ -85,7 +87,8 @@ def mix(voice_path: Optional[str] = None,
         {"ok", "path", "duration_ms", "inputs", "duck_db", "error"}
     """
     inputs: Dict[str, str] = {}
-    for name, p in (("voice", voice_path), ("bgm", bgm_path), ("music", music_path)):
+    for name, p in (("voice", voice_path), ("bgm", bgm_path),
+                    ("music", music_path), ("sfx", sfx_path)):
         if p and os.path.exists(p):
             inputs[name] = p
 
@@ -158,6 +161,16 @@ def mix(voice_path: Optional[str] = None,
             chain += f"[{name}d]"
             filters.append(chain)
             labels.append(f"[{name}d]")
+
+    # 2.5) 音效轨：独立叠加，不做闪避——闪避会把它跟着对白一起压掉，
+    # 而 SFX 本来就是对白间隙里的「重音」，压了等于没放。
+    if "sfx" in inputs:
+        si = idx["sfx"]
+        gain = _db_to_volume(sfx_gain_db)
+        filters.append(
+            f"[{si}:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,"
+            f"volume={gain:.4f}[sfxd]")
+        labels.append("[sfxd]")
 
     # 3) 混合
     n = len(labels)
