@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "updated_at": "2026-10-30T00:07:07.525584",
+  "version": 2,
+  "updated_at": "2026-10-30T01:24:07.856254",
   "episodes": {
     "1": [
       "shot_ep1_001",
@@ -16,6 +16,18 @@
     ]
   },
   "reverse_refs": {
+    "char_zhouzong": [
+      "shot_ep1_001",
+      "shot_ep1_002",
+      "shot_ep1_004"
+    ],
+    "char_linxia": [
+      "shot_ep1_001",
+      "shot_ep1_003",
+      "shot_ep1_005",
+      "shot_ep1_008",
+      "shot_ep1_010"
+    ],
     "bgm_suspense": [
       "shot_ep1_001",
       "shot_ep1_002",
@@ -29,31 +41,12 @@
     "bgm_emotion": [
       "shot_ep1_005"
     ],
+    "char_chenjie": [
+      "shot_ep1_006",
+      "shot_ep1_007",
+      "shot_ep1_009"
+    ],
     "bgm_climax": [
-      "shot_ep1_010"
-    ],
-    "theme_main": [
-      "shot_ep1_001",
-      "shot_ep1_002",
-      "shot_ep1_003",
-      "shot_ep1_004",
-      "shot_ep1_005",
-      "shot_ep1_006",
-      "shot_ep1_007",
-      "shot_ep1_008",
-      "shot_ep1_009",
-      "shot_ep1_010"
-    ],
-    "theme_end": [
-      "shot_ep1_001",
-      "shot_ep1_002",
-      "shot_ep1_003",
-      "shot_ep1_004",
-      "shot_ep1_005",
-      "shot_ep1_006",
-      "shot_ep1_007",
-      "shot_ep1_008",
-      "shot_ep1_009",
       "shot_ep1_010"
     ]
   },
@@ -62,5 +55,23 @@
     "voices": "assets/voices",
     "scenes": "assets/scenes",
     "shots": "assets/shots"
-  }
+  },
+  "episode_theme": {
+    "1": {
+      "theme_main": "05_音频/助理反击_主题曲_主用版.mp3",
+      "theme_end": "05_音频/助理反击_主题曲_片尾版.mp3",
+      "note": "主题曲用于片头/片尾，不进每镜 bgm 铺底（会与配音抢频段）"
+    }
+  },
+  "active_render": {
+    "1": {
+      "path": "/Coze/Drive/简化画廊/助理反击_ep1_分段BGM版.mp4",
+      "spec": "720x1280 / 54.000s / 3.20MB / 带 BGM+SFX 三轨",
+      "note": "ep1 真相源；_out/ep1_bgm/final_ep1.mp4 为横版旧运行，仅存档"
+    }
+  },
+  "deprecated": [
+    "char_沈临",
+    "char_苏晚"
+  ]
 }

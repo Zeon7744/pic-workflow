@@ -8,17 +8,24 @@
   "motion": "推拉",
   "est_s": 5.4,
   "emotion": "推进",
-  "characters": [],
+  "characters": [
+    "char_chenjie"
+  ],
   "bgm": [
     "bgm_suspense"
   ],
-  "version": 1,
+  "version": 2,
   "created_at": "2026-10-30T00:07:07.525584",
   "history": [
     {
       "version": 1,
       "action": "从 _out/ep1_bgm/pipeline_report 迁入",
       "timestamp": "2026-10-30T00:07:07.525584"
+    },
+    {
+      "version": 2,
+      "action": "红剑补登角色 id 引用",
+      "timestamp": "2026-10-30T01:24:07.856254"
     }
   ]
 }

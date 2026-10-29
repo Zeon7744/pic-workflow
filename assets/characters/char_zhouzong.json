@@ -1,0 +1,21 @@
+{
+  "id": "char_zhouzong",
+  "name": "周总",
+  "type": "male",
+  "age": 45,
+  "role": "反派，45岁，部门总监",
+  "desc": "西装革履，油头，金丝眼镜，笑里藏刀",
+  "ref_image": "/Coze/Drive/简化画廊/_out/ep1_bgm/_charref_周总.png",
+  "three_view": null,
+  "voice_id": "male-qn-jingying",
+  "source": "_out/ep1_bgm/pipeline_report.json → script_struct.characters",
+  "version": 1,
+  "created_at": "2026-10-30T01:24:07.856254",
+  "history": [
+    {
+      "version": 1,
+      "action": "红剑据 pipeline_report 重建（原沈临/苏晚为示例角色，已废弃）",
+      "timestamp": "2026-10-30T01:24:07.856254"
+    }
+  ]
+}
