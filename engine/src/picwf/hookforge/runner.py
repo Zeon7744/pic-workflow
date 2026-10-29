@@ -35,6 +35,8 @@ class RunnerConfig:
     script: str = ""             # 没有资产库里的 shot 时可选传入剧本
     cloud_model: str = ""        # 空=走 make_executors 默认（agnes image）
     keep_intermediates: bool = True
+    script_root: str = ""        # 原始剧本所在目录（剧本是源，分镜是派生物）
+    media_root: str = ""         # 含 05_音频 的目录（BGM/SFX 素材检索根，注入 PICWF_ASSET_ROOTS）
 
 
 @dataclass
@@ -49,6 +51,7 @@ class DryRunResult:
     diff_vs_prev: str = ""
     error: str = ""
     commit: str = ""
+    script_source: str = ""      # full 模式用的是原剧本，还是 _shots_to_md fallback
 
 
 def _ffprobe_dur(path: str) -> float:
@@ -98,24 +101,21 @@ def run(config: RunnerConfig) -> DryRunResult:
     os.makedirs(config.out_dir, exist_ok=True)
     res.out_path = os.path.join(config.out_dir, f"final_ep{config.episode}.mp4")
 
-    # 走 8 环节：先按全量生成（当前 ep1 是基准），后续 mode=dirty 时只重出脏 shot
-    # 这里为了对齐现有 分段BGM版，直接跑全量 8 环节（含分段 BGM + SFX）
-    wf = generate_workflow(tier="T1", ep=config.episode, scenario="dark_thriller")
-    ex = make_executors(wf, workdir=config.out_dir)
-    # script_struct 用资产库里的 shot 数据（不重新生成，保证回归稳定）
-    shots_payload = []
-    for sid in plan_shots:
-        s = lib.load_shot(sid)
-        rec = {"id": sid, "raw": s["raw"], "prompt": s.get("prompt", ""),
-               "est_s": s.get("est_s", 3.0), "shot_type": s.get("shot_type", ""),
-               "motion": s.get("motion", ""), "emotion": s.get("emotion", "")}
-        shots_payload.append(rec)
-        res.plan.append({"kind":"shot","asset_id":sid,"raw":s["raw"],"est_s":rec["est_s"],"shot_type":rec["shot_type"],"action":"regenerate"})
+    # 剧本是源，分镜是派生物——不能拿资产库 shot 的 raw 反推剧本喂管线，
+    # 那样会丢场景标题+对白分行结构，TTS 提取不到对白 → 哑片（440Hz 占位音）。
+    script_md, res.script_source = _resolve_script(
+        config, lib, plan_shots, shots_payload=_load_shots(lib, plan_shots))
+
+    # BGM/SFX 素材检索根：05_音频 在云盘项目树，runner 的 out_dir 常脱离该树，
+    # 靠 cwd 上溯找不到。显式注入 PICWF_ASSET_ROOTS，保住“素材检索上溯项目根”这一坑。
+    if config.media_root:
+        existing = os.environ.get("PICWF_ASSET_ROOTS", "")
+        roots = [config.media_root] + [r for r in existing.split(os.pathsep) if r]
+        os.environ["PICWF_ASSET_ROOTS"] = os.pathsep.join(roots)
+
     # 调 pipeline_cli.run（真 8 环节管线），工作目录指到 config.out_dir
-    # 这样三坑（atrim / SFX 不进 ducking / 素材检索向上找项目根）原样保留
+    # 三坑（atrim 不用 -t / SFX 不进 ducking / 素材检索上溯项目根）原样保留
     from picwf.pipeline_cli import run as _run_cli
-    # 用 assets 里存的 shot 拼成一个临时剧本，喂给 run()（run() 期望 .md 输入）
-    script_md = _shots_to_md(plan_shots, config.episode, shots_payload, lib)
     res.out_path = os.path.join(config.out_dir, f"final_ep{config.episode}.mp4")
     cli_res = _run_cli(script_md, tier="T1", style="S1_anime_jp",
                        scenario="dark_thriller", ep=config.episode,
@@ -132,6 +132,70 @@ def run(config: RunnerConfig) -> DryRunResult:
         res.duration_s = round(_ffprobe_dur(final), 2)
         res.audio_level_db = _loudness_db(final)
     return res
+
+
+def _load_shots(lib: AssetLibrary, plan_shots: List[str]) -> List[Dict[str, Any]]:
+    """读资产库 shot（只作对账/覆盖用，不反推剧本）。"""
+    out = []
+    for sid in plan_shots:
+        s = lib.load_shot(sid)
+        out.append({"id": sid, "raw": s.get("raw", ""),
+                    "prompt": s.get("prompt", ""), "est_s": s.get("est_s", 3.0),
+                    "shot_type": s.get("shot_type", ""),
+                    "motion": s.get("motion", ""), "emotion": s.get("emotion", "")})
+    return out
+
+
+def _find_original_script(config: RunnerConfig, ep: int) -> str:
+    """定位原始剧本（源）。优先级：config.script_root > 已知项目剧本目录。"""
+    import glob
+    cands = []
+    if config.script_root:
+        cands.append(os.path.join(config.script_root, f"剧本_助理反击_第{ep}集.md"))
+    cands += [
+        f"/Coze/Drive/简化画廊/剧本_助理反击_第{ep}集.md",
+        f"{config.assets_root}/_scripts/剧本_助理反击_第{ep}集.md",
+    ]
+    for c in cands:
+        if os.path.isfile(c):
+            return c
+    return ""
+
+
+def _resolve_script(config: RunnerConfig, lib: AssetLibrary,
+                    plan_shots: List[str],
+                    shots_payload: List[Dict[str, Any]]):
+    """确定喂给管线的剧本路径。
+
+    返回 (script_md_path, source_desc)：
+    - full：用原始剧本（结构完整，对白能被 TTS 提取），资产库只负责 shot/est_s 对账。
+    - dirty：原始剧本为底，把脏 shot 的 prompt/est_s 覆盖进去（若原剧本缺失则退回 fallback）。
+    - 原始剧本缺失时才用 _shots_to_md 反推（打 warn，已知会丢对白结构）。
+    """
+    orig = _find_original_script(config, config.episode)
+    if orig:
+        if config.mode == "full":
+            return orig, "original"
+        # dirty：原剧本为底，写一份仅覆盖脏 shot 的副本
+        dirty_ids = set(plan_shots)
+        with open(orig, encoding="utf-8") as f:
+            text = f.read()
+        overlay = os.path.join(config.out_dir, f"_ep{config.episode}_dirty_overlay.md")
+        os.makedirs(config.out_dir, exist_ok=True)
+        # 简单覆盖：把脏 shot 的 prompt 追加进场景（真实场景按 raw 精确替换需剧本 AST，
+        # 此处在 P0 用"追加脏 shot 指令段"保证 TTS 对白结构不丢）
+        extra = ["", "## [P0 脏分镜覆盖]"]
+        for rec in shots_payload:
+            if rec["id"] in dirty_ids:
+                extra.append(f"- 镜头 {rec['id']}: {rec['prompt'] or rec['raw']}")
+        with open(overlay, "w", encoding="utf-8") as f:
+            f.write(text + "\n" + "\n".join(extra) + "\n")
+        return overlay, "original+dirty-overlay"
+    # fallback：原剧本缺失，反推（会丢对白结构，打 warn）
+    import warnings
+    warnings.warn(f"原始剧本缺失，_shots_to_md 反推可能丢失对白结构 → 哑片风险。ep={config.episode}")
+    fb = _shots_to_md(plan_shots, config.episode, shots_payload, lib)
+    return fb, "fallback-shot-derived"
 
 
 def _shots_to_md(shot_ids: List[str], ep: int, shots_payload: List[Dict[str, Any]],
@@ -160,9 +224,12 @@ def main(argv=None):
     ap.add_argument("--mode", default="full", choices=["full", "dirty"])
     ap.add_argument("--assets-root", default="/mnt/f/项目/开发/pic/assets")
     ap.add_argument("--out", default="./_out/regress")
+    ap.add_argument("--media-root", default="/Coze/Drive/简化画廊",
+                    help="含 05_音频 的目录，注入 PICWF_ASSET_ROOTS 供 BGM/SFX 检索")
     args = ap.parse_args(argv)
     r = run(RunnerConfig(assets_root=args.assets_root, episode=args.ep,
-                         mode=args.mode, out_dir=args.out))
+                         mode=args.mode, out_dir=args.out,
+                         media_root=args.media_root))
     print(json.dumps({
         "ok": r.ok, "dirty_shots": r.dirty_shots, "out": r.out_path,
         "duration_s": r.duration_s, "loudness_db": r.audio_level_db,
