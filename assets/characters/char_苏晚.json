@@ -1,0 +1,16 @@
+{
+  "id": "char_苏晚",
+  "name": "苏晚",
+  "type": "female",
+  "avatar": "示例_女角色_苏晚_三视图.jpg",
+  "version": 1,
+  "created_at": "2026-10-29T16:48:05.716626",
+  "history": [
+    {
+      "version": 1,
+      "action": "初始创建",
+      "timestamp": "2026-10-29T16:48:05.716627"
+    }
+  ],
+  "desc": "黑长直发、浅蓝衬衫、知性温柔"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "shot_ep1_004",
+  "ep": 1,
+  "index": 4,
+  "raw": "周总（冷笑）：没做过就学。明天早上交初稿。",
+  "prompt": "全景（摇臂）全景摇臂展现冲突全貌：周总（冷笑）：没做过就学。明天早上交初稿。。情绪基调：推进",
+  "shot_type": "全景",
+  "motion": "摇臂",
+  "est_s": 5.4,
+  "emotion": "推进",
+  "characters": [],
+  "bgm": [
+    "bgm_suspense"
+  ],
+  "version": 1,
+  "created_at": "2026-10-30T00:07:07.525584",
+  "history": [
+    {
+      "version": 1,
+      "action": "从 _out/ep1_bgm/pipeline_report 迁入",
+      "timestamp": "2026-10-30T00:07:07.525584"
+    }
+  ]
+}

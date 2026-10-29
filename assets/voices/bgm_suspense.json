@@ -1,0 +1,15 @@
+{
+  "id": "bgm_suspense",
+  "kind": "bgm",
+  "file": "assets/voices/bgm_悬疑压迫.mp3",
+  "desc": "悬疑压迫 70BPM 暗色电子",
+  "version": 1,
+  "created_at": "2026-10-30T00:05:21.473744",
+  "history": [
+    {
+      "version": 1,
+      "action": "从 05_音频 迁入",
+      "timestamp": "2026-10-30T00:05:21.473765"
+    }
+  ]
+}

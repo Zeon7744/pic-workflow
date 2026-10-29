@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "updated_at": "2026-10-30T00:07:07.525584",
+  "episodes": {
+    "1": [
+      "shot_ep1_001",
+      "shot_ep1_002",
+      "shot_ep1_003",
+      "shot_ep1_004",
+      "shot_ep1_005",
+      "shot_ep1_006",
+      "shot_ep1_007",
+      "shot_ep1_008",
+      "shot_ep1_009",
+      "shot_ep1_010"
+    ]
+  },
+  "reverse_refs": {
+    "bgm_suspense": [
+      "shot_ep1_001",
+      "shot_ep1_002",
+      "shot_ep1_003",
+      "shot_ep1_004",
+      "shot_ep1_006",
+      "shot_ep1_007",
+      "shot_ep1_008",
+      "shot_ep1_009"
+    ],
+    "bgm_emotion": [
+      "shot_ep1_005"
+    ],
+    "bgm_climax": [
+      "shot_ep1_010"
+    ],
+    "theme_main": [
+      "shot_ep1_001",
+      "shot_ep1_002",
+      "shot_ep1_003",
+      "shot_ep1_004",
+      "shot_ep1_005",
+      "shot_ep1_006",
+      "shot_ep1_007",
+      "shot_ep1_008",
+      "shot_ep1_009",
+      "shot_ep1_010"
+    ],
+    "theme_end": [
+      "shot_ep1_001",
+      "shot_ep1_002",
+      "shot_ep1_003",
+      "shot_ep1_004",
+      "shot_ep1_005",
+      "shot_ep1_006",
+      "shot_ep1_007",
+      "shot_ep1_008",
+      "shot_ep1_009",
+      "shot_ep1_010"
+    ]
+  },
+  "asset_dirs": {
+    "characters": "assets/characters",
+    "voices": "assets/voices",
+    "scenes": "assets/scenes",
+    "shots": "assets/shots"
+  }
+}
